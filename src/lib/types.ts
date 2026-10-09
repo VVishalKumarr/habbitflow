@@ -15,6 +15,9 @@ export interface Profile {
   accent_theme: AccentTheme
   leaderboard_opt_in: boolean
   share_progress: boolean
+  /** individual = username login; institutional = invited school/college email login */
+  account_type: 'individual' | 'institutional'
+  display_name: string | null
 }
 
 export interface Tracker {

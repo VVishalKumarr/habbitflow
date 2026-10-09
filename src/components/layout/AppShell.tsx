@@ -1,8 +1,9 @@
-import { ChartNoAxesColumn, ChevronDown, CircleHelp, LayoutDashboard, LogOut, Settings, Sparkles, Timer, Users } from 'lucide-react'
+import { Building2, ChartNoAxesColumn, ChevronDown, CircleHelp, LayoutDashboard, LogOut, Settings, ShieldCheck, Sparkles, Timer, Users } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { analytics } from '../../lib/analytics'
 import { useAuth } from '../../store/auth'
 import { useFriends } from '../../store/friends'
+import { useInstitutionStore } from '../../store/institution'
 import { formatClock, MODE_LABEL, usePomodoro, useRemaining } from '../../store/pomodoro'
 import { useSubscription } from '../../store/subscription'
 import { Assistant } from '../assistant/Assistant'
@@ -17,6 +18,19 @@ const NAV = [
   { to: '/friends', label: 'Friends', icon: Users },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
+
+/** Institutional accounts: their institution first, then their own timetable and tools. */
+const INSTITUTION_NAV = [
+  { to: '/school', label: 'School', icon: Building2 },
+  { to: '/dashboard', label: 'Timetable', icon: LayoutDashboard },
+  { to: '/focus', label: 'Focus', icon: Timer },
+  { to: '/progress', label: 'Progress', icon: ChartNoAxesColumn },
+  { to: '/settings', label: 'Settings', icon: Settings },
+]
+
+function useNav() {
+  return useAuth((s) => (s.profile?.account_type === 'institutional' ? INSTITUTION_NAV : NAV))
+}
 
 /** Number of friend requests waiting for an answer, shown on the Friends tab. */
 function useRequestCount() {
@@ -79,7 +93,10 @@ function PlanBadge() {
 }
 
 function UserMenu() {
-  const username = useAuth((s) => s.profile?.username ?? '')
+  const username = useAuth((s) =>
+    s.profile?.account_type === 'institutional' ? (s.profile.display_name ?? s.session?.user.email ?? '') : (s.profile?.username ?? ''),
+  )
+  const isPlatformAdmin = useInstitutionStore((s) => s.isPlatformAdmin)
   const signOut = useAuth((s) => s.signOut)
   const { isPaid, plan_name } = useSubscription()
   const navigate = useNavigate()
@@ -119,6 +136,11 @@ function UserMenu() {
           <MenuItem icon={<Sparkles />} onClick={() => (close(), navigate('/pro'))}>
             {isPaid ? `Your ${plan_name} plan` : 'Upgrade'}
           </MenuItem>
+          {isPlatformAdmin && (
+            <MenuItem icon={<ShieldCheck />} onClick={() => (close(), navigate('/admin'))}>
+              Platform admin
+            </MenuItem>
+          )}
           <MenuItem icon={<CircleHelp />} onClick={() => (close(), navigate('/help'))}>
             Help
           </MenuItem>
@@ -134,15 +156,16 @@ function UserMenu() {
 
 export function AppShell() {
   const requests = useRequestCount()
+  const nav = useNav()
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-surface/85 pt-safe backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-6 px-4 sm:px-6 lg:px-8">
-          <NavLink to="/dashboard" aria-label="HabitFlow home" className="rounded-lg">
+          <NavLink to={nav[0].to} aria-label="HabitFlow home" className="rounded-lg">
             <Logo />
           </NavLink>
           <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-            {NAV.map(({ to, label, icon: Icon }) => (
+            {nav.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -184,7 +207,7 @@ export function AppShell() {
         className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-safe backdrop-blur-md md:hidden"
       >
         <div className="grid grid-cols-5">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

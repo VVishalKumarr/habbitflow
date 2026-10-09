@@ -1,5 +1,5 @@
 // Forgot password.
-// POST { identifier }  (username or recovery email; no login needed)
+// POST { identifier }  (username, recovery email or institutional login email; no login needed)
 // Uses Supabase Auth's own recovery tokens (generateLink): single-use,
 // time-limited and verified by Supabase. We only deliver the link to the
 // account's *confirmed* recovery email. The response is the same whether or
@@ -60,6 +60,11 @@ async function sendResetLinks(identifier: string): Promise<void> {
         username: profiles?.find((p) => p.id === r.user_id)?.username ?? '',
       }))
     }
+    // Institutional accounts sign in with their (verified) institutional address.
+    const { data: institutional } = await admin.rpc('institutional_login_exists', { p_email: identifier })
+    if (institutional === true) {
+      await sendLink(identifier, identifier, identifier)
+    }
   } else {
     const { data: profile } = await admin.from('profiles').select('id, username').eq('username', identifier).maybeSingle()
     if (profile) {
@@ -75,28 +80,31 @@ async function sendResetLinks(identifier: string): Promise<void> {
   }
 
   for (const acct of accounts) {
-    try {
-      const { data: user } = await admin.auth.admin.getUserById(acct.user_id)
-      const loginEmail = user.user?.email
-      if (!loginEmail) continue
-      const { data, error } = await admin.auth.admin.generateLink({ type: 'recovery', email: loginEmail })
-      if (error || !data.properties?.hashed_token) throw error ?? new Error('no token')
-      const link = `${siteUrl()}/reset-password?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=recovery`
-      await sendEmail(
-        acct.recovery_email,
-        'Reset your HabitFlow password',
-        renderEmail({
-          heading: 'Reset your password',
-          lines: [
-            `We received a request to reset the password for the HabitFlow account “${acct.username}”.`,
-            'This link works once and expires in 1 hour.',
-          ],
-          button: { label: 'Choose a new password', url: link },
-          footer: 'If you didn’t ask for this, ignore this email — your password won’t change.',
-        }),
-      )
-    } catch (e) {
-      console.error('password reset send failed', String(e))
-    }
+    const { data: user } = await admin.auth.admin.getUserById(acct.user_id)
+    const loginEmail = user.user?.email
+    if (loginEmail) await sendLink(loginEmail, acct.recovery_email, acct.username)
+  }
+}
+
+async function sendLink(loginEmail: string, to: string, accountName: string): Promise<void> {
+  try {
+    const { data, error } = await adminClient().auth.admin.generateLink({ type: 'recovery', email: loginEmail })
+    if (error || !data.properties?.hashed_token) throw error ?? new Error('no token')
+    const link = `${siteUrl()}/reset-password?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=recovery`
+    await sendEmail(
+      to,
+      'Reset your HabitFlow password',
+      renderEmail({
+        heading: 'Reset your password',
+        lines: [
+          `We received a request to reset the password for the HabitFlow account “${accountName}”.`,
+          'This link works once and expires in 1 hour.',
+        ],
+        button: { label: 'Choose a new password', url: link },
+        footer: 'If you didn’t ask for this, ignore this email — your password won’t change.',
+      }),
+    )
+  } catch (e) {
+    console.error('password reset send failed', String(e))
   }
 }

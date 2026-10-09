@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Building2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Field } from '../components/ui/Field'
@@ -20,6 +20,7 @@ export default function LoginPage() {
     e.preventDefault()
     const next: typeof errors = {}
     if (!normalizeUsername(username)) next.username = 'Username is required.'
+    else if (username.includes('@')) next.username = 'Personal accounts use a username. For a school or college email, choose Institution above.'
     if (!password) next.password = 'Password is required.'
     setErrors(next)
     setFormError(null)
@@ -37,6 +38,15 @@ export default function LoginPage() {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Log in to continue with your routines.">
+      <div className="mb-6 flex rounded-xl bg-subtle p-1 text-sm font-medium" role="tablist" aria-label="Account type">
+        <span role="tab" aria-selected="true" className="flex h-9 flex-1 items-center justify-center rounded-lg bg-surface text-ink shadow-card">
+          Personal
+        </span>
+        <Link to="/login/institution" role="tab" aria-selected="false" className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg text-muted hover:text-ink">
+          <Building2 className="size-4" aria-hidden="true" />
+          Institution
+        </Link>
+      </div>
       <form onSubmit={submit} noValidate className="space-y-5">
         {formError && (
           <div role="alert" className="flex items-start gap-2.5 rounded-xl bg-danger-soft px-3.5 py-3 text-sm text-danger">

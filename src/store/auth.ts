@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js'
 import { create } from 'zustand'
-import { normalizeUsername, usernameToLogin } from '../lib/auth'
+import { LOGIN_DOMAIN, normalizeUsername, usernameToLogin } from '../lib/auth'
 import { friendlyError } from '../lib/errors'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../lib/types'
@@ -13,6 +13,8 @@ interface AuthState {
   profile: Profile | null
   init: () => () => void
   signIn: (username: string, password: string) => Promise<void>
+  /** Institutional accounts sign in with their approved email address. */
+  signInInstitution: (email: string, password: string) => Promise<void>
   signUp: (username: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (
@@ -112,6 +114,20 @@ export const useAuth = create<AuthState>((set, get) => ({
       if (/invalid login credentials/i.test(error.message)) throw new Error('Incorrect username or password.')
       throw new Error(friendlyError(error))
     }
+  },
+
+  signInInstitution: async (email, password) => {
+    const login = email.trim().toLowerCase()
+    if (login.endsWith(`@${LOGIN_DOMAIN}`)) throw new Error('Use the personal account login for usernames.')
+    const { data, error } = await supabase.auth.signInWithPassword({ email: login, password })
+    if (error) {
+      if (/invalid login credentials/i.test(error.message)) throw new Error('Incorrect email or password.')
+      throw new Error(friendlyError(error))
+    }
+    // Personal accounts never have a real email login, so this is an institutional account.
+    if (data.user && !data.user.email?.endsWith(`@${LOGIN_DOMAIN}`)) return
+    await supabase.auth.signOut()
+    throw new Error('Incorrect email or password.')
   },
 
   signUp: async (username, password) => {

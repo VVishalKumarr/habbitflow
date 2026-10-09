@@ -25,6 +25,7 @@ import { useAuth } from './store/auth'
 import { useDialogs } from './store/dialogs'
 import { useFocusSound } from './store/focusSound'
 import { useFriends } from './store/friends'
+import { useInstitutionStore } from './store/institution'
 import { formatClock, MODE_LABEL, usePomodoro, useRemaining } from './store/pomodoro'
 import { usePomodoroSessions } from './store/pomodoroSessions'
 import { useSubscriptionStore } from './store/subscription'
@@ -41,6 +42,17 @@ const PrivacyPage = lazy(() => import('./pages/LegalPages').then((m) => ({ defau
 const TermsPage = lazy(() => import('./pages/LegalPages').then((m) => ({ default: m.TermsPage })))
 const HelpIndexPage = lazy(() => import('./pages/HelpPages').then((m) => ({ default: m.HelpIndexPage })))
 const HelpArticlePage = lazy(() => import('./pages/HelpPages').then((m) => ({ default: m.HelpArticlePage })))
+const InstitutionLoginPage = lazy(() => import('./pages/InstitutionLoginPage'))
+const ActivatePage = lazy(() => import('./pages/ActivatePage'))
+const SchoolLayout = lazy(() => import('./pages/school/SchoolLayout'))
+const SchoolOverviewPage = lazy(() => import('./pages/school/OverviewPage'))
+const SchoolPeoplePage = lazy(() => import('./pages/school/PeoplePage'))
+const SchoolClassesPage = lazy(() => import('./pages/school/ClassesPage'))
+const SchoolCalendarPage = lazy(() => import('./pages/school/CalendarPage'))
+const SchoolAssignmentsPage = lazy(() => import('./pages/school/AssignmentsPage'))
+const SchoolSettingsPage = lazy(() => import('./pages/school/SchoolSettingsPage'))
+const SchoolAuditPage = lazy(() => import('./pages/school/AuditPage'))
+const PlatformAdminPage = lazy(() => import('./pages/admin/PlatformAdminPage'))
 
 const pageFallback = (
   <div className="flex justify-center py-20 text-muted">
@@ -56,10 +68,16 @@ function RequireAuth() {
   return <AuthenticatedApp />
 }
 
+/** Where a signed-in user lands: institutional accounts open their institution. */
+function useHomePath() {
+  return useAuth((s) => (s.profile?.account_type === 'institutional' ? '/school' : '/dashboard'))
+}
+
 function GuestOnly() {
   const status = useAuth((s) => s.status)
+  const home = useHomePath()
   if (status === 'loading') return <FullPageLoader />
-  if (status === 'authenticated') return <Navigate to="/dashboard" replace />
+  if (status === 'authenticated') return <Navigate to={home} replace />
   return <Outlet />
 }
 
@@ -73,9 +91,10 @@ function AdaptiveLayout() {
 /** On Android the app opens straight into the app, not the marketing page. */
 function Home() {
   const status = useAuth((s) => s.status)
+  const home = useHomePath()
   if (isNative) {
     if (status === 'loading') return <FullPageLoader />
-    return <Navigate to={status === 'authenticated' ? '/dashboard' : '/login'} replace />
+    return <Navigate to={status === 'authenticated' ? home : '/login'} replace />
   }
   return <LandingPage />
 }
@@ -94,6 +113,7 @@ function AuthenticatedApp() {
     usePomodoroSessions.getState().load()
     useFriends.getState().load()
     useSubscriptionStore.getState().load()
+    useInstitutionStore.getState().load()
   }, [userId, loadTrackers])
 
   useEffect(() => {
@@ -155,6 +175,7 @@ function AppEffects() {
       usePomodoroSessions.getState().reset()
       useFriends.getState().reset()
       useSubscriptionStore.getState().reset()
+      useInstitutionStore.getState().reset()
       useFocusSound.getState().stop()
     }
   }, [status])
@@ -178,6 +199,8 @@ function AppEffects() {
         if (popBack()) return
         const path = location.pathname
         if (path.startsWith('/friends/')) navigate('/friends')
+        else if (path.startsWith('/school/')) navigate('/school')
+        else if (path === '/login/institution') navigate('/login')
         else if (path.startsWith('/help/')) navigate('/help')
         else if (path === '/register' || path === '/forgot-password') navigate('/login')
         else if (path !== '/dashboard' && path !== '/login' && path !== '/') navigate(useAuth.getState().status === 'authenticated' ? '/dashboard' : '/login')
@@ -241,7 +264,9 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/login/institution" element={lazyPage(<InstitutionLoginPage />)} />
           </Route>
+          <Route path="/activate" element={lazyPage(<ActivatePage />)} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
 
@@ -253,6 +278,16 @@ export default function App() {
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/friends/:friendId" element={lazyPage(<ComparePage />)} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={lazyPage(<PlatformAdminPage />)} />
+            <Route path="/school" element={lazyPage(<SchoolLayout />)}>
+              <Route index element={lazyPage(<SchoolOverviewPage />)} />
+              <Route path="calendar" element={lazyPage(<SchoolCalendarPage />)} />
+              <Route path="assignments" element={lazyPage(<SchoolAssignmentsPage />)} />
+              <Route path="people" element={lazyPage(<SchoolPeoplePage />)} />
+              <Route path="classes" element={lazyPage(<SchoolClassesPage />)} />
+              <Route path="settings" element={lazyPage(<SchoolSettingsPage />)} />
+              <Route path="audit" element={lazyPage(<SchoolAuditPage />)} />
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

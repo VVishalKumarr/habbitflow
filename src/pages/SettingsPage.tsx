@@ -147,6 +147,8 @@ export default function SettingsPage() {
   const updateProfile = useAuth((s) => s.updateProfile)
   const signOut = useAuth((s) => s.signOut)
   const sub = useSubscription()
+  const institutional = profile?.account_type === 'institutional'
+  const loginEmail = useAuth((st) => st.session?.user.email ?? '')
   const { hasFeature, requireFeature } = useFeatureAccess()
   const trackers = useTrackers((s) => s.trackers)
   const selectedId = useTrackers((s) => s.selectedId)
@@ -228,17 +230,20 @@ export default function SettingsPage() {
       <Section title="Account">
         <div className="flex items-center gap-4">
           <span className="flex size-12 items-center justify-center rounded-full bg-brand-soft text-lg font-semibold text-brand-ink uppercase">
-            {profile.username.slice(0, 1) || <UserRound />}
+            {(institutional ? profile.display_name ?? loginEmail : profile.username).slice(0, 1) || <UserRound />}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-muted">Username</p>
-            <p className="truncate text-lg font-semibold">{profile.username}</p>
+            <p className="text-sm text-muted">{institutional ? 'Institutional account' : 'Username'}</p>
+            <p className="truncate text-lg font-semibold">{institutional ? profile.display_name ?? loginEmail : profile.username}</p>
+            {institutional && <p className="truncate text-sm text-muted">{loginEmail}</p>}
           </div>
           <button type="button" className="btn-secondary" onClick={signOut}>
             <LogOut className="size-4" aria-hidden="true" />
             Log out
           </button>
         </div>
+        {!institutional && (
+        <>
         <Row label="Username" hint="Friends find you by this name.">
           <button type="button" className="btn-secondary" onClick={() => setDialog('username')}>
             <AtSign className="size-4" aria-hidden="true" />
@@ -267,6 +272,11 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
+        </>
+        )}
+        {institutional && (
+          <p className="text-sm text-muted">Your sign-in email and name are managed by your institution. Use “Forgot password” on the institution sign-in page if you can’t log in.</p>
+        )}
         <div className="border-t border-line pt-5">
           <Row label="Password">
             <button type="button" className="btn-secondary" onClick={() => setDialog('password')}>

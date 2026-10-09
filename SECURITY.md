@@ -105,6 +105,35 @@ project and check, among others:
   task names; non-friends can’t compare.
 - Account deletion requires the password and removes all data.
 
+## Institutions
+
+- **Institutional accounts** use a real, allowlisted email address and are created only
+  by the `institution-activate` function after the invitee opens a one-time link
+  (32 random bytes, SHA-256 hashed, 7-day expiry, single use, invalidated on resend or
+  withdrawal). A database trigger re-checks the token hash, so the public `signUp`
+  endpoint can’t create institutional accounts, even with a guessed invitation id.
+  Passwords go straight to Supabase Auth; none are emailed.
+- **Roles can’t be self-assigned**: memberships, invitations and audit rows have no
+  client write grants; changes go through security-definer functions that check the
+  caller. Principals/directors can only be invited by the platform owner and need an
+  exact allowlisted address (a domain match is not enough).
+- **Tenant isolation** is enforced by RLS on every table plus composite foreign keys
+  and an `institution_id`-pinning trigger. Tests modify ids and request other
+  institutions’ rows directly through the API.
+- **Suspension/removal** deletes the person’s Auth sessions and RLS stops returning
+  institutional data at once (an already-issued access token reaches nothing).
+- **Audit log** is append-only for every client role and never stores token hashes.
+- The **platform owner** cannot read classes, students, assignments or audit entries of
+  institutions — only institutions, allowlists and heads.
+- Activation lookups are rate-limited per IP (unknown links 30/h, activations 20/h);
+  invitations 300/h per inviter, resends once a minute and at most 10 times.
+- Until email is configured, `ALLOW_MANUAL_INVITE_LINKS=true` shows the activation
+  link to the inviter (setup mode, see INSTITUTION_ONBOARDING.md). Disable it if you
+  don’t want inviters to be able to activate accounts themselves.
+
+`tests/institutions.test.mjs` (25 checks) and `tests/e2e-institution.mjs` (13 browser
+steps) cover the above.
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users
