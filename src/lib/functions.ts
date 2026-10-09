@@ -15,7 +15,7 @@ export class FunctionError extends Error {
  * with the server's friendly message; status 0 means the function couldn't be
  * reached (not deployed, offline…).
  */
-export async function callFunction<T = unknown>(name: string, body: Record<string, unknown>): Promise<T> {
+export async function callFunction<T = unknown>(name: string, body: Record<string, unknown> | FormData): Promise<T> {
   const { data, error, response } = await supabase.functions.invoke(name, { body }) as {
     data: unknown
     error: { message?: string; context?: Response } | null

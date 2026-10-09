@@ -57,7 +57,9 @@ Deno.serve(async (req) => {
     return json(req, { error: 'You already have an account. Log in with this email to accept the invitation.', code: 'account_exists' }, 409)
   }
 
-  if (await rateLimited(clientIp(req), 'activate_ip', 20, 3600)) return tooMany()
+  // Valid links are unguessable, so this is only a backstop. It stays high because a
+  // whole class may activate at once from one school network (one public IP).
+  if (await rateLimited(clientIp(req), 'activate_ip', 300, 3600)) return tooMany()
 
   const password = String(body?.password ?? '')
   if (password.length < 8 || password.length > 72) {

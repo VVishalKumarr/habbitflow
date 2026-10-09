@@ -9,6 +9,7 @@ import { useSubscription } from '../../store/subscription'
 import { Assistant } from '../assistant/Assistant'
 import { Dropdown, MenuDivider, MenuItem } from '../ui/Dropdown'
 import { Logo } from './Logo'
+import { NotificationBell } from './NotificationBell'
 import { SiteFooter } from './SiteFooter'
 
 const NAV = [
@@ -186,6 +187,7 @@ export function AppShell() {
           <div className="ml-auto flex items-center gap-2">
             <TimerPill />
             <PlanBadge />
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpenCheck, CalendarClock, CalendarDays, ClipboardList, GraduationCap, MailPlus, ShieldAlert, UserCog, Users } from 'lucide-react'
+import { AlertTriangle, Award, BookOpenCheck, CalendarCheck, CalendarClock, CalendarDays, ClipboardList, GraduationCap, MailPlus, ShieldAlert, UserCog, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ErrorNote, Loading, Panel, PageHeader, Pill, Stat } from '../../components/school/ui'
 import { addDays } from '../../lib/dates'
@@ -17,6 +17,12 @@ import {
 import { supabase } from '../../lib/supabase'
 import { unwrap, useLoad } from '../../lib/useLoad'
 import { useCurrentInstitution } from '../../store/institution'
+
+interface AcademicSummary {
+  attendance: { records: number; present_rate: number | null }
+  homework: { expected: number; submitted: number; accepted: number; completion_rate: number | null }
+  marks: { marks: number; average_pct: number | null }
+}
 
 const GREETING: Record<string, string> = {
   principal: 'Institution overview',
@@ -46,13 +52,14 @@ export default function OverviewPage() {
         .order('starts_on')
         .limit(8),
     ])
-    return { overview, days: unwrap(days) as DeadlineDay[], events: unwrap(events) as CalendarEvent[] }
+    const summary = unwrap(await supabase.rpc('academic_summary', { p_inst: inst.institution_id })) as AcademicSummary
+    return { overview, days: unwrap(days) as DeadlineDay[], events: unwrap(events) as CalendarEvent[], summary }
   }, [inst.institution_id])
 
   if (loading && !data) return <Loading />
   if (error || !data) return <ErrorNote>{error}</ErrorNote>
 
-  const { overview: o, days, events } = data
+  const { overview: o, days, events, summary } = data
   const staffView = isStaff(inst.role)
   const conflicts = days.filter((d) => d.flags.some((f) => SERIOUS_FLAGS.includes(f)))
   const upcoming = days.flatMap((d) => d.deadlines.map((x) => ({ ...x, class_name: d.class_name, day: d.day }))).slice(0, 8)
@@ -166,11 +173,31 @@ export default function OverviewPage() {
         </Panel>
       </div>
 
-      {staffView && (
-        <Panel title="Attendance, homework and marks" description="These summaries appear once attendance, submissions and marks are recorded (Phase 2).">
-          <p className="text-sm text-muted">No attendance, submission or marks data has been recorded yet, so no averages are shown. HabitFlow doesn’t show estimates in place of real records.</p>
-        </Panel>
-      )}
+      <Panel title={staffView ? 'Attendance, homework and marks' : 'Your progress'} description="Last 30 days of recorded data (marks: last 90 days). Only real records are used — nothing is estimated.">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Stat
+            icon={CalendarCheck}
+            label="Attendance"
+            value={summary.attendance.records ? `${Math.round(summary.attendance.present_rate! * 100)}%` : '—'}
+            hint={summary.attendance.records ? `${summary.attendance.records} records` : 'Not recorded yet'}
+            tone="muted"
+          />
+          <Stat
+            icon={ClipboardList}
+            label="Homework submitted"
+            value={summary.homework.completion_rate === null ? '—' : `${Math.round(summary.homework.completion_rate * 100)}%`}
+            hint={summary.homework.expected ? `${summary.homework.submitted} of ${summary.homework.expected} · ${summary.homework.accepted} accepted` : 'No past deadlines yet'}
+            tone="muted"
+          />
+          <Stat
+            icon={Award}
+            label="Average mark"
+            value={summary.marks.average_pct === null ? '—' : `${summary.marks.average_pct}%`}
+            hint={summary.marks.marks ? `${summary.marks.marks} marks` : 'No marks yet'}
+            tone="muted"
+          />
+        </div>
+      </Panel>
 
       {!staffView && (
         <Panel title="Your habits and timetable">

@@ -125,14 +125,23 @@ project and check, among others:
 - **Audit log** is append-only for every client role and never stores token hashes.
 - The **platform owner** cannot read classes, students, assignments or audit entries of
   institutions — only institutions, allowlists and heads.
-- Activation lookups are rate-limited per IP (unknown links 30/h, activations 20/h);
+- Activation lookups are rate-limited per IP (unknown links 30/h; activations 300/h as a backstop, because a whole class may share one school IP);
   invitations 300/h per inviter, resends once a minute and at most 10 times.
 - Until email is configured, `ALLOW_MANUAL_INVITE_LINKS=true` shows the activation
   link to the inviter (setup mode, see INSTITUTION_ONBOARDING.md). Disable it if you
   don’t want inviters to be able to activate accounts themselves.
 
-`tests/institutions.test.mjs` (25 checks) and `tests/e2e-institution.mjs` (13 browser
-steps) cover the above.
+- **Homework files** sit in a private bucket with no client storage policies. Uploads
+  are checked server-side for size (4 MB), declared type *and* file signature, the
+  student’s enrolment and the submission window. Downloads are 2-minute signed URLs
+  issued only to the owner and the assignment’s reviewers. The retention job is
+  authenticated by a Vault-held secret (constant-time compare).
+- **Attendance and marks** have no client write grants; corrections require a reason
+  and the audit log keeps the previous value. Students and parents can’t edit them.
+  Marks are validated to 0..max in the database.
+
+`tests/institutions.test.mjs` (25 checks), `tests/institutions-phase2.test.mjs` (17) and the browser suites `tests/e2e-institution.mjs` (13 steps) and
+`tests/e2e-institution-phase2.mjs` (9) cover the above.
 
 ## Known limitations / to do
 

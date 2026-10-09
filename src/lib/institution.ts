@@ -222,6 +222,8 @@ export interface Assignment {
   max_file_mb: number
   late_policy: 'reject' | 'accept_marked_late'
   review_retention_days: number
+  retention_hold: boolean
+  retention_hold_reason: string | null
   created_at: string
 }
 

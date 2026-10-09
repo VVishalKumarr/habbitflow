@@ -1,6 +1,7 @@
 import { ClipboardList, Pencil, Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useStructure, type SchoolStructure } from '../../components/school/data'
+import { StudentSubmission, SubmissionsModal } from '../../components/school/Submissions'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row, SelectField, TextArea } from '../../components/school/ui'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { Field } from '../../components/ui/Field'
@@ -13,6 +14,15 @@ import { unwrap, useLoad } from '../../lib/useLoad'
 import { useCurrentInstitution } from '../../store/institution'
 import { toast } from '../../store/ui'
 
+interface Progress {
+  assignment_id: string
+  enrolled: number
+  submitted: number
+  late: number
+  accepted: number
+  needs_changes: number
+}
+
 const KIND_LABEL: Record<AssignmentKind, string> = { homework: 'Homework', classwork: 'Classwork', project: 'Project', assessment: 'Assessment' }
 
 export default function AssignmentsPage() {
@@ -21,13 +31,19 @@ export default function AssignmentsPage() {
   const structure = useStructure(inst.institution_id)
   const [filter, setFilter] = useState<'upcoming' | 'past' | 'all'>('upcoming')
   const [editing, setEditing] = useState<Assignment | 'new' | null>(null)
+  const [reviewing, setReviewing] = useState<Assignment | null>(null)
   const list = useLoad(async () => {
     let q = supabase.from('assignments').select('*').eq('institution_id', inst.institution_id)
     const now = new Date().toISOString()
     if (filter === 'upcoming') q = q.gte('due_at', now).order('due_at')
     else if (filter === 'past') q = q.lt('due_at', now).order('due_at', { ascending: false })
     else q = q.order('due_at', { ascending: false })
-    return unwrap(await q.limit(300)) as Assignment[]
+    const rows = unwrap(await q.limit(300)) as Assignment[]
+    // Submission counts for staff (the function returns nothing for students).
+    const progress = isStaff(inst.role) && rows.length
+      ? (unwrap(await supabase.rpc('assignment_progress', { p_assignments: rows.map((a) => a.id) })) as Progress[])
+      : []
+    return rows.map((a) => ({ ...a, progress: progress.find((p) => p.assignment_id === a.id) ?? null }))
   }, [inst.institution_id, filter])
 
   const s = structure.data
@@ -46,7 +62,7 @@ export default function AssignmentsPage() {
         description={
           student
             ? 'Homework and classwork set by your teachers. Your teacher records when work is accepted.'
-            : 'The submission window can be at most one calendar month. Deadlines appear in the cross-subject calendar.'
+            : 'Submission windows are at most one calendar month. Students upload PDF, JPG or PNG files (4 MB max); you accept the work or ask for changes.'
         }
         actions={
           canCreate && (
@@ -100,10 +116,16 @@ export default function AssignmentsPage() {
                       Opens {formatDateTime(a.opens_at)} · <strong>Due {formatDateTime(a.due_at)}</strong>
                     </p>
                     {a.description && <p className="mt-1 line-clamp-2 text-sm text-muted">{a.description}</p>}
+                    {student && a.status !== 'draft' && <StudentSubmission assignment={a} />}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {a.status === 'published' && (dueToday ? <Pill tone="warning">Due today</Pill> : overdue ? <Pill>Deadline passed</Pill> : null)}
-                    {student && <Pill>Online submission: coming soon</Pill>}
+                    {a.progress && (
+                      <button type="button" className="btn-secondary h-9 px-3" onClick={() => setReviewing(a)}>
+                        Submissions {a.progress.submitted}/{a.progress.enrolled}
+                        {a.progress.late > 0 && <span className="text-xs text-muted">· {a.progress.late} late</span>}
+                      </button>
+                    )}
                     {editable && (
                       <button type="button" className="btn-ghost h-9 px-2.5" onClick={() => setEditing(a)}>
                         <Pencil className="size-4" aria-hidden="true" />
@@ -118,6 +140,14 @@ export default function AssignmentsPage() {
         </Panel>
       )}
 
+      {reviewing && (
+        <SubmissionsModal
+          assignment={reviewing}
+          canHold={can('set_homework_retention')}
+          students={s.members.filter((m) => s.enrollments.some((e) => e.class_id === reviewing.class_id && e.student_id === m.id))}
+          onClose={() => (setReviewing(null), list.reload())}
+        />
+      )}
       {editing && <AssignmentModal inst={inst} s={s} assignment={editing === 'new' ? null : editing} onClose={() => setEditing(null)} onDone={list.reload} />}
     </div>
   )
@@ -246,7 +276,7 @@ function AssignmentModal({ inst, s, assignment, onClose, onDone }: { inst: MyIns
           </div>
         </fieldset>
         <p className="text-xs text-muted">
-          Uploaded files will be kept for the review/retention interval set by coordinators ({assignment?.review_retention_days ?? 'institution default'} days after the deadline) and then deleted.
+          Uploaded files are kept for the review/retention interval set by coordinators ({assignment?.review_retention_days ?? 'institution default'} days after the deadline or last upload), then deleted automatically. Review records and marks are kept.
         </p>
       </form>
     </Modal>

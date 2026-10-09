@@ -242,7 +242,7 @@ function RetentionPanel({ inst, days, onSaved }: { inst: MyInstitution; days: nu
   }
 
   return (
-    <Panel title="Homework review and retention" description="How long uploaded homework files are kept after the deadline for review (0–14 days). After this the files are deleted; marks and review records stay.">
+    <Panel title="Homework review and retention" description="How long uploaded homework files are kept after the deadline for review (0–14 days). After this an hourly job deletes the files automatically; submission, review and marks records stay. Coordinators can place a hold on an assignment when policy requires keeping files longer.">
       <form onSubmit={save} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="sm:w-48">
           <Field label="Days after the deadline" type="number" min={0} max={14} value={value} onChange={(e) => setValue(e.target.value)} error={valid ? null : 'Choose 0 to 14 days.'} />

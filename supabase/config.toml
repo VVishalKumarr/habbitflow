@@ -30,3 +30,9 @@ verify_jwt = false
 
 [functions.institution-activate]
 verify_jwt = false
+
+[functions.homework]
+verify_jwt = false
+
+[functions.homework-retention]
+verify_jwt = false

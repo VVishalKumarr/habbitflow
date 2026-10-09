@@ -52,6 +52,8 @@ const SchoolCalendarPage = lazy(() => import('./pages/school/CalendarPage'))
 const SchoolAssignmentsPage = lazy(() => import('./pages/school/AssignmentsPage'))
 const SchoolSettingsPage = lazy(() => import('./pages/school/SchoolSettingsPage'))
 const SchoolAuditPage = lazy(() => import('./pages/school/AuditPage'))
+const SchoolAttendancePage = lazy(() => import('./pages/school/AttendancePage'))
+const SchoolMarksPage = lazy(() => import('./pages/school/MarksPage'))
 const PlatformAdminPage = lazy(() => import('./pages/admin/PlatformAdminPage'))
 
 const pageFallback = (
@@ -287,6 +289,8 @@ export default function App() {
               <Route path="classes" element={lazyPage(<SchoolClassesPage />)} />
               <Route path="settings" element={lazyPage(<SchoolSettingsPage />)} />
               <Route path="audit" element={lazyPage(<SchoolAuditPage />)} />
+              <Route path="attendance" element={lazyPage(<SchoolAttendancePage />)} />
+              <Route path="marks" element={lazyPage(<SchoolMarksPage />)} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

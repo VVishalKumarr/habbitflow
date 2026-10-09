@@ -99,6 +99,24 @@ Key functions: `my_institutions()`, `my_permissions(inst)`, `institution_overvie
 `platform_institutions`. Server-only: `create_invitation`, `rotate_invitation`,
 `invitation_preview`, `institutional_login_exists`.
 
+### Phase 2 (`2026-10-11_institutions_phase2.sql`)
+
+| Table | Purpose |
+|---|---|
+| `submissions` | one per student per assignment: status (not submitted → submitted → under review → accepted / resubmission requested / rejected), attempt, timestamps, late flag, feedback |
+| `submission_files` | uploaded files (path in the private `homework` bucket, type, size, SHA-256); `deleted_at` once removed |
+| `submission_reviews` | review history (status, comment, attempt, reviewer) |
+| `homework_file_deletions` | minimal record of each file deleted by the retention job |
+| `attendance_records` | per student per class/date/period (and subject for subject sessions); corrections carry a reason |
+| `assessments`, `marks` | internal/external/project/practical assessments with max marks; marks 0..max or absent; draft → published |
+| `notifications` | in-app notifications (dedupe key per user) |
+
+No client role can write submissions, files, reviews, attendance or marks directly:
+`homework_*` functions (server only), `review_submission`, `record_attendance`,
+`save_marks`, `publish_assessment`, `set_retention_hold`. Read models:
+`academic_summary(inst, class?, days)`, `assignment_progress(ids[])`, `grade_for(inst, pct)`.
+Scheduled job: see [HOMEWORK_RETENTION.md](HOMEWORK_RETENTION.md).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

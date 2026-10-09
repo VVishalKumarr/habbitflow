@@ -279,9 +279,8 @@ function DeadlineView({ inst, s }: { inst: MyInstitution; s: SchoolStructure }) 
   const [proposing, setProposing] = useState<{ id: string; title: string; opens_at: string; due_at: string } | null>(null)
   const staff = isStaff(inst.role)
 
-  const { data, error, loading } = useLoad(
-    async () =>
-      unwrap(
+  const { data: loaded, error, loading } = useLoad(async () => {
+    const days = unwrap(
         await supabase.rpc('deadline_calendar', {
           p_inst: inst.institution_id,
           p_from: from,
@@ -291,9 +290,14 @@ function DeadlineView({ inst, s }: { inst: MyInstitution; s: SchoolStructure }) 
           p_subject: subject || null,
           p_teacher: teacher || null,
         }),
-      ) as DeadlineDay[],
-    [inst.institution_id, from, to, classId, grade, subject, teacher],
-  )
+      ) as DeadlineDay[]
+    const ids = days.flatMap((d) => d.deadlines.map((x) => x.id))
+    const progress = staff && ids.length
+      ? (unwrap(await supabase.rpc('assignment_progress', { p_assignments: ids })) as { assignment_id: string; enrolled: number; submitted: number; accepted: number }[])
+      : []
+    return { days, progress }
+  }, [inst.institution_id, from, to, classId, grade, subject, teacher])
+  const data = loaded?.days
 
   const rows = (data ?? []).filter((d) => !onlyConflicts || d.flags.some((f) => SERIOUS_FLAGS.includes(f)))
   const teachers = s.members.filter((m) => s.teaching.some((t) => t.teacher_id === m.id))
@@ -374,6 +378,14 @@ function DeadlineView({ inst, s }: { inst: MyInstitution; s: SchoolStructure }) 
                       <span className="text-muted">
                         {a.subject} · {a.teacher} · due {new Date(a.due_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                       </span>
+                      {(() => {
+                        const p = loaded?.progress.find((x) => x.assignment_id === a.id)
+                        return p ? (
+                          <span className="text-xs text-muted">
+                            {p.submitted}/{p.enrolled} submitted · {p.accepted} accepted
+                          </span>
+                        ) : null
+                      })()}
                       {staff && (
                         <button type="button" className="text-sm font-medium text-brand hover:underline" onClick={() => setProposing(a)}>
                           Propose new date
@@ -394,7 +406,6 @@ function DeadlineView({ inst, s }: { inst: MyInstitution; s: SchoolStructure }) 
               </Row>
             ))}
           </List>
-          <p className="mt-3 text-xs text-muted">Submission and completion statistics appear here once homework submissions are enabled (Phase 2).</p>
         </Panel>
       )}
       {proposing && <ProposeModal inst={inst} assignment={proposing} onClose={() => setProposing(null)} />}
