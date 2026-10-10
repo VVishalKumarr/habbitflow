@@ -25,6 +25,7 @@ export type AnalyticsEvent =
   | 'friend_request_sent'
   | 'export_downloaded'
   | 'assistant_opened'
+  | 'ai_timetable_generated'
 
 type Props = Record<string, string | number | boolean>
 

@@ -50,6 +50,7 @@ One codebase ships as a website and as an Android app (Capacitor).
 | [SECURITY.md](SECURITY.md) | Auth, password recovery, payments verification, what is tested, limitations |
 | [MONETIZATION.md](MONETIZATION.md) | Plans, changing prices, Razorpay, Stripe/Lemon Squeezy, Google Play, ads, donations |
 | [AI_QUOTAS.md](AI_QUOTAS.md) | AI limits per plan and school, counting rules, cost controls, usage views |
+| [AI_TIMETABLE.md](AI_TIMETABLE.md) | Timetable assistant: AI builder, check, rescheduling, voice commands, history/undo |
 | [LICENSE_MANAGEMENT.md](LICENSE_MANAGEMENT.md) | Gift codes, licence codes, institution licences, plan limits, how access is decided |
 | [PRIVACY_SETUP.md](PRIVACY_SETUP.md) | Legal details, disclosures, consent, launch checklist |
 | [PLAY_STORE_CHECKLIST.md](PLAY_STORE_CHECKLIST.md) | Android release: what’s done and what you must do |

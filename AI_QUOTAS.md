@@ -1,7 +1,7 @@
 # AI limits and cost controls
 
-Every AI request — today the help assistant, from Phase 6 the timetable AI and voice
-commands — passes one server-side gate before the model is called. Limits are enforced
+Every AI request — the help assistant, the timetable assistant and voice commands
+([AI_TIMETABLE.md](AI_TIMETABLE.md)) — passes one server-side gate before the model is called. Limits are enforced
 in the database (`supabase/migrations/2026-10-15_ai_quotas_phase5.sql`); the app only
 shows them. API keys stay in Edge Function secrets.
 
@@ -55,8 +55,12 @@ with the service role.
 
 ## Cost controls (Platform admin → AI → Cost controls)
 
-- **Max request length** (characters, default 4,000) — longer requests are refused.
+- **Max request length** (characters, default 4,000) — longer requests are refused. For
+  the timetable assistant this counts what the student typed (answers, command, event
+  name, or the timetable listing for a check), not the school data the server adds.
 - **Max answer length** (tokens, default 2,000) — passed to the model as `max_tokens`.
+  Timetable generation uses at least 12,000 (a whole week plus the model's reasoning
+  doesn't fit in less).
 - **Requests per student per hour** (default 30, all features) — stops bursts.
 - **Platform token cap per month** (default none) — AI pauses for everyone when reached.
 - **Institution token cap per month** — part of the institution's credit pool.

@@ -174,6 +174,20 @@ project and check, among others:
   platform owner sees personal accounts by username and institution members only in totals.
 - `tests/ai-quota.test.mjs` (15 checks) and `tests/e2e-ai-quota.mjs` (7 steps).
 
+## AI timetable assistant
+
+- The `timetable-ai` function never writes: it reads with the student's own token (RLS)
+  and returns proposals. Changes are saved only by `apply_timetable_change()` after the
+  student confirms; it checks every slot/task belongs to the caller's timetable, refuses
+  proposals made for an older version, and runs in one transaction.
+- Model output is untrusted: proposals, rescheduling choices and commands are validated
+  against fixed shapes and the real timetable (`timetable-core.ts`); a command can only be
+  one of a fixed list of student actions.
+- `timetable_changes` is append-only for clients; `timetable_preferences` is own-row only.
+- Data minimisation as in [AI_TIMETABLE.md](AI_TIMETABLE.md#data-sent-to-the-ai-provider).
+- `tests/timetable-core.test.mjs` (12), `tests/timetable-ai.test.mjs` (14),
+  `tests/e2e-ai-timetable.mjs` (9 steps).
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users

@@ -91,8 +91,8 @@ await step('rename tracker', async () => {
 
 async function addSlot(start, end) {
   await page.getByRole('button', { name: 'Add time slot' }).first().click()
-  await page.getByLabel('Start').fill(start)
-  await page.getByLabel('End').fill(end)
+  await page.getByLabel('Start', { exact: true }).fill(start)
+  await page.getByLabel('End', { exact: true }).fill(end)
   await page.getByRole('dialog').getByRole('button', { name: 'Add time slot' }).click()
 }
 
@@ -107,12 +107,12 @@ await step('add time slots (arbitrary lengths)', async () => {
 
 await step('overlapping / invalid slot shows validation', async () => {
   await page.getByRole('button', { name: 'Add time slot' }).first().click()
-  await page.getByLabel('Start').fill('17:30')
-  await page.getByLabel('End').fill('18:30')
+  await page.getByLabel('Start', { exact: true }).fill('17:30')
+  await page.getByLabel('End', { exact: true }).fill('18:30')
   await page.getByRole('dialog').getByRole('button', { name: 'Add time slot' }).click()
   await page.getByText(/Overlaps with/).waitFor()
-  await page.getByLabel('Start').fill('21:00')
-  await page.getByLabel('End').fill('20:00')
+  await page.getByLabel('Start', { exact: true }).fill('21:00')
+  await page.getByLabel('End', { exact: true }).fill('20:00')
   await page.getByRole('dialog').getByRole('button', { name: 'Add time slot' }).click()
   await page.getByText('End time must be after start time.').waitFor()
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click()
@@ -120,7 +120,7 @@ await step('overlapping / invalid slot shows validation', async () => {
 
 await step('edit a time slot', async () => {
   await page.getByRole('button', { name: /Edit time slot 7:30 PM/ }).click()
-  await page.getByLabel('End').fill('20:30')
+  await page.getByLabel('End', { exact: true }).fill('20:30')
   await page.getByRole('button', { name: 'Save changes' }).click()
   await page.getByRole('row', { name: /8:30 PM/ }).waitFor()
 })

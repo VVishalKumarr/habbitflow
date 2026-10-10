@@ -36,6 +36,11 @@ export function friendlyError(err: unknown, fallback = 'Something went wrong. Pl
     onPlanError?.(plan.key, plan.message)
     return plan.message
   }
+  if (/STALE_TIMETABLE/.test(msg)) return 'Your timetable changed after this suggestion was made. Nothing was saved — please ask again.'
+  const undo = /CANNOT_UNDO:(.+)/.exec(msg)
+  if (undo) return undo[1]
+  const invalid = /INVALID_CHANGE:(.+)/.exec(msg)
+  if (invalid) return `This change couldn’t be saved (${invalid[1]}). Nothing was changed.`
   if (/failed to fetch|network|load failed/i.test(msg)) return 'Network error — check your connection and try again.'
   if (e?.code === '23P01' || /overlaps/i.test(msg)) return 'That time slot overlaps an existing slot.'
   if (e?.code === '23505') return 'That already exists.'

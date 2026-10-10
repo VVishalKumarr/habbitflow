@@ -266,6 +266,67 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
   },
   {
+    slug: 'timetable-assistant',
+    title: 'Timetable assistant: AI, voice commands and rescheduling',
+    description: 'Build a timetable with AI, check how balanced your week is, move activities around an event, and use typed or spoken commands.',
+    keywords: ['ai', 'assistant', 'voice', 'speak', 'microphone', 'command', 'build', 'generate', 'reschedule', 'move', 'check', 'evaluate', 'balanced', 'history', 'undo'],
+    route: '/dashboard',
+    public: true,
+    sections: [
+      {
+        body: [
+          'The Timetable assistant is on the Dashboard, below your weekly timetable. It never changes anything on its own: it shows exactly what will change and waits for you to press Confirm, Move or Save.',
+        ],
+      },
+      {
+        heading: 'Commands (typed or spoken)',
+        body: [
+          'Type in the command box, or tap the microphone and speak. Examples:',
+          '- “Add maths revision tomorrow 6 pm”',
+          '- “Move today’s unfinished tasks to Saturday”',
+          '- “Start a 25-minute focus session on chemistry”',
+          '- “Mark reading done”',
+          '- “What’s due this week?”',
+          '- “Open my progress”',
+          'Speech is turned into text by your browser or phone; HabitFlow never receives audio. If the AI is unavailable or you’ve used your allowance, common commands still work.',
+        ],
+      },
+      {
+        heading: 'Build with AI (Plus and Pro)',
+        body: [
+          '1. Click “Build with AI”.',
+          '2. Answer a few questions — your goals, subjects that need more time, fixed commitments, sleep times, when you focus best. Skip anything you like. If your school uses HabitFlow, your class timetable, homework deadlines and exams are filled in automatically.',
+          '3. Click “Build my timetable”. The AI explains what it included and why, and anything that didn’t fit.',
+          '4. Click “Save as new timetable”. Your existing timetables aren’t changed. Your answers are saved for next time.',
+        ],
+      },
+      {
+        heading: 'Check my timetable',
+        body: [
+          'Shows hours per category and per day, and points out overloaded days, long stretches without breaks, late nights, clashes with school and exams with no revision planned. With AI available you also get personal advice.',
+        ],
+      },
+      {
+        heading: 'Reschedule for an event',
+        body: [
+          'Enter what’s happening (for example a football match), the day and time. The assistant lists the activities it displaces with before → after times. Untick any you want to leave, then click “Move”. Moves change your weekly timetable.',
+        ],
+      },
+      {
+        heading: 'History and undo',
+        body: [
+          '“History” lists every change made by the assistant. You can undo the most recent one, as long as you haven’t edited the timetable since. School timetables are never changed by the assistant.',
+        ],
+      },
+      {
+        heading: 'Limits',
+        body: [
+          'AI requests have a monthly or daily allowance depending on your plan (see Settings → AI usage). Requests that fail aren’t counted.',
+        ],
+      },
+    ],
+  },
+  {
     slug: 'habitflow-pro',
     title: 'Plans: Free, Plus and Pro',
     description: 'What each plan includes, how to upgrade and how to cancel.',
@@ -277,7 +338,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
         heading: 'The three plans',
         body: [
           '- Free: 2 trackers, 30-day charts, the focus timer and up to 3 friends. Includes some ads.',
-          '- Plus: no ads, unlimited trackers, full history and 90-day charts, colour themes and up to 10 friends.',
+          '- Plus: no ads, unlimited trackers, full history and 90-day charts, colour themes, the AI timetable builder and up to 10 friends.',
           '- Pro: everything in Plus, plus PDF and CSV reports, focus sounds, weekly leaderboards and up to 50 friends. Pro has a free trial.',
           'Prices are shown on the pricing page and depend on your region.',
         ],

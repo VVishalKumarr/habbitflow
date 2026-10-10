@@ -178,6 +178,18 @@ Server only: `ai_begin(user, feature, request_id, input_chars)`, `ai_finish(...)
 `platform_set_ai_quota`, `platform_update_ai_settings`, `platform_set_ai_pool`.
 Details: [AI_QUOTAS.md](AI_QUOTAS.md).
 
+## AI timetable (Phase 6, `2026-10-16_ai_timetable_phase6.sql`)
+
+| Table | Purpose |
+|---|---|
+| `timetable_preferences` | one row per user: saved needs-check answers (JSON, ≤ 8 KB); own row only |
+| `timetable_changes` | append-only history of AI / command changes: source, summary, steps, undo steps, versions, `undone_at`; read own, no client writes |
+
+Functions: `timetable_version(tracker)` (content hash; null for others' timetables),
+`apply_timetable_change(tracker, new_name, base_version, source, summary, ops)`,
+`undo_timetable_change(id)`, `my_timetable_context()` (student's class periods, deadlines,
+exams, holidays). Internal: `tt_apply_ops`. Details: [AI_TIMETABLE.md](AI_TIMETABLE.md).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

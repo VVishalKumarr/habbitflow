@@ -2,6 +2,7 @@ import { AlertTriangle, CalendarClock, Clock, Plus, Sparkles } from 'lucide-reac
 import { TodayPanel } from '../components/dashboard/TodayPanel'
 import { TodayProgressCard } from '../components/dashboard/TodayProgressCard'
 import { TrackerHeader } from '../components/dashboard/TrackerHeader'
+import { TimetableAssistant } from '../components/timetable-ai/TimetableAssistant'
 import { WeekNavigator } from '../components/dashboard/WeekNavigator'
 import { MobileDaySelector, MobileDayView } from '../components/timetable/MobileDayView'
 import { Timetable } from '../components/timetable/Timetable'
@@ -80,7 +81,8 @@ export default function DashboardPage() {
 
   if (!hasTrackers) {
     return (
-      <div className="card mx-auto mt-4 max-w-2xl">
+      <div className="mx-auto mt-4 max-w-2xl space-y-6">
+      <div className="card">
         <EmptyState
           icon={Sparkles}
           title={`Welcome, ${username}!`}
@@ -92,6 +94,8 @@ export default function DashboardPage() {
             </button>
           }
         />
+      </div>
+      <TimetableAssistant />
       </div>
     )
   }
@@ -177,6 +181,9 @@ export default function DashboardPage() {
           </section>
         </>
       )}
+
+      {/* Outside the loading state so a saved change (which reloads the timetable) keeps the assistant open. */}
+      {dataStatus !== 'error' && <TimetableAssistant />}
     </div>
   )
 }

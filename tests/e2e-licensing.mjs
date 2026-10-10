@@ -103,10 +103,10 @@ try {
     await dialog('1 code generated').getByRole('button', { name: 'Done' }).click()
   })
 
-  await step('pricing page doesn’t advertise the unreleased AI timetable feature', async () => {
+  await step('pricing page advertises the AI timetable builder (shipped in Phase 6)', async () => {
     await page.goto(`${BASE}/pro`)
     await page.getByText('Everything in Free, plus:').first().waitFor()
-    assert.equal(await page.getByText('AI timetable that asks your needs first').count(), 0)
+    await page.getByText('AI timetable that asks your needs first').first().waitFor()
     await page.getByText('Up to 3 friends').first().waitFor()
   })
 

@@ -151,7 +151,7 @@ export function PrivacyPage() {
           )}
           {ai && (
             <li>
-              <strong>{ai}</strong> — powers the in-app help assistant (see AI assistant).
+              <strong>{ai}</strong> — powers the in-app help assistant and the timetable assistant (see AI assistant).
             </li>
           )}
         </ul>
@@ -163,6 +163,12 @@ export function PrivacyPage() {
           <p>
             When you ask the assistant a question, we send your question, the conversation so far, the page you’re on and which plan you’re on (Free, Plus or Pro) to {ai} to generate an
             answer. We don’t send your tasks, statistics, email, password or payment details. Please don’t type personal information into the assistant.
+          </p>
+          <p>
+            The timetable assistant sends {ai} only what each request needs: your command text; or your answers to the timetable questions; or your timetable’s activity names,
+            categories and times. For students of a school that uses HabitFlow it also sends class times and subjects, and homework and exam titles and dates. It never sends your name,
+            email, school name, marks or attendance. Voice commands are turned into text by your browser or phone; we never receive or store audio. We don’t store prompts or
+            answers — only counts and token numbers for usage limits. {ai} does not use this data to train its models.
           </p>
         </section>
       )}

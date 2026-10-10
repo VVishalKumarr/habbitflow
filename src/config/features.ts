@@ -43,7 +43,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
  * Features that exist in the plans table but aren't built yet: never advertised
  * on the pricing page. Remove a key here when its feature ships.
  */
-export const UNRELEASED_FEATURES = new Set<Feature>(['ai_guided_timetable'])
+export const UNRELEASED_FEATURES = new Set<Feature>([])
 
 /** Shown in the upgrade dialog when a feature is locked. */
 export const FEATURE_UPSELL: Partial<Record<Feature | LimitKey, string>> = {
@@ -56,4 +56,5 @@ export const FEATURE_UPSELL: Partial<Record<Feature | LimitKey, string>> = {
   custom_themes: 'Custom themes need a paid plan.',
   focus_sounds: 'Focus sounds are a Pro feature.',
   leaderboards: 'Leaderboards are a Pro feature.',
+  ai_guided_timetable: 'The AI timetable builder comes with Plus and Pro. Checking your timetable and rescheduling stay available on Free.',
 }

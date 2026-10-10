@@ -104,9 +104,13 @@ headers, cookies and user info (`src/lib/monitoring.ts`).
 2. `npx supabase secrets set ANTHROPIC_API_KEY=… --project-ref <ref>`
 3. Set `VITE_AI_PROVIDER=anthropic` (for the Privacy Policy disclosure) and redeploy the site.
 
-Model defaults to `claude-opus-5-5` (override with the `AI_MODEL` secret); it runs at low
-effort with automatic refusal fallback enabled. Limits: 30 questions/hour, 100/day per user.
-Without a key the assistant answers from the built-in help articles.
+The same key powers the help assistant (`assistant`) and the timetable assistant
+(`timetable-ai`); deploy both functions. Model defaults to `claude-opus-5-5` (override with
+the `AI_MODEL` secret) with automatic refusal fallback enabled. Limits per plan are set in
+Platform admin → AI ([AI_QUOTAS.md](AI_QUOTAS.md)).
+Without a key the help assistant answers from the built-in help articles, and the timetable
+assistant uses its built-in command parser and automatic suggestions
+([AI_TIMETABLE.md](AI_TIMETABLE.md)); the AI timetable builder shows that it isn't switched on.
 
 ## 8. Ads, payments, Android billing, pricing
 

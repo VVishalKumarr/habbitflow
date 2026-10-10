@@ -102,7 +102,7 @@ Moved ahead of AI because AI quotas (Phase 5) depend on it.
   features, upgrade/downgrade/expiry, students can't edit usage
 - Docs: `AI_QUOTAS.md` (or section in `LICENSE_MANAGEMENT.md`)
 
-## Phase 6 — AI timetable assistant ⬜
+## Phase 6 — AI timetable assistant ✅
 
 - Text assistant on the student dashboard, through the existing `assistant`
   function (server-side key), metered by Phase 5
@@ -137,6 +137,12 @@ Moved ahead of AI because AI quotas (Phase 5) depend on it.
 - Timetable change history
 - Minimal student data sent to the AI provider; no training use
 - Docs: `AI_TIMETABLE.md`
+
+As built: the needs-check questions are a fixed, optional list in the app (instant, no AI
+cost); the model decides the timetable from the answers and explains its choices.
+Rescheduling changes the weekly timetable (no single-date overrides yet; undo from
+History). `study_plan` quota is not used yet. Real model output is untested until
+`ANTHROPIC_API_KEY` is set; all fallbacks and server checks are tested.
 
 ## Phase 7 — Development reports, programmes, import/export ⬜
 

@@ -17,6 +17,8 @@ interface TrackerDataState {
   completions: Record<string, boolean>
 
   load: (trackerId: string | null) => Promise<void>
+  /** Re-reads the current timetable without showing the loading state (after a saved change). */
+  refresh: () => Promise<void>
   addSlot: (start: string, end: string) => Promise<TimeSlot>
   updateSlot: (id: string, start: string, end: string) => Promise<void>
   deleteSlot: (id: string) => Promise<void>
@@ -66,33 +68,18 @@ export const useTrackerData = create<TrackerDataState>((set, get) => ({
   tasks: [],
   completions: {},
 
+  refresh: async () => {
+    const trackerId = get().trackerId
+    if (trackerId) await loadInto(trackerId, true)
+  },
+
   load: async (trackerId) => {
-    const seq = ++loadSeq
     if (!trackerId) {
+      ++loadSeq
       set({ trackerId: null, status: 'idle', error: null, slots: [], tasks: [], completions: {} })
       return
     }
-    set({ trackerId, status: 'loading', error: null, slots: [], tasks: [], completions: {} })
-    try {
-      const [slotsRes, tasksRes, completions] = await Promise.all([
-        supabase.from('time_slots').select(SLOT_COLS).eq('tracker_id', trackerId),
-        supabase.from('tasks').select(TASK_COLS).eq('tracker_id', trackerId).order('created_at'),
-        fetchAllCompletions(trackerId),
-      ])
-      if (slotsRes.error) throw slotsRes.error
-      if (tasksRes.error) throw tasksRes.error
-      if (seq !== loadSeq) return
-      const map: Record<string, boolean> = {}
-      for (const c of completions) map[completionKey(c.task_id, c.completion_date)] = c.completed
-      set({
-        status: 'ready',
-        slots: sortSlots(slotsRes.data as TimeSlot[]),
-        tasks: tasksRes.data as Task[],
-        completions: map,
-      })
-    } catch (err) {
-      if (seq === loadSeq) set({ status: 'error', error: friendlyError(err) })
-    }
+    await loadInto(trackerId, false)
   },
 
   addSlot: async (start, end) => {
@@ -199,3 +186,31 @@ export const useTrackerData = create<TrackerDataState>((set, get) => ({
     set({ trackerId: null, status: 'idle', error: null, slots: [], tasks: [], completions: {} })
   },
 }))
+
+/** Loads a timetable into the store; quiet keeps the current data on screen until the new data arrives. */
+async function loadInto(trackerId: string, quiet: boolean) {
+  const seq = ++loadSeq
+  const set = useTrackerData.setState
+  if (!quiet) set({ trackerId, status: 'loading', error: null, slots: [], tasks: [], completions: {} })
+  try {
+    const [slotsRes, tasksRes, completions] = await Promise.all([
+      supabase.from('time_slots').select(SLOT_COLS).eq('tracker_id', trackerId),
+      supabase.from('tasks').select(TASK_COLS).eq('tracker_id', trackerId).order('created_at'),
+      fetchAllCompletions(trackerId),
+    ])
+    if (slotsRes.error) throw slotsRes.error
+    if (tasksRes.error) throw tasksRes.error
+    if (seq !== loadSeq) return
+    const map: Record<string, boolean> = {}
+    for (const c of completions) map[completionKey(c.task_id, c.completion_date)] = c.completed
+    set({
+      status: 'ready',
+      slots: sortSlots(slotsRes.data as TimeSlot[]),
+      tasks: tasksRes.data as Task[],
+      completions: map,
+    })
+  } catch (err) {
+    // a quiet refresh keeps what's on screen if it fails
+    if (seq === loadSeq && !quiet) set({ status: 'error', error: friendlyError(err) })
+  }
+}
