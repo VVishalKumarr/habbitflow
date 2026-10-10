@@ -117,6 +117,26 @@ No client role can write submissions, files, reviews, attendance or marks direct
 `academic_summary(inst, class?, days)`, `assignment_progress(ids[])`, `grade_for(inst, pct)`.
 Scheduled job: see [HOMEWORK_RETENTION.md](HOMEWORK_RETENTION.md).
 
+### Phase 3 (`2026-10-12_institutions_phase3.sql`)
+
+| Table | Purpose |
+|---|---|
+| `guardian_links` | student → parent/guardian link: requested → approved (class teacher or `manage_students`) → active once the parent opens a one-time link; declined / revoked with a reason |
+| `class_periods` | weekly class timetable (day, start/end, subject, teacher); overlapping periods in a class are rejected by trigger |
+| `announcements` | institution / grade / class announcements for staff, students, parents or everyone |
+| `conversations`, `conversation_messages` | parent ↔ staff threads about one child; text or meeting requests (proposed / accepted / declined) |
+| `student_goals` | personal goals (private to the student) |
+| `notification_prefs` | per-kind in-app / email / push switches (email and push stored for later phases) |
+
+Parents never read institution tables directly: `guardian_children()`,
+`guardian_child_view(student)` and `guardian_contacts(student)` check an active link
+first. Other functions: `request_guardian_link`, `close_guardian_link`,
+`post_announcement`, `start_conversation`, `send_message`, `respond_meeting`,
+`my_conversations`, `student_guardians`, `timetable_conflicts(inst)`,
+`my_achievements()`, `notify(...)` (server only). Scheduled job: `send-reminders`
+(pg_cron, hourly at :05) runs `send_reminders()` for homework due in 24 h, overdue
+work and exams tomorrow, deduplicated and respecting preferences.
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

@@ -1,4 +1,4 @@
-import { Building2, ChartNoAxesColumn, ChevronDown, CircleHelp, LayoutDashboard, LogOut, Settings, ShieldCheck, Sparkles, Timer, Users } from 'lucide-react'
+import { Building2, ChartNoAxesColumn, ChevronDown, CircleHelp, LayoutDashboard, LogOut, Settings, ShieldCheck, Sparkles, Target, Timer, Users } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { analytics } from '../../lib/analytics'
 import { useAuth } from '../../store/auth'
@@ -98,6 +98,7 @@ function UserMenu() {
     s.profile?.account_type === 'institutional' ? (s.profile.display_name ?? s.session?.user.email ?? '') : (s.profile?.username ?? ''),
   )
   const isPlatformAdmin = useInstitutionStore((s) => s.isPlatformAdmin)
+  const institutional = useAuth((s) => s.profile?.account_type === 'institutional')
   const signOut = useAuth((s) => s.signOut)
   const { isPaid, plan_name } = useSubscription()
   const navigate = useNavigate()
@@ -133,6 +134,9 @@ function UserMenu() {
           <MenuDivider />
           <MenuItem icon={<Settings />} onClick={() => (close(), navigate('/settings'))}>
             Settings
+          </MenuItem>
+          <MenuItem icon={<Target />} onClick={() => (close(), navigate(institutional ? '/school/goals' : '/goals'))}>
+            Goals &amp; achievements
           </MenuItem>
           <MenuItem icon={<Sparkles />} onClick={() => (close(), navigate('/pro'))}>
             {isPaid ? `Your ${plan_name} plan` : 'Upgrade'}

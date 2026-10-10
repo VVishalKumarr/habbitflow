@@ -140,8 +140,17 @@ project and check, among others:
   and the audit log keeps the previous value. Students and parents can’t edit them.
   Marks are validated to 0..max in the database.
 
-`tests/institutions.test.mjs` (25 checks), `tests/institutions-phase2.test.mjs` (17) and the browser suites `tests/e2e-institution.mjs` (13 steps) and
-`tests/e2e-institution-phase2.mjs` (9) cover the above.
+- **Parents** get access only through an active guardian link (student request →
+  staff approval → one-time, hashed, expiring activation link sent to the parent).
+  They read child data only through functions that re-check the link, so revoking it
+  cuts access at once. Knowing a student’s name or class grants nothing.
+- **Messages** are visible to the two participants only; announcements and their
+  notifications reach only the targeted audience.
+
+`tests/institutions.test.mjs` (25 checks), `tests/institutions-phase2.test.mjs` (17),
+`tests/institutions-phase3.test.mjs` (10) and the browser suites
+`tests/e2e-institution.mjs` (13 steps), `tests/e2e-institution-phase2.mjs` (9) and
+`tests/e2e-institution-phase3.mjs` (10) cover the above.
 
 ## Known limitations / to do
 

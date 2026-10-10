@@ -9,6 +9,7 @@ import {
   RecoveryEmailDialog,
   RemoveEmailDialog,
 } from '../components/settings/AccountDialogs'
+import { NotificationPrefs } from '../components/settings/NotificationPrefs'
 import { Spinner } from '../components/ui/Spinner'
 import { appConfig } from '../config'
 import { analytics } from '../lib/analytics'
@@ -380,6 +381,12 @@ export default function SettingsPage() {
           />
         </Row>
       </Section>
+
+      {institutional && (
+        <Section title="Notifications" description="Choose which school notifications you get in the app.">
+          <NotificationPrefs />
+        </Section>
+      )}
 
       <Section title="Privacy" description="Your tasks are always private. Choose what friends can see.">
         <Row label="Share my progress with friends" hint="Friends can compare daily totals (completion %, tasks done, focus minutes). Never task names.">

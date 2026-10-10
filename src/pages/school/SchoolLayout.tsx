@@ -1,4 +1,4 @@
-import { Award, BookOpenCheck, Building2, CalendarCheck, CalendarDays, ClipboardList, History, LayoutGrid, Settings2, ShieldAlert, Users } from 'lucide-react'
+import { Award, BookOpenCheck, Building2, CalendarCheck, CalendarDays, ClipboardList, HeartHandshake, History, LayoutGrid, Megaphone, MessageSquare, Settings2, ShieldAlert, Target, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/EmptyState'
@@ -14,12 +14,23 @@ interface Item {
   show: (m: MyInstitution, can: (p: Permission) => boolean) => boolean
 }
 
+const notParent = (m: MyInstitution) => m.role !== 'parent'
+
 const ITEMS: Item[] = [
   { to: '/school', label: 'Overview', icon: LayoutGrid, show: () => true },
   { to: '/school/calendar', label: 'Calendar', icon: CalendarDays, show: () => true },
-  { to: '/school/assignments', label: 'Assignments', icon: ClipboardList, show: () => true },
-  { to: '/school/attendance', label: 'Attendance', icon: CalendarCheck, show: () => true },
-  { to: '/school/marks', label: 'Marks', icon: Award, show: () => true },
+  { to: '/school/assignments', label: 'Assignments', icon: ClipboardList, show: notParent },
+  { to: '/school/attendance', label: 'Attendance', icon: CalendarCheck, show: notParent },
+  { to: '/school/marks', label: 'Marks', icon: Award, show: notParent },
+  { to: '/school/announcements', label: 'Announcements', icon: Megaphone, show: () => true },
+  { to: '/school/messages', label: 'Messages', icon: MessageSquare, show: (m) => m.role === 'parent' || isStaff(m.role) },
+  { to: '/school/goals', label: 'Goals', icon: Target, show: (m) => m.role === 'student' },
+  {
+    to: '/school/guardians',
+    label: 'Parents & guardians',
+    icon: HeartHandshake,
+    show: (m, can) => isStaff(m.role) && (can('manage_students') || m.role === 'class_teacher'),
+  },
   { to: '/school/people', label: 'People', icon: Users, show: (m) => isStaff(m.role) },
   { to: '/school/classes', label: 'Classes & subjects', icon: BookOpenCheck, show: (m) => isStaff(m.role) },
   {

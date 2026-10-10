@@ -8,6 +8,8 @@ import { Spinner } from '../../components/ui/Spinner'
 import { friendlyError } from '../../lib/errors'
 import { isHead, ROLE_LABEL, STAFF_ROLES, type MyInstitution, type SchoolClass } from '../../lib/institution'
 import { supabase } from '../../lib/supabase'
+import { unwrap, useLoad } from '../../lib/useLoad'
+import { DAY_SHORT } from '../../lib/dates'
 import { useCurrentInstitution } from '../../store/institution'
 import { toast } from '../../store/ui'
 
@@ -82,6 +84,8 @@ export default function ClassesPage() {
           </ul>
         </Panel>
       ))}
+
+      {can('manage_classes') && <ConflictsPanel inst={inst.institution_id} />}
 
       {creating && <NewClassModal inst={inst} s={s} canManageGrade={canManageGrade} onClose={() => setCreating(false)} onDone={reload} />}
     </div>
@@ -238,6 +242,8 @@ function ClassDetail({ inst, c, s, editable, onChange }: { inst: string; c: Scho
         )}
       </div>
 
+      <PeriodsEditor inst={inst} c={c} s={s} editable={editable} onChange={onChange} />
+
       <div>
         <h3 className="mb-2 text-sm font-semibold">Students ({enrolled.length})</h3>
         <List empty="No students enrolled.">
@@ -351,5 +357,134 @@ function NewClassModal({ inst, s, canManageGrade, onClose, onDone }: { inst: MyI
         </SelectField>
       </form>
     </Modal>
+  )
+}
+
+/** Weekly class timetable: fixed school periods (used by the parent view and the AI planner). */
+function PeriodsEditor({ inst, c, s, editable, onChange }: { inst: string; c: SchoolClass; s: SchoolStructure; editable: boolean; onChange: () => void }) {
+  const periods = s.periods.filter((p) => p.class_id === c.id)
+  const [day, setDay] = useState(1)
+  const [start, setStart] = useState('09:00')
+  const [end, setEnd] = useState('09:45')
+  const [subject, setSubject] = useState('')
+  const [label, setLabel] = useState('')
+  const teacherFor = (subjectId: string) => s.teaching.find((t) => t.class_id === c.id && t.subject_id === subjectId)?.teacher_id ?? null
+
+  const add = async () => {
+    if (!subject && !label.trim()) return toast.error('Choose a subject or type a label such as Lunch.')
+    const { error } = await supabase.from('class_periods').insert({
+      institution_id: inst,
+      class_id: c.id,
+      day_of_week: day,
+      start_time: start,
+      end_time: end,
+      subject_id: subject || null,
+      teacher_id: subject ? teacherFor(subject) : null,
+      label: subject ? null : label.trim(),
+    })
+    if (error) return toast.error(friendlyError(error))
+    onChange()
+  }
+  const remove = async (id: string) => {
+    const { error } = await supabase.from('class_periods').delete().eq('id', id)
+    if (error) toast.error(friendlyError(error))
+    else onChange()
+  }
+
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-semibold">Weekly timetable</h3>
+      {periods.length === 0 ? (
+        <p className="text-sm text-muted">No periods yet.</p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6, 0]
+            .filter((d) => periods.some((p) => p.day_of_week === d))
+            .map((d) => (
+              <div key={d} className="rounded-xl border border-line bg-surface p-2.5">
+                <p className="mb-1 text-xs font-semibold text-muted">{DAY_SHORT[d]}</p>
+                <ul className="space-y-0.5 text-sm">
+                  {periods
+                    .filter((p) => p.day_of_week === d)
+                    .map((p) => (
+                      <li key={p.id} className="flex items-center gap-2">
+                        <span className="w-24 shrink-0 text-muted tabular-nums">
+                          {p.start_time.slice(0, 5)}–{p.end_time.slice(0, 5)}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate">{p.subject_id ? s.subjects.find((x) => x.id === p.subject_id)?.name : p.label}</span>
+                        {editable && (
+                          <button type="button" className="rounded p-1 text-muted hover:text-danger" onClick={() => remove(p.id)} aria-label="Remove period">
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
+        </div>
+      )}
+      {editable && (
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-[100px_110px_110px_minmax(0,1fr)_auto]">
+          <select className="input h-10 text-sm" value={day} onChange={(e) => setDay(Number(e.target.value))} aria-label="Day">
+            {[1, 2, 3, 4, 5, 6, 0].map((d) => (
+              <option key={d} value={d}>
+                {DAY_SHORT[d]}
+              </option>
+            ))}
+          </select>
+          <input type="time" className="input h-10 text-sm" value={start} onChange={(e) => setStart(e.target.value)} aria-label="Start time" />
+          <input type="time" className="input h-10 text-sm" value={end} onChange={(e) => setEnd(e.target.value)} aria-label="End time" />
+          <select className="input h-10 text-sm" value={subject} onChange={(e) => setSubject(e.target.value)} aria-label="Period subject">
+            <option value="">Other (label)…</option>
+            {s.teaching
+              .filter((t) => t.class_id === c.id)
+              .map((t) => (
+                <option key={t.id} value={t.subject_id}>
+                  {s.subjects.find((x) => x.id === t.subject_id)?.name}
+                </option>
+              ))}
+          </select>
+          {!subject && <input className="input h-10 text-sm" placeholder="Label, e.g. Lunch" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={40} aria-label="Period label" />}
+          <button type="button" className="btn-secondary h-10" onClick={add}>
+            Add period
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Teachers timetabled in two classes at the same time. */
+function ConflictsPanel({ inst }: { inst: string }) {
+  const { data } = useLoad(
+    async () =>
+      unwrap(await supabase.rpc('timetable_conflicts', { p_inst: inst })) as {
+        teacher: string
+        day_of_week: number
+        a_class: string
+        a_start: string
+        a_end: string
+        b_class: string
+        b_start: string
+        b_end: string
+      }[],
+    [inst],
+  )
+  if (!data) return null
+  return (
+    <Panel title="Timetable conflicts" description="Teachers scheduled in two classes at once.">
+      <List empty="No clashes in the class timetables you can see.">
+        {data.map((x, i) => (
+          <Row key={i} className="py-2">
+            <span className="flex-1 text-sm">
+              <span className="font-medium">{x.teacher}</span> · {DAY_SHORT[x.day_of_week]}: {x.a_class} {x.a_start.slice(0, 5)}–{x.a_end.slice(0, 5)} and {x.b_class}{' '}
+              {x.b_start.slice(0, 5)}–{x.b_end.slice(0, 5)}
+            </span>
+            <Pill tone="danger">Double-booked</Pill>
+          </Row>
+        ))}
+      </List>
+    </Panel>
   )
 }

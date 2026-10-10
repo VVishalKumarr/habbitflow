@@ -1,6 +1,8 @@
 import { AlertTriangle, Award, BookOpenCheck, CalendarCheck, CalendarClock, CalendarDays, ClipboardList, GraduationCap, MailPlus, ShieldAlert, UserCog, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { StudentGuardians } from '../../components/school/Guardians'
 import { ErrorNote, Loading, Panel, PageHeader, Pill, Stat } from '../../components/school/ui'
+import ParentOverviewPage from './ParentOverviewPage'
 import { addDays } from '../../lib/dates'
 import {
   EVENT_LABEL,
@@ -18,6 +20,13 @@ import { supabase } from '../../lib/supabase'
 import { unwrap, useLoad } from '../../lib/useLoad'
 import { useCurrentInstitution } from '../../store/institution'
 
+interface TodayPeriod {
+  start_time: string
+  end_time: string
+  label: string | null
+  subjects: { name: string } | null
+}
+
 interface AcademicSummary {
   attendance: { records: number; present_rate: number | null }
   homework: { expected: number; submitted: number; accepted: number; completion_rate: number | null }
@@ -34,6 +43,11 @@ const GREETING: Record<string, string> = {
 }
 
 export default function OverviewPage() {
+  const { current } = useCurrentInstitution()
+  return current?.role === 'parent' ? <ParentOverviewPage /> : <InstitutionOverview />
+}
+
+function InstitutionOverview() {
   const { current, can } = useCurrentInstitution()
   const inst = current!
   const { data, error, loading } = useLoad(async () => {
@@ -53,13 +67,18 @@ export default function OverviewPage() {
         .limit(8),
     ])
     const summary = unwrap(await supabase.rpc('academic_summary', { p_inst: inst.institution_id })) as AcademicSummary
-    return { overview, days: unwrap(days) as DeadlineDay[], events: unwrap(events) as CalendarEvent[], summary }
+    const today = new Date().getDay()
+    const periods =
+      inst.role === 'student'
+        ? (unwrap(await supabase.from('class_periods').select('start_time, end_time, label, subjects(name)').eq('day_of_week', today).order('start_time')) as unknown as TodayPeriod[])
+        : []
+    return { overview, days: unwrap(days) as DeadlineDay[], events: unwrap(events) as CalendarEvent[], summary, periods }
   }, [inst.institution_id])
 
   if (loading && !data) return <Loading />
   if (error || !data) return <ErrorNote>{error}</ErrorNote>
 
-  const { overview: o, days, events, summary } = data
+  const { overview: o, days, events, summary, periods } = data
   const staffView = isStaff(inst.role)
   const conflicts = days.filter((d) => d.flags.some((f) => SERIOUS_FLAGS.includes(f)))
   const upcoming = days.flatMap((d) => d.deadlines.map((x) => ({ ...x, class_name: d.class_name, day: d.day }))).slice(0, 8)
@@ -199,12 +218,33 @@ export default function OverviewPage() {
         </div>
       </Panel>
 
+      {!staffView && periods.length > 0 && (
+        <Panel title="Today at school">
+          <ul className="divide-y divide-line">
+            {periods.map((p, i) => (
+              <li key={i} className="flex gap-3 py-2 text-sm">
+                <span className="w-28 shrink-0 text-muted tabular-nums">
+                  {p.start_time.slice(0, 5)}–{p.end_time.slice(0, 5)}
+                </span>
+                <span>{p.subjects?.name ?? p.label}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
+
+      {inst.role === 'student' && <StudentGuardians institutionId={inst.institution_id} studentId={inst.membership_id} />}
+
       {!staffView && (
         <Panel title="Your habits and timetable">
           <p className="text-sm text-muted">
             Your personal habit trackers and weekly timetable stay private to you.{' '}
             <Link to="/dashboard" className="font-medium text-brand hover:underline">
               Open your timetable
+            </Link>{' '}
+            or{' '}
+            <Link to="/school/goals" className="font-medium text-brand hover:underline">
+              set a goal
             </Link>
             .
           </p>

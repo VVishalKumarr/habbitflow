@@ -15,7 +15,7 @@ to match, but hiding a button is never what protects the data.
 | 2 | **Class Teacher** | Same tier as coordinator. Manages their own class where permitted. |
 | 3 | **Subject Teacher** | Their assigned classes and subjects only. |
 | 4 | **Student** | Their own class, published assignments, calendar. Can’t see other students. |
-| 5 | **Parent / Guardian** | Phase 3 (linked children only). |
+| 5 | **Parent / Guardian** | Only children with an *active* guardian link: timetable, homework status, attendance, published marks and feedback, exams, announcements for them, messages with that child’s teachers. Can’t search students or read institution tables. |
 
 ## Permissions
 
@@ -45,6 +45,20 @@ nobody else can ever be granted them, not even through an override.
 ✔ = default. A principal/director can switch any unlocked permission on or off
 per role in **School → Settings → Role permissions**. Overrides are stored in
 `institution_role_permissions` and audited.
+
+### Parent links and messages
+
+- A **student** starts a link (parent’s email, name, relationship). It is approved by
+  the student’s **class teacher** or anyone with `manage_students`, then activated by
+  the parent through a one-time email link. The student, approver or a head can revoke
+  it with a reason; access stops immediately.
+- **Parents** can message their child’s class teacher, subject teachers, in-scope
+  coordinators and the principal/director.
+- **Staff** need `message_parents` to start a conversation, and only about students in
+  classes they can see. Any staff member can reply in a thread a parent started with them.
+- Conversations are readable only by their two participants — not even principals.
+- **Announcements**: heads post anywhere (staff announcements are head-only);
+  coordinators within their grades; class teachers to their own class.
 
 ## Scope rules (always on top of permissions)
 

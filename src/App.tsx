@@ -54,6 +54,10 @@ const SchoolSettingsPage = lazy(() => import('./pages/school/SchoolSettingsPage'
 const SchoolAuditPage = lazy(() => import('./pages/school/AuditPage'))
 const SchoolAttendancePage = lazy(() => import('./pages/school/AttendancePage'))
 const SchoolMarksPage = lazy(() => import('./pages/school/MarksPage'))
+const SchoolGuardiansPage = lazy(() => import('./pages/school/GuardiansPage'))
+const SchoolMessagesPage = lazy(() => import('./pages/school/MessagesPage'))
+const SchoolAnnouncementsPage = lazy(() => import('./pages/school/AnnouncementsPage'))
+const GoalsPage = lazy(() => import('./pages/GoalsPage'))
 const PlatformAdminPage = lazy(() => import('./pages/admin/PlatformAdminPage'))
 
 const pageFallback = (
@@ -281,6 +285,7 @@ export default function App() {
             <Route path="/friends/:friendId" element={lazyPage(<ComparePage />)} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/admin" element={lazyPage(<PlatformAdminPage />)} />
+            <Route path="/goals" element={lazyPage(<GoalsPage />)} />
             <Route path="/school" element={lazyPage(<SchoolLayout />)}>
               <Route index element={lazyPage(<SchoolOverviewPage />)} />
               <Route path="calendar" element={lazyPage(<SchoolCalendarPage />)} />
@@ -291,6 +296,10 @@ export default function App() {
               <Route path="audit" element={lazyPage(<SchoolAuditPage />)} />
               <Route path="attendance" element={lazyPage(<SchoolAttendancePage />)} />
               <Route path="marks" element={lazyPage(<SchoolMarksPage />)} />
+              <Route path="guardians" element={lazyPage(<SchoolGuardiansPage />)} />
+              <Route path="messages" element={lazyPage(<SchoolMessagesPage />)} />
+              <Route path="announcements" element={lazyPage(<SchoolAnnouncementsPage />)} />
+              <Route path="goals" element={lazyPage(<GoalsPage />)} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

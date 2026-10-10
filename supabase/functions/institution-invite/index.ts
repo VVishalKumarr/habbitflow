@@ -1,6 +1,7 @@
 // Institutional invitations (signed in).
 // POST { action: 'invite', institution_id, email, role, display_name, external_id? }
 // POST { action: 'resend', invitation_id }
+// POST { action: 'approve_guardian', link_id }  (approve a student's parent/guardian link)
 //
 // The caller's session is verified here; the database (create_invitation /
 // rotate_invitation) decides whether this caller may invite that role and
@@ -19,6 +20,7 @@ const ROLE_LABEL: Record<string, string> = {
   class_teacher: 'Class Teacher',
   subject_teacher: 'Subject Teacher',
   student: 'Student',
+  parent: 'Parent / Guardian',
 }
 
 type Body = {
@@ -29,9 +31,10 @@ type Body = {
   display_name?: string
   external_id?: string
   invitation_id?: string
+  link_id?: string
 }
 
-type Invite = { id: string; email: string; expires_at: string; institution: string; role: string }
+type Invite = { id: string; email: string; expires_at: string; institution: string; role: string; student?: string }
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -81,6 +84,15 @@ Deno.serve(async (req) => {
     })
     if (error) return json(req, { error: error.message }, 400)
     invite = data as Invite
+  } else if (body.action === 'approve_guardian') {
+    if (!uuid.test(body.link_id ?? '')) return json(req, { error: 'Request not found.' }, 400)
+    const { data, error } = await admin.rpc('create_guardian_invitation', {
+      p_actor: who.user.id,
+      p_link: body.link_id,
+      p_token_hash: tokenHash,
+    })
+    if (error) return json(req, { error: error.message }, 400)
+    invite = data as Invite
   } else {
     return json(req, { error: 'Unknown action.' }, 400)
   }
@@ -100,7 +112,9 @@ Deno.serve(async (req) => {
       renderEmail({
         heading: `Join ${invite.institution}`,
         lines: [
-          `You've been invited to ${invite.institution} on HabitFlow as ${ROLE_LABEL[invite.role] ?? invite.role}.`,
+          invite.role === 'parent' && invite.student
+            ? `${invite.institution} confirmed you as a parent or guardian of ${invite.student} on HabitFlow. You'll be able to see their timetable, homework, attendance and marks, and message their teachers.`
+            : `You've been invited to ${invite.institution} on HabitFlow as ${ROLE_LABEL[invite.role] ?? invite.role}.`,
           'Open the link to confirm your email address and choose your password. You will then sign in with this email address and that password.',
           `The link works once and expires on ${expires}.`,
         ],

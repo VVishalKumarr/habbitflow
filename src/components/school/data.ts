@@ -20,6 +20,19 @@ export interface SchoolStructure {
   enrollments: Enrollment[]
   teaching: TeachingAssignment[]
   scopes: CoordinatorScope[]
+  periods: ClassPeriod[]
+}
+
+export interface ClassPeriod {
+  id: string
+  class_id: string
+  day_of_week: number
+  start_time: string
+  end_time: string
+  subject_id: string | null
+  teacher_id: string | null
+  label: string | null
+  room: string | null
 }
 
 /**
@@ -28,7 +41,7 @@ export interface SchoolStructure {
  * their classes and students, a student only their own class.
  */
 export async function loadStructure(inst: string): Promise<SchoolStructure> {
-  const [members, classes, subjects, years, terms, enrollments, teaching, scopes] = await Promise.all([
+  const [members, classes, subjects, years, terms, enrollments, teaching, scopes, periods] = await Promise.all([
     supabase.from('institution_memberships').select('*').eq('institution_id', inst).order('display_name'),
     supabase.from('classes').select('*').eq('institution_id', inst).order('grade').order('name'),
     supabase.from('subjects').select('*').eq('institution_id', inst).order('name'),
@@ -37,6 +50,7 @@ export async function loadStructure(inst: string): Promise<SchoolStructure> {
     supabase.from('class_enrollments').select('id, class_id, student_id, roll_no').eq('institution_id', inst),
     supabase.from('teaching_assignments').select('id, class_id, subject_id, teacher_id').eq('institution_id', inst),
     supabase.from('coordinator_scopes').select('id, coordinator_id, grade').eq('institution_id', inst),
+    supabase.from('class_periods').select('id, class_id, day_of_week, start_time, end_time, subject_id, teacher_id, label, room').eq('institution_id', inst).order('day_of_week').order('start_time'),
   ])
   return {
     members: unwrap(members) as Membership[],
@@ -47,6 +61,7 @@ export async function loadStructure(inst: string): Promise<SchoolStructure> {
     enrollments: unwrap(enrollments) as Enrollment[],
     teaching: unwrap(teaching) as TeachingAssignment[],
     scopes: unwrap(scopes) as CoordinatorScope[],
+    periods: unwrap(periods) as ClassPeriod[],
   }
 }
 
