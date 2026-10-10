@@ -73,6 +73,8 @@ Moved ahead of AI because AI quotas (Phase 5) depend on it.
 - Licensing section in Principal dashboard: activate institution key
 - Gift-code redemption for individuals (atomic, clear errors)
 - License expiry grace policy (no academic data deleted)
+- Institution licences are yearly; heads and the platform owner are reminded 30 days and
+  7 days before expiry and on the day; a new key must be activated to continue
 - License/subscription audit events
 - Tests: forged requests can't grant paid features; expired/revoked/fully redeemed
   codes rejected; friend limits per plan

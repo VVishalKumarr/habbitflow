@@ -96,7 +96,7 @@ try {
     await d.getByLabel('Type').selectOption({ label: 'Institution licence' })
     await d.getByLabel('Plan').selectOption({ label: 'Pro' })
     await d.getByLabel('Institution').selectOption({ label: `Test School A ${suffix}` })
-    await d.getByLabel('Licence length (days)').fill('365')
+    await d.getByText('1 year', { exact: true }).waitFor()
     await d.getByRole('button', { name: 'Generate' }).click()
     licenceKey = (await dialog('1 code generated').getByLabel('Generated codes').innerText()).trim()
     assert.match(licenceKey, /^HFI-/)
@@ -153,6 +153,20 @@ try {
     await page.goto(`${BASE}/settings`)
     await page.getByText(`Through Test School A ${suffix}’s licence`).waitFor()
     await page.getByText('Pro', { exact: true }).first().waitFor()
+  })
+
+  await step('a month before expiry the principal is reminded and sees the warning', async () => {
+    await adminSql(`update public.institution_licenses set starts_at = now() - interval '345 days', expires_at = now() + interval '20 days'
+                    where institution_id = '${W.instA}' and status = 'active'`)
+    await adminSql('select public.send_license_reminders()')
+    await institutional(`head@${W.DOM_A}`)
+    await page.getByRole('button', { name: /Notifications, \d+ unread/ }).click()
+    await page.getByRole('menuitem', { name: /Licence ends in a month/ }).click()
+    await page.waitForURL(/\/school\/settings/)
+    await page.getByText('Expiring soon', { exact: true }).waitFor()
+    await page.getByRole('alert').filter({ hasText: 'The licence ends in 20 days' }).waitFor()
+    await page.getByRole('heading', { name: 'Licence' }).scrollIntoViewIfNeeded()
+    await page.screenshot({ path: `${SHOTS}/03b-expiring.png` })
   })
 
   await step('platform owner sees and revokes the licence; history records it', async () => {

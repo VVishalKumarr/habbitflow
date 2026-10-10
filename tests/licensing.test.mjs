@@ -223,6 +223,50 @@ try {
     assert.ok(e.features.includes('csv_export') && e.features.includes('ai_guided_timetable'))
   })
 
+  await test('institution licences last one year; heads and the owner are reminded 30 and 7 days before; renewal stops reminders', async () => {
+    const st = await one(principal.c.rpc('institution_license_status', { p_inst: instA }))
+    const days = (new Date(st.expires_at) - Date.now()) / 864e5
+    assert.ok(days > 364 && days < 367, `one year, got ${days}`)
+    const listed = (await one(owner.c.rpc('platform_codes', { p_kind: 'institution' })))[0]
+    assert.equal(listed.duration_days, 365, 'length passed in is ignored for institutions')
+
+    const reminders = async (c) => (await one(c.from('notifications').select('title, link').eq('kind', 'license_expiring')))
+    const run = () => adminSql('select public.send_license_reminders()')
+    await adminSql(`update public.institution_licenses set starts_at = now() - interval '345 days', expires_at = now() + interval '20 days'
+                    where institution_id = '${instA}' and status = 'active'`)
+    const soon = await one(principal.c.rpc('institution_license_status', { p_inst: instA }))
+    assert.equal(soon.state, 'expiring')
+    assert.equal(soon.days_left, 20)
+    await run()
+    await run()
+    const head = await reminders(principal.c)
+    assert.equal(head.length, 1, 'once, not twice')
+    assert.match(head[0].title, /ends in a month/)
+    assert.equal(head[0].link, '/school/settings')
+    assert.equal((await reminders(owner.c)).filter((n) => n.title.includes(`Test School A ${suffix}`)).length, 1, 'owner reminded')
+    assert.equal((await reminders(coord.c)).length, 0, 'coordinator not reminded')
+    assert.equal((await reminders(s1.c)).length, 0, 'students not reminded')
+    assert.equal((await reminders(principalB.c)).length, 0, 'other schools not reminded')
+
+    await adminSql(`update public.institution_licenses set expires_at = now() + interval '5 days' where institution_id = '${instA}' and status = 'active'`)
+    await run()
+    assert.equal((await reminders(principal.c)).length, 2)
+    assert.ok((await reminders(principal.c)).some((n) => /under a week/.test(n.title)))
+
+    const [renewal] = await codes({ p_kind: 'institution', p_plan: 'plus', p_count: 1, p_duration_days: 365, p_institution: instA })
+    await one(principal.c.rpc('activate_institution_license', { p_inst: instA, p_code: renewal }))
+    const renewed = await one(principal.c.rpc('institution_license_status', { p_inst: instA }))
+    assert.equal(renewed.state, 'active')
+    assert.equal(renewed.renewal_scheduled, true)
+    const total = (new Date(renewed.expires_at) - Date.now()) / 864e5
+    assert.ok(total > 369 && total < 372, `renewal starts when the current licence ends, got ${total}`)
+    await adminSql(`update public.institution_licenses set expires_at = now() + interval '1 day'
+                    where institution_id = '${instA}' and status = 'active' and starts_at <= now()`)
+    await run()
+    assert.equal((await reminders(principal.c)).length, 2, 'no reminders once renewed')
+    assert.equal((await ent(s1.c)).limits.friends, null, 'still covered')
+  })
+
   await test('platform owner: manual grants, account lookup and plan limits (audited)', async () => {
     const sid = await one(owner.c.rpc('platform_grant_plan', { p_username: `dave_${suffix}`, p_plan: 'plus', p_days: 14, p_note: 'support goodwill' }))
     assert.equal((await ent(dave.c)).plan, 'plus')

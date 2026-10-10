@@ -11,9 +11,11 @@ import { Spinner } from '../ui/Spinner'
 import { ErrorNote, List, Loading, Panel, Pill, Row } from './ui'
 
 interface LicenceStatus {
-  state: 'active' | 'grace' | 'expired' | 'none'
+  state: 'active' | 'expiring' | 'grace' | 'expired' | 'none'
   plan_name: string | null
   expires_at: string | null
+  days_left: number
+  renewal_scheduled: boolean
   grace_ends_at: string | null
   members_covered: number
   history: {
@@ -30,6 +32,7 @@ interface LicenceStatus {
 
 const STATE: Record<LicenceStatus['state'], { label: string; tone: 'success' | 'warning' | 'danger' | 'muted' }> = {
   active: { label: 'Active', tone: 'success' },
+  expiring: { label: 'Expiring soon', tone: 'warning' },
   grace: { label: 'Expired — grace period', tone: 'warning' },
   expired: { label: 'Expired', tone: 'danger' },
   none: { label: 'No licence', tone: 'muted' },
@@ -76,13 +79,26 @@ export function LicencePanel({ institutionId }: { institutionId: string }) {
           {data.state !== 'none' && (
             <p className="text-sm">
               <span className="font-medium">{data.plan_name}</span>
-              {data.expires_at && (data.state === 'active' ? ` · valid until ${day(data.expires_at)}` : ` · ended ${day(data.expires_at)}`)}
+              {data.expires_at &&
+                (data.state === 'active' || data.state === 'expiring' ? ` · valid until ${day(data.expires_at)}` : ` · ended ${day(data.expires_at)}`)}
               {data.state === 'grace' && data.grace_ends_at && ` · features stop ${day(data.grace_ends_at)}`}
               {` · covers ${data.members_covered} member${data.members_covered === 1 ? '' : 's'}`}
             </p>
           )}
         </div>
         {data.state === 'none' && <p className="text-sm text-muted">No licence yet. Enter the key you received from us to activate it.</p>}
+        {data.state === 'expiring' && (
+          <p role="alert" className="rounded-xl bg-amber-100 px-4 py-3 text-sm text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
+            The licence ends in {data.days_left} day{data.days_left === 1 ? '' : 's'}. Licences run for one year — contact us for a renewal key and
+            activate it below. It starts when the current licence ends, so renewing early loses nothing.
+          </p>
+        )}
+        {data.state === 'grace' && (
+          <p role="alert" className="rounded-xl bg-amber-100 px-4 py-3 text-sm text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
+            The licence has ended. Licensed features continue until {data.grace_ends_at && day(data.grace_ends_at)}; activate a renewal key to keep them. No records are deleted.
+          </p>
+        )}
+        {data.renewal_scheduled && <p className="text-sm text-muted">Renewal activated — the licence continues automatically.</p>}
 
         <form onSubmit={activate} className="flex flex-col gap-3 sm:flex-row sm:items-start">
           <div className="min-w-0 flex-1">
@@ -91,7 +107,7 @@ export function LicencePanel({ institutionId }: { institutionId: string }) {
               value={key}
               onChange={(e) => setKey(e.target.value.toUpperCase())}
               error={keyError}
-              hint="Looks like HFI-XXXX-XXXX-XXXX-XXXX. A renewal starts when the current licence ends."
+              hint="Looks like HFI-XXXX-XXXX-XXXX-XXXX. Each key gives one year; a renewal starts when the current licence ends."
               autoComplete="off"
               spellCheck={false}
               maxLength={40}

@@ -122,7 +122,7 @@ function GenerateModal({ institutions, onClose }: { institutions: { id: string; 
       p_kind: kind,
       p_plan: plan,
       p_count: inst ? 1 : Number(count),
-      p_duration_days: Number(days),
+      p_duration_days: inst ? 365 : Number(days),
       p_max_redemptions: inst ? 1 : Number(uses),
       p_redeem_by: redeemBy ? new Date(`${redeemBy}T23:59:59`).toISOString() : null,
       p_institution: inst ? institution || null : null,
@@ -134,7 +134,7 @@ function GenerateModal({ institutions, onClose }: { institutions: { id: string; 
     setCodes((data as { code: string }[]).map((r) => r.code))
   }
 
-  if (codes) return <ShowCodes codes={codes} label={`${KIND_LABEL[kind]} · ${plan} · ${days} days`} onClose={onClose} />
+  if (codes) return <ShowCodes codes={codes} label={`${KIND_LABEL[kind]} · ${plan} · ${inst ? '1 year' : `${days} days`}`} onClose={onClose} />
 
   return (
     <Modal
@@ -183,7 +183,14 @@ function GenerateModal({ institutions, onClose }: { institutions: { id: string; 
           </SelectField>
         )}
         <div className="grid gap-3 sm:grid-cols-3">
-          <Field label={inst ? 'Licence length (days)' : 'Access length (days)'} type="number" min={1} max={3660} value={days} onChange={(e) => setDays(e.target.value)} />
+          {inst ? (
+            <div>
+              <p className="field-label">Licence length</p>
+              <p className="flex h-11 items-center text-sm">1 year</p>
+            </div>
+          ) : (
+            <Field label="Access length (days)" type="number" min={1} max={3660} value={days} onChange={(e) => setDays(e.target.value)} />
+          )}
           {!inst && <Field label="How many codes" type="number" min={1} max={500} value={count} onChange={(e) => setCount(e.target.value)} />}
           {!inst && <Field label="Uses per code" type="number" min={1} max={100000} value={uses} onChange={(e) => setUses(e.target.value)} />}
           {inst && <Field label="Grace period (days)" type="number" min={0} max={60} value={grace} onChange={(e) => setGrace(e.target.value)} />}
@@ -314,13 +321,13 @@ interface LicenceRow {
   starts_at: string
   expires_at: string
   grace_days: number
-  state: 'scheduled' | 'active' | 'grace' | 'expired' | 'revoked'
+  state: 'scheduled' | 'active' | 'expiring' | 'grace' | 'expired' | 'revoked'
   activated_at: string
   revoked_reason: string | null
   code_hint: string | null
 }
 
-const LICENCE_TONE = { scheduled: 'brand', active: 'success', grace: 'warning', expired: 'muted', revoked: 'danger' } as const
+const LICENCE_TONE = { scheduled: 'brand', active: 'success', expiring: 'warning', grace: 'warning', expired: 'muted', revoked: 'danger' } as const
 
 export function LicencesTab() {
   const list = useLoad(async () => unwrap(await supabase.rpc('platform_licenses')) as LicenceRow[], [])
@@ -331,7 +338,7 @@ export function LicencesTab() {
       {list.loading && !list.data ? (
         <Loading />
       ) : (
-        <Panel description="Activated institution licences. Generate a key under Codes (type: Institution licence); the principal or director activates it in School → Settings → Licence.">
+        <Panel description="Institution licences run for one year. You and the principal/director are reminded 30 and 7 days before the end; generate a renewal key under Codes (type: Institution licence) and the principal or director activates it in School → Settings → Licence.">
           <List empty="No institution has activated a licence yet.">
             {(list.data ?? []).map((l) => (
               <Row key={l.id}>

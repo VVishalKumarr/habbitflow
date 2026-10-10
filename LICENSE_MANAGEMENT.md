@@ -13,7 +13,7 @@ A user's access is the **best of every active source**, merged:
 | Free trial | once per account | after `trial_days` |
 | Gift code / personal licence code | whoever redeems it | `duration_days` after redemption (codes for the same plan stack) |
 | Manual grant (platform owner) | one account | after the chosen days, or when ended |
-| Institution licence | every **active** staff member and student of that institution (not parents, not suspended or revoked members, not if the institution is suspended) | `expires_at` + grace period, or at once if revoked |
+| Institution licence | every **active** staff member and student of that institution (not parents, not suspended or revoked members, not if the institution is suspended) | one year after it starts (+ grace period), or at once if revoked |
 | Free plan | everyone | never |
 
 Merging: features are the union of all sources; each limit takes the most generous
@@ -51,7 +51,7 @@ but not advertised on the pricing page until they ship.
 |---|---|---|---|
 | Gift code | `HFG-` | any personal or institutional account, in **Settings → Plan → Redeem a code** | the plan for `duration_days` |
 | Personal licence | `HFL-` | same as gift (use for sales outside the app stores, e.g. bank transfer) | the plan for `duration_days` |
-| Institution licence | `HFI-` | the principal or director of **that** institution, in **School → Settings → Licence** | the plan for every active staff member and student for `duration_days` (+ grace) |
+| Institution licence | `HFI-` | the principal or director of **that** institution, in **School → Settings → Licence** | the plan for every active staff member and student for **one year** (+ grace) |
 
 - 16 random characters from a 32-letter alphabet without 0/O/1/I (80 bits, pgcrypto).
 - Shown **once** when generated. Only a SHA-256 hash and the last 4 characters are stored,
@@ -73,7 +73,7 @@ but not advertised on the pricing page until they ship.
 node --env-file=.env scripts/generate-codes.mjs --kind gift --plan plus --days 30 --count 10
 node --env-file=.env scripts/generate-codes.mjs --kind gift --plan pro --days 90 --uses 100 --redeem-by 2026-12-31 --note "Diwali promo"
 node --env-file=.env scripts/generate-codes.mjs --kind individual --plan pro --days 365 --note "Order 1042, bank transfer"
-node --env-file=.env scripts/generate-codes.mjs --kind institution --institution <institution id> --plan pro --days 365 --grace 14
+node --env-file=.env scripts/generate-codes.mjs --kind institution --institution <institution id> --plan pro --days 365 --grace 14   # always one year
 ```
 
 The script needs `SUPABASE_ACCESS_TOKEN` in `.env`. The institution id is in the
@@ -90,10 +90,27 @@ Platform admin → Codes → click a code → Revoke (a reason is required).
 ## Institution licences
 
 1. Create the institution and invite its principal (see [INSTITUTION_ONBOARDING.md](INSTITUTION_ONBOARDING.md)).
-2. Generate an **Institution licence** key for that institution (plan, length, grace days).
+2. Generate an **Institution licence** key for that institution (plan, grace days). Institution
+   licences always last **one year** — to the same date next year.
 3. Send the key to the principal/director. They enter it in **School → Settings → Licence**.
    A key for another institution, or a personal code, is refused with a clear message.
-4. **Renewal:** generate a new key; once activated it starts when the current licence ends.
+4. **Renewal (every year):** a new key has to be activated to continue. Generate one for the
+   institution; once the principal/director activates it, it starts when the current licence
+   ends, so renewing early loses nothing.
+
+### Renewal reminders
+
+A daily job (`license-reminders`, pg_cron, 03:30 UTC) sends an in-app notification to the
+institution's **principal and director** and to **you, the platform owner**:
+
+- **30 days** before the licence ends,
+- **7 days** before,
+- on the day it **ends** (the grace period starts).
+
+Each reminder is sent once. No reminders are sent once a renewal key has been activated.
+School → Settings → Licence shows "Expiring soon" with the days left, and Platform admin →
+Licences marks the licence as *expiring*. Email copies of these reminders arrive with email
+notifications (roadmap Phase 8).
 
 ### Expiry and grace policy
 

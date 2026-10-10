@@ -156,6 +156,11 @@ Entitlements: `entitlement_sources(user)`, `effective_limits(user)`,
 `platform_license_audit`. Server only: `generate_license_codes` (used by
 `scripts/generate-codes.mjs`), `claim_code`. Details: [LICENSE_MANAGEMENT.md](LICENSE_MANAGEMENT.md).
 
+`2026-10-14_license_renewal.sql`: institution licences last one calendar year;
+`institution_license_end(inst)`; `institution_license_status` adds `expiring`, `days_left`,
+`renewal_scheduled`; daily pg_cron job `license-reminders` runs `send_license_reminders()`
+(30 days, 7 days, on expiry — heads and platform owner, deduplicated).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops
