@@ -399,7 +399,7 @@ export default function SettingsPage() {
       </Section>
 
       {institutional && (
-        <Section title="Notifications" description="Choose which school notifications you get in the app.">
+        <Section title="Notifications" description="Choose which school notifications you get in the app, by email and as push notifications.">
           <NotificationPrefs />
         </Section>
       )}

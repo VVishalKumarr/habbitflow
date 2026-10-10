@@ -10,7 +10,7 @@ Tick them off as you go. Details are in the linked docs.
 
 ## Before telling the public
 - [ ] Buy a domain and move hosting to Cloudflare Pages (GitHub Pages doesn’t allow commercial sites) — [SETUP.md §9](SETUP.md#9-deploy-the-website)
-- [ ] Password reset emails: Resend account + verify your domain + set the secrets — [SETUP.md §4](SETUP.md#4-password-recovery-email)
+- [ ] Password reset and notification emails: Resend account + verify your domain + set the secrets — [SETUP.md §4](SETUP.md#4-password-recovery-email), then test with “Send a test notification” ([NOTIFICATIONS.md](NOTIFICATIONS.md#email-to-do-needs-your-accounts))
 - [ ] Legal details (`VITE_LEGAL_*`), write a refund policy, have Privacy/Terms reviewed by a lawyer — [PRIVACY_SETUP.md](PRIVACY_SETUP.md)
 - [ ] Turn on Supabase leaked-password protection and CAPTCHA for sign-ups — [SECURITY.md](SECURITY.md#known-limitations--to-do)
 
@@ -35,6 +35,7 @@ The Android app is already built; these steps get it onto the Play Store. Full l
 - [ ] Privacy policy URL, account-deletion URL, Data safety form, content rating
 - [ ] Closed test with testers for 14 days (required for new personal accounts), then production
 - [ ] Pro in the app: subscription product + Play Billing plugin + service account secrets
+- [ ] Push notifications in the Android app: Firebase project + `google-services.json` + service-account secret, build with `VITE_ANDROID_PUSH=true` — [NOTIFICATIONS.md](NOTIFICATIONS.md#android-app-push-to-do-needs-firebase)
 - [ ] Optional: AdMob ads
 
 ## Apple App Store (iOS)

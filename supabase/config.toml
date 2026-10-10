@@ -39,3 +39,9 @@ verify_jwt = false
 
 [functions.timetable-ai]
 verify_jwt = false
+
+[functions.notify-deliver]
+verify_jwt = false
+
+[functions.notifications]
+verify_jwt = false

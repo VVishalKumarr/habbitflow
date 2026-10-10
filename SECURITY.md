@@ -206,6 +206,17 @@ project and check, among others:
 - Year transition: heads only, one transaction, nothing deleted.
 - `tests/reports.test.mjs` (12), `tests/e2e-reports.mjs` (8 steps).
 
+## Notification delivery
+
+- Push payloads are end-to-end encrypted to each browser (RFC 8291) and signed with the
+  server's VAPID key; the private key and the FCM service account are function secrets.
+- The sender is called only by pg_cron with a secret header; the app can't claim, send or
+  mark deliveries, and can't read device endpoints of anyone (including its own).
+- Notification text is the same as in-app (no extra personal data); email goes only to the
+  institutional login address or a confirmed recovery email.
+- `tests/webpush.test.mjs` (5), `tests/notifications.test.mjs` (10),
+  `tests/e2e-notifications.mjs` (4, real push in Chrome).
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users

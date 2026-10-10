@@ -174,6 +174,15 @@ export function PrivacyPage() {
       )}
 
       <section>
+        <h2>Email and push notifications</h2>
+        <p>
+          Only if you turn them on (Settings → Notifications), we send the same text you see in the app by email, or as a push notification. Push messages are encrypted for your
+          device and pass through your browser’s or phone’s push service (for example Google, Mozilla or Apple); emails are sent through our email provider. Turning push off
+          removes the device from your account.
+        </p>
+      </section>
+
+      <section>
         <h2>Accounts provided by a school</h2>
         <p>
           If you use HabitFlow through your school or college, your class teacher can see and change your personal timetable (time slots, activities and notes) if your school

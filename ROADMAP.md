@@ -163,13 +163,19 @@ As built: planning/habits counts only if the student shares it with the school (
 default, private otherwise). Parents don't see development scores yet. The year transition
 moves whole classes; individual exceptions are re-enrolled afterwards.
 
-## Phase 8 — Notification delivery ⬜ (needs credentials)
+## Phase 8 — Notification delivery 🟡 (browser push ✅ tested; email and Android push built, need credentials)
 
 - Email delivery via Resend for chosen notification kinds (respects preferences)
 - Browser push (VAPID keys) and Android push (Firebase)
 - Duplicate prevention across channels
 - Only claimed as working once tested with real credentials
 - Docs: `NOTIFICATIONS.md`
+
+As built: per-kind email/push preferences, a delivery queue with retries, email as a
+10-minute fallback skipped when the notification was read or pushed, 6 emails/hour cap,
+dead-device clean-up. Browser push works and was tested end to end in Google Chrome.
+Email (Resend) and Android push (Firebase) are implemented but untested until their
+credentials exist — see NOTIFICATIONS.md and LAUNCH_TODO.md.
 
 ## Phase 9 — Hardening & release ⬜
 

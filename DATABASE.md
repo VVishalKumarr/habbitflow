@@ -217,6 +217,19 @@ setting `development_weights`. Functions: `compute_development` (server only),
 `record_import` (server only), `year_transition_preview`, `year_transition`.
 Details: [DATA_IMPORT_EXPORT.md](DATA_IMPORT_EXPORT.md).
 
+## Notification delivery (Phase 8, `2026-10-20_notification_delivery.sql`)
+
+| Table | Purpose |
+|---|---|
+| `push_subscriptions` | browser (Web Push) and Android (FCM token) devices per account; endpoints not readable by the app |
+| `notification_deliveries` | one row per notification and channel (email/push): pending → sent / skipped (reason) / failed, attempts, retry time; people read their own |
+
+Trigger `notifications_deliver` queues deliveries from `notification_prefs.email/push`.
+Functions: `register_push_subscription`, `unregister_push_subscription`,
+`my_notification_channels`, `send_test_notification`; server only: `delivery_claim`,
+`delivery_result`, `push_subscription_result`, `delivery_email`. pg_cron job
+`notify-deliver` (every minute when something is due). Details: [NOTIFICATIONS.md](NOTIFICATIONS.md).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

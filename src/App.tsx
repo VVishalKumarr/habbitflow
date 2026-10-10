@@ -10,6 +10,7 @@ import { FullPageLoader, Spinner } from './components/ui/Spinner'
 import { Toaster } from './components/ui/Toaster'
 import { analytics } from './lib/analytics'
 import { exitApp, isNative, registerBackButton, syncStatusBar } from './lib/native'
+import { listenForPushTaps } from './lib/push'
 import { isConfigured } from './lib/supabase'
 import DashboardPage from './pages/DashboardPage'
 import FocusPage from './pages/FocusPage'
@@ -201,6 +202,11 @@ function AppEffects() {
   useEffect(() => {
     analytics.page(location.pathname)
   }, [location.pathname])
+
+  // Android: tapping a push notification opens its page.
+  useEffect(() => {
+    listenForPushTaps((path) => navigate(path)).catch(() => {})
+  }, [navigate])
 
   useEffect(
     () =>
