@@ -1,0 +1,4 @@
+# Line endings: LF in the repository and working tree, CRLF only for Windows scripts.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
