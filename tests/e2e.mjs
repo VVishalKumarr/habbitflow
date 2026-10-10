@@ -10,7 +10,11 @@ mkdirSync(SHOTS, { recursive: true })
 const user = `e2e_${Date.now().toString(36)}`
 const pass = 'e2e-password-1'
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const todayName = DAYS[new Date().getDay()]
+// FAKE_NOW=<a later date, e.g. next Saturday> runs the browser as if it were that moment, to check
+// weekday-dependent steps. Steps after a page reload then fail (the browser clock is ahead of the
+// server, so the session looks expired) — that part only works with the real date.
+const NOW = process.env.FAKE_NOW ? new Date(process.env.FAKE_NOW) : new Date()
+const todayName = DAYS[NOW.getDay()]
 
 let passed = 0
 const failures = []
@@ -40,6 +44,7 @@ const toast = (page, text) => page.getByRole('status').getByText(text).first().w
 
 console.log(`E2E as ${user} on ${BASE}`)
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+if (process.env.FAKE_NOW) await ctx.clock.setSystemTime(NOW)
 const page = await ctx.newPage()
 watch(page)
 
@@ -141,7 +146,7 @@ await step('add tasks to timetable cells', async () => {
   await addTaskAt(todayName, '5:00 PM', 'Study Mathematics', 'Study')
   await addTaskAt(todayName, '6:00 PM', 'Exercise', 'Exercise')
   await addTaskAt(todayName, '7:30 PM', 'Reading', 'Personal')
-  await addTaskAt(DAYS[(new Date().getDay() + 1) % 7], '6:00 PM', 'Exercise', 'Exercise')
+  await addTaskAt(DAYS[(NOW.getDay() + 1) % 7], '6:00 PM', 'Exercise', 'Exercise')
   await page.getByRole('checkbox', { name: /Study Mathematics/ }).first().waitFor()
 })
 
@@ -192,7 +197,12 @@ await step('task options: mark complete, edit, duplicate', async () => {
 })
 
 await step('delete task requires confirmation', async () => {
-  await page.getByRole('table').getByRole('button', { name: 'Reading 20 pages' }).nth(1).click()
+  // Delete the copy (not today's original): the one outside today's column, where Study Mathematics is.
+  // (The copy can land before today — e.g. on Sunday when today is Saturday.)
+  const todayX = (await studyCheck().first().boundingBox()).x
+  const copies = page.getByRole('table').getByRole('button', { name: 'Reading 20 pages' })
+  const xs = await Promise.all([0, 1].map(async (i) => (await copies.nth(i).boundingBox()).x))
+  await copies.nth(Math.abs(xs[0] - todayX) > Math.abs(xs[1] - todayX) ? 0 : 1).click()
   await page.getByRole('button', { name: 'Delete task' }).click()
   await page.getByText(/will be removed from every/).waitFor()
   await page.getByRole('dialog').getByRole('button', { name: 'Delete task' }).click()
@@ -319,7 +329,7 @@ await step('mobile: day view, swipe, tick, bottom nav, modal fits', async () => 
   await card.click()
   await page.getByRole('checkbox', { name: 'Exercise: completed' }).first().waitFor()
   await card.click()
-  await page.getByRole('tab', { name: new RegExp(`^${DAYS[(new Date().getDay() + 2) % 7]}`) }).click()
+  await page.getByRole('tab', { name: new RegExp(`^${DAYS[(NOW.getDay() + 2) % 7]}`) }).click()
   await page.getByRole('button', { name: 'Add task' }).first().click()
   const box = await page.getByRole('dialog').boundingBox()
   assert.ok(box && box.width <= 390 && box.y >= 0, 'modal should fit the screen')

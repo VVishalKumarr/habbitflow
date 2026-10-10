@@ -51,7 +51,8 @@ Status: ✅ done (committed) · 🟡 built, not yet verified/committed · ⬜ no
 
 Known pre-existing issue (not from Phase 3): `tests/e2e.mjs` "progress page" step fails
 on Saturdays — the "tomorrow" task wraps to the current week's Sunday, and today's
-count shows 1 / 2 instead of 1 / 3. Investigate in Phase 9 regression.
+count shows 1 / 2 instead of 1 / 3. Fixed in Phase 9: the test deleted the wrong copy of a
+duplicated task when the copy landed before today (test bug, not an app bug).
 
 ## Phase 4 — Entitlements, licensing & gift codes ✅
 
@@ -177,7 +178,7 @@ dead-device clean-up. Browser push works and was tested end to end in Google Chr
 Email (Resend) and Android push (Firebase) are implemented but untested until their
 credentials exist — see NOTIFICATIONS.md and LAUNCH_TODO.md.
 
-## Phase 9 — Hardening & release ⬜
+## Phase 9 — Hardening & release ✅
 
 - Responsive pass on every dashboard (phone/tablet/desktop, tables, calendars,
   modals, uploads, no horizontal overflow)

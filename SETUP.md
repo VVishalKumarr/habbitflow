@@ -135,17 +135,16 @@ npm run apk:debug     # → android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 Requirements: JDK 21 and the Android SDK (`android/local.properties` →
-`sdk.dir=C:/Android/Sdk`, forward slashes). Release builds and Play Store: see
-[PLAY_STORE_CHECKLIST.md](PLAY_STORE_CHECKLIST.md).
+`sdk.dir=C:/Android/Sdk`, forward slashes). Signed release bundle (`npm run aab:release`),
+permissions and push: [ANDROID_BUILD.md](ANDROID_BUILD.md); Play Store: [PLAY_STORE_CHECKLIST.md](PLAY_STORE_CHECKLIST.md).
 
 ## 11. Tests
 
 ```bash
-node --env-file=.env tests/api-security.test.mjs      # core data isolation
-node --env-file=.env tests/launch-security.test.mjs   # plans, payments, account, friends (needs SUPABASE_ACCESS_TOKEN)
-BASE_URL=http://localhost:5173 node tests/e2e.mjs                         # core UI
-BASE_URL=http://localhost:5173 node tests/e2e-social.mjs                  # focus + friends
-BASE_URL=http://localhost:5173 node --env-file=.env tests/e2e-launch.mjs  # launch features + 8 screen sizes
+npm run test:all                                                                  # unit + backend suites
+BASE_URL=http://localhost:5173 node --env-file=.env scripts/test-all.mjs --e2e    # + browser suites (npm run dev first)
 ```
 
-All tests create throw-away accounts and delete them afterwards.
+Every suite can also run alone, e.g. `node --env-file=.env tests/security-review.test.mjs`.
+Backend suites need `SUPABASE_ACCESS_TOKEN` in `.env`. All tests create throw-away accounts and
+schools and delete them afterwards. Deployment of everything else: [DEPLOYMENT.md](DEPLOYMENT.md).

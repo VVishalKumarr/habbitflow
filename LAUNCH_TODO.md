@@ -11,6 +11,7 @@ Tick them off as you go. Details are in the linked docs.
 ## Before telling the public
 - [ ] Buy a domain and move hosting to Cloudflare Pages (GitHub Pages doesn’t allow commercial sites) — [SETUP.md §9](SETUP.md#9-deploy-the-website)
 - [ ] Password reset and notification emails: Resend account + verify your domain + set the secrets — [SETUP.md §4](SETUP.md#4-password-recovery-email), then test with “Send a test notification” ([NOTIFICATIONS.md](NOTIFICATIONS.md#email-to-do-needs-your-accounts))
+- [ ] When email works: remove the setup-mode secret `ALLOW_MANUAL_INVITE_LINKS` (it shows activation links to the inviter) — [INSTITUTION_ONBOARDING.md](INSTITUTION_ONBOARDING.md)
 - [ ] Legal details (`VITE_LEGAL_*`), write a refund policy, have Privacy/Terms reviewed by a lawyer — [PRIVACY_SETUP.md](PRIVACY_SETUP.md)
 - [ ] Turn on Supabase leaked-password protection and CAPTCHA for sign-ups — [SECURITY.md](SECURITY.md#known-limitations--to-do)
 

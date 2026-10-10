@@ -117,11 +117,15 @@ export function PrivacyPage() {
             {legalConfig.dataRegion ? ` (data stored in ${legalConfig.dataRegion})` : ''}.
           </li>
           <li>
+            <strong>Your browser’s or phone’s push service</strong> (for example Google, Mozilla or Apple) — delivers push notifications, encrypted for your device, only if you
+            turn them on.
+          </li>
+          <li>
             <strong>{legalConfig.hostingProvider || 'Our web hosting provider'}</strong> — serves the website.
           </li>
           {legalConfig.emailProvider && (
             <li>
-              <strong>{legalConfig.emailProvider}</strong> — sends account emails (recovery-email confirmation and password reset).
+              <strong>{legalConfig.emailProvider}</strong> — sends account emails (recovery-email confirmation, password reset, school invitations) and the notification emails you turn on.
             </li>
           )}
           {analyticsName && (

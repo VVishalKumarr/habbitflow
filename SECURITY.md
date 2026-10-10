@@ -217,6 +217,45 @@ project and check, among others:
 - `tests/webpush.test.mjs` (5), `tests/notifications.test.mjs` (10),
   `tests/e2e-notifications.mjs` (4, real push in Chrome).
 
+## Phase 9 security review
+
+Automated, repeatable: `tests/security-review.test.mjs` (10 checks) plus Supabase's
+security advisor.
+
+| Area | How it was tested | Result |
+|---|---|---|
+| Cross-institution ID tampering | another school's principal and a personal account read, update and delete across all 38 institution-scoped tables; reuse school A's IDs in school B rows; call 17 named RPCs with A's IDs | no leaks, nothing changed |
+| Function sweep | **every** client-callable database function (140) called by two outsiders with school A's IDs filled in; school A's data and audit log compared before/after | 2 issues found and fixed (below) |
+| Role self-escalation | student promotes/un-suspends self, teachers grant their role locked or extra permissions, coordinator widens scope, subject teacher makes self class teacher, platform-owner insert, personal → institutional, membership insert into another school, inviting a principal | all refused |
+| Entitlement forging | subscriptions, plans, licence codes, redemptions, AI quotas/usage, development scores, licences, Pro-only theme, platform/server RPCs | all refused |
+| Storage | direct download/list/upload in the homework bucket by owner, classmate, other school, stranger, signed-out; signed links only for owner/reviewers | refused / correct |
+| Database-wide | RLS enabled on every table; every security-definer function has a pinned `search_path`; server-only functions not executable by clients; only `confirm_recovery_email` callable signed-out | pass |
+
+**Fixed in Phase 9**
+
+1. **`year_transition` / `year_transition_preview` (high):** the head-only check compared
+   `inst_role()` with `not in (…)`; for a non-member that is NULL, so the check passed. Any
+   signed-in user could preview — and could have run — a year transition for any school.
+   Now `coalesce(…, '') not in (…)`. Found by the RPC tests; the pattern was searched across
+   all migrations and no other function had it.
+2. **`institution_settings` (low):** any signed-in user could read another institution's
+   settings (grading scale, limits, weights). Now members, platform owners and server-side
+   callers only.
+3. Trigger functions and three internal utilities (`ai_least`, `current_actor`,
+   `normalize_code`) are no longer executable by clients (defence in depth).
+
+Migration: `2026-10-21_hardening.sql` (+ corrected `2026-10-19_import_year_transition.sql`).
+
+**Data sent to third parties** (each only when configured): Supabase (all app data — the
+backend), Anthropic (AI requests, minimised — AI_TIMETABLE.md), Resend (email address +
+email text), browser/phone push services (encrypted notification payloads), Google Firebase
+(Android push token + payload), Razorpay / Google Play (purchase data), Plausible/Umami
+(page views, consent-based), Sentry (error reports, consent-based), Google AdSense (ads,
+consent-based). Listed for users in the Privacy Policy.
+
+**Remaining:** Supabase leaked-password protection and CAPTCHA are dashboard settings (launch
+list). `ALLOW_MANUAL_INVITE_LINKS` is on until email is configured — remove it then.
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users

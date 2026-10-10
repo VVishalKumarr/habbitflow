@@ -559,7 +559,7 @@ declare
   y public.academic_years;
   top integer;
 begin
-  if public.inst_role(p_inst) not in ('principal', 'director') then
+  if coalesce(public.inst_role(p_inst), '') not in ('principal', 'director') then
     raise exception 'NOT_ALLOWED:Only the principal or director can start a new academic year.' using errcode = '42501';
   end if;
   select * into y from public.academic_years where institution_id = p_inst and is_current;
@@ -610,7 +610,7 @@ declare
   ids     uuid[];
   moved   integer;
 begin
-  if me is null or public.inst_role(p_inst) not in ('principal', 'director') then
+  if me is null or coalesce(public.inst_role(p_inst), '') not in ('principal', 'director') then
     raise exception 'NOT_ALLOWED:Only the principal or director can start a new academic year.' using errcode = '42501';
   end if;
   if char_length(btrim(coalesce(p_name, ''))) not between 1 and 40 then

@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "cap:sync": "npm run build && cap sync android",
-    "apk:debug": "npm run cap:sync && cd android && gradlew.bat assembleDebug"
+    "apk:debug": "npm run cap:sync && cd android && gradlew.bat assembleDebug",
+    "aab:release": "npm run cap:sync && cd android && gradlew.bat bundleRelease",
+    "test:all": "node --env-file=.env scripts/test-all.mjs"
   },
   "dependencies": {
     "@capacitor-community/speech-recognition": "^7.0.1",

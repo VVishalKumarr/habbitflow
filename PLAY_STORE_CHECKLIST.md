@@ -7,9 +7,9 @@ you still need to do by hand.
 
 - [x] Application id `com.habitflow.app`, app name “HabitFlow” (`capacitor.config.ts`, `android/app/build.gradle`)
 - [x] App icon (check mark) and splash screen resources
-- [x] Only the `INTERNET` permission
+- [x] Permissions: `INTERNET`, `ACCESS_NETWORK_STATE`; `RECORD_AUDIO` (voice commands, asked on first use); notification permissions from the push plugin (asked only when push is enabled) — see [ANDROID_BUILD.md](ANDROID_BUILD.md#permissions-in-this-build)
 - [x] HTTPS only (`usesCleartextTraffic="false"`); Android backups disabled so login tokens aren’t copied off-device
-- [x] versionCode 2 / versionName 1.1.0
+- [x] versionCode 3 / versionName 1.2.0
 - [x] Release signing reads `android/keystore.properties` (git-ignored) when present
 - [x] In-app account deletion (Settings → Data → Delete account), password-protected
 - [x] Privacy Policy and Terms pages in the app and on the web
@@ -32,7 +32,9 @@ you still need to do by hand.
       (explains in-app deletion); add an email option for users who can’t log in
 - [ ] **Data safety form**: collected = username, optional email, user content (tasks, focus
       sessions), app interactions (only if analytics on), crash logs (only if Sentry on),
-      purchase history (if Pro). Encrypted in transit: yes. Deletion: yes.
+      purchase history (if Pro). Encrypted in transit: yes. Deletion: yes. Microphone: speech is
+      recognised by the phone’s speech service — HabitFlow doesn’t collect audio. Schools: names,
+      institutional email, homework files, attendance, marks (collected for the institution).
 - [ ] Content rating questionnaire; target audience (set a minimum age — see PRIVACY_SETUP.md)
 - [ ] Ads declaration (“contains ads” only once AdMob is integrated)
 

@@ -157,7 +157,7 @@ export function NotificationPrefs() {
                 <td className="py-2 pr-3">{label}</td>
                 {(['in_app', 'email', 'push'] as Channel[]).map((ch) => (
                   <td key={ch} className="py-2 text-center">
-                    <input type="checkbox" className="size-5 accent-[var(--brand)]" checked={value(kind, ch)} onChange={(e) => toggle(kind, ch, e.target.checked)}
+                    <input type="checkbox" className="size-5 accent-[var(--brand)]" checked={value(kind, ch)} disabled={!data} onChange={(e) => toggle(kind, ch, e.target.checked)}
                       aria-label={`${label}: ${ch === 'in_app' ? 'in app' : ch}`} />
                   </td>
                 ))}

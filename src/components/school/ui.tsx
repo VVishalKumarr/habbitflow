@@ -16,7 +16,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
 
 export function Panel({ title, description, actions, children, className = '' }: { title?: string; description?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`card p-4 sm:p-5 ${className}`}>
+    <section className={`card min-w-0 p-4 sm:p-5 ${className}`}>
       {(title || actions) && (
         <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
