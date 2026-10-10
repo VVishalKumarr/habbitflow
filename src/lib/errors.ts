@@ -36,6 +36,8 @@ export function friendlyError(err: unknown, fallback = 'Something went wrong. Pl
     onPlanError?.(plan.key, plan.message)
     return plan.message
   }
+  const denied = /NOT_ALLOWED:(.+)/.exec(msg)
+  if (denied) return denied[1]
   if (/STALE_TIMETABLE/.test(msg)) return 'Your timetable changed after this suggestion was made. Nothing was saved — please ask again.'
   const undo = /CANNOT_UNDO:(.+)/.exec(msg)
   if (undo) return undo[1]

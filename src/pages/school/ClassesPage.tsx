@@ -1,6 +1,7 @@
-import { Archive, ArchiveRestore, ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, CalendarClock, ChevronDown, Plus, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { gradeSort, useStructure, type SchoolStructure } from '../../components/school/data'
+import { StudentTimetableModal } from '../../components/school/StudentTimetable'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row, SelectField } from '../../components/school/ui'
 import { Field } from '../../components/ui/Field'
 import { Modal } from '../../components/ui/Modal'
@@ -19,6 +20,12 @@ export default function ClassesPage() {
   const { data: s, error, loading, reload } = useStructure(inst.institution_id)
   const [creating, setCreating] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
+  const [timetableOf, setTimetableOf] = useState<string | null>(null)
+  // Students whose personal timetables I may edit (class teachers, if the school allows it).
+  const { data: editable } = useLoad(
+    async () => (inst.role === 'class_teacher' ? new Set((unwrap(await supabase.rpc('my_editable_students')) as string[]) ?? []) : new Set<string>()),
+    [inst.institution_id, inst.role],
+  )
 
   if (loading && !s) return <Loading />
   if (error || !s) return <ErrorNote>{error}</ErrorNote>
@@ -27,6 +34,13 @@ export default function ClassesPage() {
   const canManageGrade = (grade: string) =>
     can('manage_classes') && (isHead(inst.role) || (inst.role === 'coordinator' && (myScopes.includes('*') || myScopes.includes(grade.toLowerCase()))))
   const canManage = (c: SchoolClass) => canManageGrade(c.grade) || (can('manage_classes') && c.class_teacher_id === inst.membership_id)
+  // Class timetable: manage_classes as above, or the narrower manage_timetable.
+  const canEditPeriods = (c: SchoolClass) =>
+    canManage(c) ||
+    (can('manage_timetable') &&
+      (isHead(inst.role) ||
+        (inst.role === 'coordinator' && (myScopes.includes('*') || myScopes.includes(c.grade.toLowerCase()))) ||
+        (inst.role === 'class_teacher' && c.class_teacher_id === inst.membership_id)))
   const grades = [...new Set(s.classes.map((c) => c.grade))].sort(gradeSort)
   const canCreate = can('manage_classes') && (isHead(inst.role) || myScopes.length > 0)
 
@@ -77,7 +91,10 @@ export default function ClassesPage() {
                       </span>
                       <ChevronDown className={`ml-auto size-4 text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
                     </button>
-                    {isOpen && <ClassDetail inst={inst.institution_id} c={c} s={s} editable={canManage(c)} onChange={reload} />}
+                    {isOpen && (
+                      <ClassDetail inst={inst.institution_id} c={c} s={s} editable={canManage(c)} periodsEditable={canEditPeriods(c)}
+                        timetableStudents={editable ?? new Set()} onTimetable={setTimetableOf} onChange={reload} />
+                    )}
                   </li>
                 )
               })}
@@ -87,6 +104,7 @@ export default function ClassesPage() {
 
       {can('manage_classes') && <ConflictsPanel inst={inst.institution_id} />}
 
+      {timetableOf && <StudentTimetableModal studentId={timetableOf} onClose={() => setTimetableOf(null)} />}
       {creating && <NewClassModal inst={inst} s={s} canManageGrade={canManageGrade} onClose={() => setCreating(false)} onDone={reload} />}
     </div>
   )
@@ -147,7 +165,16 @@ function SubjectsPanel({ inst, s, canEdit, onChange }: { inst: MyInstitution; s:
   )
 }
 
-function ClassDetail({ inst, c, s, editable, onChange }: { inst: string; c: SchoolClass; s: SchoolStructure; editable: boolean; onChange: () => void }) {
+function ClassDetail({ inst, c, s, editable, periodsEditable, timetableStudents, onTimetable, onChange }: {
+  inst: string
+  c: SchoolClass
+  s: SchoolStructure
+  editable: boolean
+  periodsEditable: boolean
+  timetableStudents: Set<string>
+  onTimetable: (studentId: string) => void
+  onChange: () => void
+}) {
   const staff = s.members.filter((m) => STAFF_ROLES.includes(m.role) && m.status === 'active' && m.role !== 'principal' && m.role !== 'director')
   const enrolled = s.enrollments.filter((e) => e.class_id === c.id)
   const enrolledIds = new Set(enrolled.map((e) => e.student_id))
@@ -242,7 +269,7 @@ function ClassDetail({ inst, c, s, editable, onChange }: { inst: string; c: Scho
         )}
       </div>
 
-      <PeriodsEditor inst={inst} c={c} s={s} editable={editable} onChange={onChange} />
+      <PeriodsEditor inst={inst} c={c} s={s} editable={periodsEditable} onChange={onChange} />
 
       <div>
         <h3 className="mb-2 text-sm font-semibold">Students ({enrolled.length})</h3>
@@ -256,6 +283,12 @@ function ClassDetail({ inst, c, s, editable, onChange }: { inst: string; c: Scho
                   {n}
                   {e.roll_no && <span className="text-muted"> · Roll {e.roll_no}</span>}
                 </span>
+                {timetableStudents.has(e.student_id) && (
+                  <button type="button" className="btn-ghost h-9 min-h-9 px-2.5 text-brand" onClick={() => onTimetable(e.student_id)} aria-label={`Timetable of ${n}`}>
+                    <CalendarClock className="size-4" aria-hidden="true" />
+                    <span className="hidden sm:inline">Timetable</span>
+                  </button>
+                )}
                 {editable && (
                   <button type="button" className="icon-btn size-9" onClick={() => run(supabase.from('class_enrollments').delete().eq('id', e.id))} aria-label={`Remove ${n} from class`}>
                     <Trash2 className="size-4" />

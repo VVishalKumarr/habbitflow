@@ -11,6 +11,7 @@ const KINDS: { kind: string; label: string }[] = [
   { kind: 'submission_reviewed', label: 'Teacher feedback on work' },
   { kind: 'marks_published', label: 'New marks' },
   { kind: 'announcement', label: 'School announcements' },
+  { kind: 'timetable_changed', label: 'Your class teacher changed your timetable' },
   { kind: 'message', label: 'Messages' },
   { kind: 'meeting_request', label: 'Meeting requests' },
   { kind: 'guardian_request', label: 'Parent link requests (staff)' },

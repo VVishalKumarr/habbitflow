@@ -4,7 +4,7 @@ import { resetsIn } from '../../lib/aiQuota'
 import { CATEGORY_STYLE } from '../../lib/category'
 import { DAY_SHORT, orderedDays } from '../../lib/dates'
 import { DAYS, mins, type AiNote, type Busy, type Proposal } from '../../lib/timetableAi'
-import { formatTime } from '../../lib/time'
+import { formatSlot } from '../../lib/time'
 import type { TimeFormat } from '../../lib/types'
 
 /** Toggle buttons for picking several values. */
@@ -78,9 +78,7 @@ export function ProposalPreview({ proposal, busy = [], timeFormat, weekStart }: 
               <ul className="space-y-1.5">
                 {items.map((it) => (
                   <li key={it.key} className={`flex gap-2 text-sm ${it.school ? 'text-muted' : ''}`}>
-                    <span className="w-[6.5rem] shrink-0 tabular-nums text-muted">
-                      {formatTime(it.start, timeFormat)}–{formatTime(it.end, timeFormat)}
-                    </span>
+                    <span className="w-[7.5rem] shrink-0 tabular-nums text-muted">{formatSlot({ start_time: it.start, end_time: it.end }, timeFormat)}</span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5">
                         {it.cat && <span className={`size-2 shrink-0 rounded-full ${CATEGORY_STYLE[it.cat].dot}`} aria-hidden="true" />}

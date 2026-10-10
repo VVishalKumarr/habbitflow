@@ -180,6 +180,7 @@ export type Op =
   | { op: 'add_slot'; ref: string; start: string; end: string }
   | { op: 'add_task'; slot?: string; slot_ref?: string; day: number; title: string; category: Category | string; description: string | null }
   | { op: 'move_task'; task: string; slot?: string; slot_ref?: string; day: number }
+  | { op: 'update_task'; task: string; title: string; category: Category | string; description: string | null }
   | { op: 'delete_task'; task: string }
 
 /** Steps that create a proposal in an (empty) timetable, for apply_timetable_change(). */

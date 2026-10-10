@@ -185,6 +185,11 @@ project and check, among others:
   one of a fixed list of student actions.
 - `timetable_changes` is append-only for clients; `timetable_preferences` is own-row only.
 - Data minimisation as in [AI_TIMETABLE.md](AI_TIMETABLE.md#data-sent-to-the-ai-provider).
+- Class teachers' access to students' personal timetables is checked on every call
+  (`student_timetable_owner`: class teacher of an active class the student is enrolled in,
+  permission on, both memberships active); they never get ticks or progress; every edit is
+  audited, notified and undoable. `tests/teacher-timetable.test.mjs` (8),
+  `tests/e2e-teacher-timetable.mjs` (5 steps).
 - `tests/timetable-core.test.mjs` (12), `tests/timetable-ai.test.mjs` (14),
   `tests/e2e-ai-timetable.mjs` (9 steps).
 

@@ -41,10 +41,27 @@ nobody else can ever be granted them, not even through an override.
 | create_assignments (for subjects they teach) | | ✔ | ✔ |
 | enter_marks (for subjects they teach) | | ✔ | ✔ |
 | message_parents | ✔ | ✔ | |
+| manage_timetable (class periods; class teachers: own class, coordinators: their grades) | ✔ | ✔ | |
+| edit_student_timetables (personal timetables of students in their own class) | | ✔ | |
 
 ✔ = default. A principal/director can switch any unlocked permission on or off
 per role in **School → Settings → Role permissions**. Overrides are stored in
 `institution_role_permissions` and audited.
+
+### Timetables
+
+- **Class timetable** (`class_periods`): anyone who can manage the class, plus holders of
+  `manage_timetable` — class teachers for their own class, coordinators for their grades,
+  heads everywhere. `manage_timetable` doesn't allow changing the class, subjects or enrolment.
+- **Students' personal timetables**: only the class teacher of a (non-archived) class the
+  student is enrolled in, with `edit_student_timetables`. They see the student's timetables
+  (time slots, activities, notes and the change history) — never ticks, streaks or progress
+  — and edit through `teacher_apply_timetable_change()`: one transaction, refused if the
+  timetable changed meanwhile, recorded in the student's History with the teacher's name,
+  written to the audit log (`student_timetable`). The student gets a notification and can
+  undo the change. Coordinators, subject teachers and heads have no access to personal
+  timetables. Access ends when the permission is switched off, the class is archived, the
+  student leaves the class or either membership is suspended.
 
 ### Parent links and messages
 

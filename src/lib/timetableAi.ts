@@ -141,7 +141,9 @@ export async function applyChange(trackerId: string | null, opts: { name?: strin
 export interface ChangeRow {
   id: string
   tracker_id: string
-  source: ChangeSource | 'undo'
+  source: ChangeSource | 'undo' | 'teacher'
+  /** set when a class teacher made the change */
+  actor_name: string | null
   summary: string
   inverse: unknown[] | null
   undo_of: string | null
@@ -152,7 +154,7 @@ export interface ChangeRow {
 export async function loadHistory(trackerId: string): Promise<ChangeRow[]> {
   const { data, error } = await supabase
     .from('timetable_changes')
-    .select('id, tracker_id, source, summary, inverse, undo_of, undone_at, created_at')
+    .select('id, tracker_id, source, summary, inverse, undo_of, undone_at, created_at, actor_name')
     .eq('tracker_id', trackerId)
     .order('created_at', { ascending: false })
     .limit(30)

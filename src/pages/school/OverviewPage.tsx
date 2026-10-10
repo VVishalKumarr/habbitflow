@@ -238,7 +238,7 @@ function InstitutionOverview() {
       {!staffView && (
         <Panel title="Your habits and timetable">
           <p className="text-sm text-muted">
-            Your personal habit trackers and weekly timetable stay private to you.{' '}
+            Your ticks and progress stay private to you. Your class teacher can see and adjust your timetable if your school allows it — you’re notified of every change and can undo it.{' '}
             <Link to="/dashboard" className="font-medium text-brand hover:underline">
               Open your timetable
             </Link>{' '}

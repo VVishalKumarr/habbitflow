@@ -1,4 +1,4 @@
-import { Bot, Mic, RotateCcw, Shuffle, Undo2 } from 'lucide-react'
+import { Bot, GraduationCap, Mic, RotateCcw, Shuffle, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { friendlyError } from '../../lib/errors'
 import { loadHistory, undoable, undoChange, type ChangeRow } from '../../lib/timetableAi'
@@ -7,8 +7,8 @@ import { toast } from '../../store/ui'
 import { Modal } from '../ui/Modal'
 import { Spinner } from '../ui/Spinner'
 
-const ICON = { ai_generate: Bot, ai_reschedule: Shuffle, voice: Mic, undo: RotateCcw }
-const SOURCE = { ai_generate: 'AI timetable builder', ai_reschedule: 'Rescheduling', voice: 'Command', undo: 'Undo' }
+const ICON = { ai_generate: Bot, ai_reschedule: Shuffle, voice: Mic, undo: RotateCcw, teacher: GraduationCap }
+const SOURCE = { ai_generate: 'AI timetable builder', ai_reschedule: 'Rescheduling', voice: 'Command', undo: 'Undo', teacher: 'Class teacher' }
 
 /** Changes made by the AI assistant and commands, newest first. The newest can be undone. */
 export function HistoryModal({ open, onClose, trackerId }: { open: boolean; onClose: () => void; trackerId: string }) {
@@ -45,11 +45,11 @@ export function HistoryModal({ open, onClose, trackerId }: { open: boolean; onCl
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Timetable history" subtitle="Changes made with the AI assistant and commands."
+    <Modal open={open} onClose={onClose} title="Timetable history" subtitle="Changes made with the AI assistant, commands, or by your class teacher."
       footer={<button type="button" className="btn-secondary" onClick={onClose}>Close</button>}>
       {error && <p className="rounded-xl bg-danger-soft px-3.5 py-3 text-sm text-danger" role="alert">{error}</p>}
       {!rows && !error && <p className="flex justify-center py-10"><Spinner /></p>}
-      {rows && rows.length === 0 && <p className="py-6 text-center text-sm text-muted">No AI changes to this timetable yet.</p>}
+      {rows && rows.length === 0 && <p className="py-6 text-center text-sm text-muted">No assistant or teacher changes to this timetable yet.</p>}
       {rows && rows.length > 0 && (
         <ul className="divide-y divide-line">
           {rows.map((r) => {
@@ -60,7 +60,7 @@ export function HistoryModal({ open, onClose, trackerId }: { open: boolean; onCl
                 <div className="min-w-0 flex-1 text-sm">
                   <p className={`break-words ${r.undone_at ? 'text-muted line-through' : ''}`}>{r.summary}</p>
                   <p className="text-xs text-muted">
-                    {SOURCE[r.source]} · {new Date(r.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                    {r.source === 'teacher' && r.actor_name ? `Your class teacher, ${r.actor_name}` : SOURCE[r.source]} · {new Date(r.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
                     {r.undone_at && ' · undone'}
                   </p>
                 </div>

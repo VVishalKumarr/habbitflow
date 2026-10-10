@@ -25,6 +25,8 @@ export type Permission =
   | 'create_assignments'
   | 'enter_marks'
   | 'message_parents'
+  | 'manage_timetable'
+  | 'edit_student_timetables'
 
 export const ROLE_LABEL: Record<InstRole, string> = {
   principal: 'Principal',
@@ -63,6 +65,8 @@ export const PERMISSION_LABEL: Record<Permission, string> = {
   create_assignments: 'Create assignments',
   enter_marks: 'Enter marks',
   message_parents: 'Message parents',
+  manage_timetable: 'Edit the class timetable (periods)',
+  edit_student_timetables: 'Edit personal timetables of students in their class (class teachers)',
 }
 
 /** Only principals and directors ever have these. */
@@ -70,8 +74,8 @@ export const LOCKED_PERMISSIONS: Permission[] = ['manage_institution_settings', 
 
 /** Must match default_role_permissions() in the database. */
 export const DEFAULT_PERMISSIONS: Record<ConfigurableRole, Permission[]> = {
-  coordinator: ['manage_students', 'manage_classes', 'manage_calendar', 'approve_deadline_changes', 'set_homework_retention', 'manage_programmes', 'view_reports', 'message_parents'],
-  class_teacher: ['record_attendance', 'create_assignments', 'enter_marks', 'view_reports', 'message_parents'],
+  coordinator: ['manage_students', 'manage_classes', 'manage_calendar', 'approve_deadline_changes', 'set_homework_retention', 'manage_programmes', 'view_reports', 'message_parents', 'manage_timetable'],
+  class_teacher: ['record_attendance', 'create_assignments', 'enter_marks', 'view_reports', 'message_parents', 'manage_timetable', 'edit_student_timetables'],
   subject_teacher: ['record_attendance', 'create_assignments', 'enter_marks'],
 }
 

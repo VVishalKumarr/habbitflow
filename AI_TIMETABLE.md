@@ -106,6 +106,14 @@ hidden and typing works. Audio never reaches HabitFlow.
 unchanged since (otherwise it explains why not). A generated timetable is removed by
 deleting it like any other.
 
+## Class teachers
+
+Class teachers can also edit their students' personal timetables (and their class
+timetable) — see [ROLE_PERMISSIONS.md](ROLE_PERMISSIONS.md#timetables). Their edits use the
+same `tt_apply_ops` steps (plus `update_task` for renaming / notes), appear in the
+student's History as “Your class teacher, *name*”, notify the student and can be undone
+by the student like any other change.
+
 ## Data sent to the AI provider
 
 Only what the request needs: command text; needs-check answers; activity titles,

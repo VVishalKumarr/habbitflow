@@ -174,6 +174,15 @@ export function PrivacyPage() {
       )}
 
       <section>
+        <h2>Accounts provided by a school</h2>
+        <p>
+          If you use HabitFlow through your school or college, your class teacher can see and change your personal timetable (time slots, activities and notes) if your school
+          allows it. They can’t see which tasks you ticked, your streaks or your progress. You get a notification for every change, it’s listed in your timetable History
+          with the teacher’s name, and you can undo it. Your school can switch this off.
+        </p>
+      </section>
+
+      <section>
         <h2>Cookies and local storage</h2>
         <p>
           Necessary storage keeps you logged in and remembers settings (theme, timer settings, your cookie choice). It is always on.

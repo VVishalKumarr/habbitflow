@@ -190,6 +190,13 @@ Functions: `timetable_version(tracker)` (content hash; null for others' timetabl
 `undo_timetable_change(id)`, `my_timetable_context()` (student's class periods, deadlines,
 exams, holidays). Internal: `tt_apply_ops`. Details: [AI_TIMETABLE.md](AI_TIMETABLE.md).
 
+`2026-10-17_teacher_timetables.sql`: permissions `manage_timetable` and
+`edit_student_timetables`; `class_periods` writable by `can_edit_class_timetable(class)`;
+`timetable_changes.actor_id/actor_name` and source `teacher`; step `update_task`;
+`teacher_student_timetables(student)`, `teacher_apply_timetable_change(...)`,
+`my_editable_students()`; server-only `student_timetable_owner(student)`. Notification kind
+`timetable_changed`. Rules: [ROLE_PERMISSIONS.md](ROLE_PERMISSIONS.md#timetables).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops
