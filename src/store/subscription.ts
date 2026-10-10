@@ -17,6 +17,11 @@ export interface Entitlements {
   /** 0 = free; higher = more features */
   rank: number
   state: PlanState
+  /** where the current plan comes from: a personal subscription (paid, trial, gift code) or an institution licence */
+  source: 'subscription' | 'institution' | null
+  institution_name: string | null
+  /** institution licence has expired and is in its grace period */
+  grace: boolean
   provider: string | null
   status: string | null
   expires_at: string | null
@@ -46,6 +51,9 @@ const FREE_FALLBACK: Entitlements = {
   plan_name: 'Free',
   rank: 0,
   state: 'FREE',
+  source: null,
+  institution_name: null,
+  grace: false,
   provider: null,
   status: null,
   expires_at: null,
@@ -63,6 +71,8 @@ interface SubscriptionState {
   load: () => Promise<void>
   loadPlans: () => Promise<void>
   startTrial: () => Promise<void>
+  /** Redeems a gift or licence code; returns the plan name and end date. */
+  redeem: (code: string) => Promise<{ plan_name: string; expires_at: string }>
   reset: () => void
 }
 
@@ -95,6 +105,14 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     set({ ent: { ...FREE_FALLBACK, ...(data as Entitlements) } })
   },
 
+  redeem: async (code) => {
+    const { data, error } = await supabase.rpc('redeem_code', { p_code: code })
+    if (error) throw new Error(friendlyError(error))
+    const { redeemed, ...ent } = data as Entitlements & { redeemed: { plan_name: string; expires_at: string } }
+    set({ status: 'ready', ent: { ...FREE_FALLBACK, ...ent } })
+    return redeemed
+  },
+
   reset: () => set({ status: 'idle', ent: FREE_FALLBACK }),
 }))
 
@@ -103,6 +121,11 @@ export function useSubscription(): Entitlements & { loading: boolean; isPaid: bo
   const status = useSubscriptionStore((s) => s.status)
   return { ...ent, loading: status === 'idle' || status === 'loading', isPaid: ent.plan !== 'free' }
 }
+
+const RECURRING = ['razorpay', 'google_play', 'stripe', 'lemonsqueezy']
+
+/** Paid subscriptions renew; trials, gift codes, manual grants and institution licences just end. */
+export const renewsAutomatically = (e: Entitlements) => RECURRING.includes(e.provider ?? '') && !e.cancel_at_period_end && e.state !== 'TRIAL'
 
 /* ------------------------------------------------------------------ */
 /* Upgrade dialog                                                      */

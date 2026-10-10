@@ -137,6 +137,25 @@ first. Other functions: `request_guardian_link`, `close_guardian_link`,
 (pg_cron, hourly at :05) runs `send_reminders()` for homework due in 24 h, overdue
 work and exams tomorrow, deduplicated and respecting preferences.
 
+## Licensing (Phase 4, `2026-10-13_licensing_phase4.sql`)
+
+| Table | Purpose |
+|---|---|
+| `license_codes` | gift / personal / institution codes: SHA-256 `code_hash` + last 4 characters, plan, duration, uses, redeem-by, institution (licences), status |
+| `institution_licenses` | activated licences: plan, `starts_at`/`expires_at`, `grace_days`, status |
+| `code_redemptions` | who redeemed what and the subscription or licence it created (one per code per account) |
+
+`subscriptions.provider` also allows `gift`. No client grants on the new tables.
+Entitlements: `entitlement_sources(user)`, `effective_limits(user)`,
+`effective_features(user)`; `plan_of`, `plan_limit`, `has_feature` and
+`my_entitlements()` read from them. Functions: `redeem_code`, `my_redemptions`,
+`activate_institution_license`, `institution_license_status`, `platform_generate_codes`,
+`platform_codes`, `platform_code_redemptions`, `platform_revoke_code`,
+`platform_licenses`, `platform_revoke_license`, `platform_update_plan`,
+`platform_user_plan`, `platform_grant_plan`, `platform_end_subscription`,
+`platform_license_audit`. Server only: `generate_license_codes` (used by
+`scripts/generate-codes.mjs`), `claim_code`. Details: [LICENSE_MANAGEMENT.md](LICENSE_MANAGEMENT.md).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

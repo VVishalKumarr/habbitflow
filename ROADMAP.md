@@ -53,7 +53,7 @@ Known pre-existing issue (not from Phase 3): `tests/e2e.mjs` "progress page" ste
 on Saturdays — the "tomorrow" task wraps to the current week's Sunday, and today's
 count shows 1 / 2 instead of 1 / 3. Investigate in Phase 9 regression.
 
-## Phase 4 — Entitlements, licensing & gift codes ⬜
+## Phase 4 — Entitlements, licensing & gift codes ✅
 
 Moved ahead of AI because AI quotas (Phase 5) depend on it.
 
@@ -61,6 +61,9 @@ Moved ahead of AI because AI quotas (Phase 5) depend on it.
   → individual subscription → gift entitlement → Free defaults; expiry/revocation
 - Plan features/limits configured in the database (reuse existing `plans`,
   `subscriptions` tables), no scattered plan checks in components
+- Add feature `ai_guided_timetable` (AI asks your needs, then builds the timetable)
+  to the Plus and Pro plans in the `plans` table; shown on the pricing page only
+  once Phase 6 ships it
 - Server-side friend limits: Free 1, Plus 3, Pro unlimited, institution as licensed;
   never remove existing friends on downgrade
 - Platform Owner dashboard: create institutions, generate institutional and
@@ -110,8 +113,20 @@ Moved ahead of AI because AI quotas (Phase 5) depend on it.
   actions the student is allowed to do; typed command box as fallback when
   speech isn't supported (web + Android/Capacitor permission). Metered as
   "voice commands" in Phase 5
-- Timetable generation using school hours, class periods, commitments, deadlines,
-  exams, sleep, breaks, preferences; never overlapping; explains impossible requests
+- Needs check before generating (**Plus and Pro feature** for individual accounts,
+  feature key `ai_guided_timetable`; institution members get it if their license
+  includes it; Free users see an upgrade prompt): the AI first asks the student a short set of
+  questions about their main needs, then decides what goes into the timetable.
+  It asks only what it can't already see (school hours, class periods, deadlines
+  and exams are pre-filled from their records), for example: main goals right now
+  (exam prep, catching up, a skill), subjects that need more time, fixed
+  commitments (tuition, sports, chores), wake/sleep times, best focus time of day,
+  activities to keep or drop. Answers can be typed, tapped from suggestions or
+  spoken; the student can skip any question, and saved answers are reused and
+  editable next time. The AI then explains what it chose to include and why
+- Timetable generation from those answers plus school hours, class periods,
+  commitments, deadlines, exams, sleep, breaks; never overlapping; explains
+  impossible requests; proposal shown for review before saving
 - Timetable evaluation: hours per subject/homework/extracurricular/rest,
   overloaded days, unused slots, deadline conflicts, plain-language advice
 - Event-based rescheduling: affected slots → displaced tasks → alternatives →

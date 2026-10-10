@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useStructure } from '../../components/school/data'
+import { LicencePanel } from '../../components/school/LicencePanel'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row } from '../../components/school/ui'
 import { Field } from '../../components/ui/Field'
 import { Spinner } from '../../components/ui/Spinner'
@@ -55,11 +56,7 @@ export default function SchoolSettingsPage() {
       {can('set_homework_retention') && <RetentionPanel inst={inst} days={data.settings.homework_retention_days} onSaved={reload} />}
       {head && <AcademicRulesPanel row={data.row} settings={data.settings} onSaved={reload} />}
       {head && <PermissionsPanel inst={inst} />}
-      {head && (
-        <Panel title="Licence" description="Institution licences are activated here.">
-          <p className="text-sm text-muted">Licence activation arrives with licensing (Phase 5). Until then every feature in this area is available to your institution.</p>
-        </Panel>
-      )}
+      {can('manage_license') && <LicencePanel institutionId={inst.institution_id} />}
     </div>
   )
 }

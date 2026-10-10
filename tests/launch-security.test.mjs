@@ -225,10 +225,12 @@ await test('friend privacy: sharing off blocks comparison; leaderboard is opt-in
 })
 
 await test('free friend limit enforced (counting sent requests)', async () => {
+  // Carol (free): up to the Free plan's limit (read from the server), then refused
+  const max = (await carol.c.rpc('my_entitlements')).data.limits.friends
+  assert.ok(Number.isInteger(max) && max >= 1)
   const extra = []
-  for (let i = 0; i < 3; i++) extra.push(await signUp(`lx${i}_${suffix}`))
+  for (let i = 0; i < max; i++) extra.push(await signUp(`lx${i}_${suffix}`))
   users.push(...extra)
-  // Carol (free): 3 requests allowed, the 4th is refused
   for (const u of extra) assert.equal((await carol.c.rpc('send_friend_request', { p_username: u.username })).data, 'sent')
   const r = await carol.c.rpc('send_friend_request', { p_username: alice.username })
   assert.match(r.error?.message ?? '', /PLAN_LIMIT:friends/)

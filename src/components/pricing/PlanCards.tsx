@@ -1,6 +1,6 @@
 import { Check, Globe } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { FEATURE_LABELS, type Feature } from '../../config'
+import { FEATURE_LABELS, UNRELEASED_FEATURES, type Feature } from '../../config'
 import { formatPrice, priceFor } from '../../config/pricing'
 import { REGION_LABEL, useRegion, type Region } from '../../lib/region'
 import { useSubscriptionStore, type Plan } from '../../store/subscription'
@@ -38,7 +38,9 @@ export function planBullets(plan: Plan, below?: Plan): { intro?: string; items: 
   const prev = limitLines(below)
   const items = own.filter((l, i) => l !== prev[i])
   for (const f of plan.features) {
-    if (!below.features.includes(f) && !COVERED_BY_LIMITS.has(f)) items.push(FEATURE_LABELS[f as Feature] ?? f)
+    // Unknown keys (added in the database before the app knows them) and unreleased features are not advertised.
+    const label = FEATURE_LABELS[f as Feature]
+    if (label && !below.features.includes(f) && !COVERED_BY_LIMITS.has(f) && !UNRELEASED_FEATURES.has(f as Feature)) items.push(label)
   }
   return { intro: `Everything in ${below.name}, plus:`, items }
 }

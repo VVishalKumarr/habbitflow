@@ -9,7 +9,7 @@ import { formatDate } from '../lib/dates'
 import { getPaymentService } from '../lib/payments'
 import { useRegion } from '../lib/region'
 import { useAuth } from '../store/auth'
-import { useSubscription, useSubscriptionStore, type Plan } from '../store/subscription'
+import { renewsAutomatically, useSubscription, useSubscriptionStore, type Plan } from '../store/subscription'
 import { toast } from '../store/ui'
 
 const FAQ = [
@@ -110,7 +110,7 @@ export default function ProPage() {
             <CheckCircle2 className="size-4 text-success" aria-hidden="true" />
             {sub.state === 'TRIAL' ? `You’re on a ${plan.name} trial` : `You’re on ${plan.name}`}
             {sub.expires_at &&
-              ` · ${sub.cancel_at_period_end || sub.state === 'TRIAL' ? 'ends' : 'renews'} ${formatDate(sub.expires_at.slice(0, 10), { month: 'short', day: 'numeric', year: 'numeric' })}`}
+              ` · ${renewsAutomatically(sub) ? 'renews' : 'ends'} ${formatDate(sub.expires_at.slice(0, 10), { month: 'short', day: 'numeric', year: 'numeric' })}`}
           </p>
           {sub.provider === 'razorpay' && !sub.cancel_at_period_end && payments.cancel && (
             <button type="button" className="btn-ghost" onClick={() => setConfirmCancel(true)}>

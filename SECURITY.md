@@ -152,6 +152,18 @@ project and check, among others:
 `tests/e2e-institution.mjs` (13 steps), `tests/e2e-institution-phase2.mjs` (9) and
 `tests/e2e-institution-phase3.mjs` (10) cover the above.
 
+## Licences and gift codes
+
+- Codes are 80-bit random (pgcrypto), shown once and stored only as SHA-256 hashes; no
+  master key exists. Redemption is validated and performed atomically in the database
+  (row lock, per-code limit, once per account, expiry, revocation, rate limit 10/hour).
+- `subscriptions`, `license_codes`, `institution_licenses`, `code_redemptions` and
+  `plans` have no client write access; plan and entitlement checks are server-side, so
+  editing requests in the browser can't unlock paid features.
+- Only the principal/director (locked `manage_license`) can activate a key, and only
+  for the institution it was issued for. Licences add features, never permissions.
+- `tests/licensing.test.mjs` (15 checks) and `tests/e2e-licensing.mjs` (10 steps).
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users

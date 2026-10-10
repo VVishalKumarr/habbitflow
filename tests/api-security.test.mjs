@@ -220,14 +220,15 @@ await test('friends: compare returns both users’ Pomodoro and timetable totals
 })
 
 await test('friends: reverse request auto-accepts; unfriend removes access', async () => {
-  let r = await carol.c.rpc('send_friend_request', { p_username: `alice_${suffix}` })
-  assert.equal(r.data, 'sent')
-  r = await alice.c.rpc('send_friend_request', { p_username: `carol_${suffix}` })
-  assert.equal(r.data, 'accepted')
-  r = await bob.c.from('friendships').delete().eq('id', friendship.id)
+  // Unfriend first: Free accounts have a single friend slot.
+  let r = await bob.c.from('friendships').delete().eq('id', friendship.id)
   assert.ifError(r.error)
   r = await bob.c.rpc('compare_progress', { p_friend: alice.id, p_from: '2026-09-15', p_to: '2026-09-21' })
   assert.ok(r.error, 'access ends after unfriending')
+  r = await carol.c.rpc('send_friend_request', { p_username: `alice_${suffix}` })
+  assert.equal(r.data, 'sent')
+  r = await alice.c.rpc('send_friend_request', { p_username: `carol_${suffix}` })
+  assert.equal(r.data, 'accepted')
 })
 
 await test('deleting a tracker cascades its data', async () => {

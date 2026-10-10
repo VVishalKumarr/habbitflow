@@ -19,6 +19,7 @@ export type Feature =
   | 'leaderboards'
   | 'friend_groups'
   | 'no_ads'
+  | 'ai_guided_timetable'
 
 export type LimitKey = 'trackers' | 'friends' | 'history_days'
 
@@ -35,7 +36,14 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   leaderboards: 'Weekly friend leaderboards',
   friend_groups: 'Friend groups (coming soon)',
   no_ads: 'No advertisements',
+  ai_guided_timetable: 'AI timetable that asks your needs first',
 }
+
+/**
+ * Features that exist in the plans table but aren't built yet: never advertised
+ * on the pricing page. Remove a key here when its feature ships.
+ */
+export const UNRELEASED_FEATURES = new Set<Feature>(['ai_guided_timetable'])
 
 /** Shown in the upgrade dialog when a feature is locked. */
 export const FEATURE_UPSELL: Partial<Record<Feature | LimitKey, string>> = {

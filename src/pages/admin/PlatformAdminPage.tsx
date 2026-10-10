@@ -12,6 +12,17 @@ import { supabase } from '../../lib/supabase'
 import { unwrap, useLoad } from '../../lib/useLoad'
 import { useInstitutionStore } from '../../store/institution'
 import { toast } from '../../store/ui'
+import { AccountsTab, CodesTab, LicenceHistoryTab, LicencesTab, PlansTab } from './LicensingAdmin'
+
+const TABS = [
+  ['institutions', 'Institutions'],
+  ['codes', 'Codes'],
+  ['licences', 'Licences'],
+  ['plans', 'Plans'],
+  ['accounts', 'Accounts'],
+  ['history', 'History'],
+] as const
+type Tab = (typeof TABS)[number][0]
 
 interface PlatformInstitution {
   id: string
@@ -44,6 +55,7 @@ export default function PlatformAdminPage() {
   const isAdmin = useInstitutionStore((s) => s.isPlatformAdmin)
   const [selected, setSelected] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [tab, setTab] = useState<Tab>('institutions')
   const list = useLoad(async () => (isAdmin ? (unwrap(await supabase.rpc('platform_institutions')) as PlatformInstitution[]) : []), [isAdmin])
 
   if (status === 'idle' || status === 'loading') return <FullPageLoader />
@@ -56,16 +68,37 @@ export default function PlatformAdminPage() {
     <div className="space-y-5">
       <PageHeader
         title="Platform administration"
-        description="Create institutions, approve their email addresses and invite their principal or director. Academic records stay with each institution."
+        description="Institutions, licences, gift codes and plans. Academic records stay with each institution."
         actions={
-          <button type="button" className="btn-primary" onClick={() => setCreating(true)}>
-            <Plus className="size-4" aria-hidden="true" />
-            New institution
-          </button>
+          tab === 'institutions' && (
+            <button type="button" className="btn-primary" onClick={() => setCreating(true)}>
+              <Plus className="size-4" aria-hidden="true" />
+              New institution
+            </button>
+          )
         }
       />
-      <ErrorNote>{list.error}</ErrorNote>
-      {list.loading && !list.data ? (
+      <div role="tablist" aria-label="Administration sections" className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+        {TABS.map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`h-9 shrink-0 rounded-lg px-3 text-sm font-medium transition-colors ${tab === id ? 'bg-brand-soft text-brand-ink' : 'text-muted hover:bg-subtle hover:text-ink'}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === 'codes' && <CodesTab institutions={(list.data ?? []).map((i) => ({ id: i.id, name: i.name }))} />}
+      {tab === 'licences' && <LicencesTab />}
+      {tab === 'plans' && <PlansTab />}
+      {tab === 'accounts' && <AccountsTab />}
+      {tab === 'history' && <LicenceHistoryTab />}
+      {tab === 'institutions' && <ErrorNote>{list.error}</ErrorNote>}
+      {tab !== 'institutions' ? null : list.loading && !list.data ? (
         <Loading />
       ) : (
         <Panel>

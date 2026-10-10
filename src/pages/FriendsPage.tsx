@@ -107,7 +107,9 @@ function FriendLimitNote({ used }: { used: number }) {
   if (max == null) return null
   return (
     <p className="mb-3 text-sm text-muted">
-      {Math.min(used, max)} of {max} friends (including sent requests).{' '}
+      {used > max
+        ? `You have ${used} friends and requests; your plan allows ${max}. Everyone stays — you just can’t add more.`
+        : `${used} of ${max} friend${max === 1 ? '' : 's'} (including sent requests).`}{' '}
       {used >= max && (
         <Link to="/pro" className="font-medium text-brand hover:underline">
           Get more with Plus or Pro

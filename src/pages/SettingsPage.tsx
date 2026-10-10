@@ -21,7 +21,8 @@ import { supabase } from '../lib/supabase'
 import type { AccentTheme, Profile } from '../lib/types'
 import { useAuth } from '../store/auth'
 import { useConsent } from '../store/consent'
-import { useFeatureAccess, useSubscription } from '../store/subscription'
+import { RedeemCodeButton } from '../components/subscription/RedeemCode'
+import { renewsAutomatically, useFeatureAccess, useSubscription } from '../store/subscription'
 import { useTrackers } from '../store/trackers'
 import { toast } from '../store/ui'
 
@@ -220,6 +221,17 @@ export default function SettingsPage() {
 
   const planLabel = sub.state === 'TRIAL' ? `${sub.plan_name} trial` : sub.state === 'EXPIRED' ? 'Free (paid plan ended)' : sub.plan_name
   const themesOk = hasFeature('custom_themes')
+  const on = (iso: string) => formatDate(iso.slice(0, 10), { month: 'long', day: 'numeric', year: 'numeric' })
+  const planHint =
+    sub.source === 'institution' && sub.expires_at
+      ? sub.grace
+        ? `${sub.institution_name}’s licence ended on ${on(sub.expires_at)}. Access continues for a short grace period while the school renews.`
+        : `Through ${sub.institution_name}’s licence, until ${on(sub.expires_at)}.`
+      : sub.isPaid && sub.expires_at
+        ? `${renewsAutomatically(sub) ? 'Renews' : 'Ends'} on ${on(sub.expires_at)}`
+        : sub.isPaid
+          ? `All ${sub.plan_name} features are unlocked.`
+          : 'Upgrade to remove ads and limits, or get Pro for reports, focus sounds and more.'
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -291,13 +303,7 @@ export default function SettingsPage() {
       <Section title="Plan">
         <Row
           label={planLabel}
-          hint={
-            sub.isPaid && sub.expires_at
-              ? `${sub.cancel_at_period_end || sub.state === 'TRIAL' ? 'Ends' : 'Renews'} on ${formatDate(sub.expires_at.slice(0, 10), { month: 'long', day: 'numeric', year: 'numeric' })}`
-              : sub.isPaid
-                ? `All ${sub.plan_name} features are unlocked.`
-                : 'Upgrade to remove ads and limits, or get Pro for reports, focus sounds and more.'
-          }
+          hint={planHint}
         >
           <button
             type="button"
@@ -311,6 +317,11 @@ export default function SettingsPage() {
             {sub.isPaid ? 'Manage plan' : 'See plans'}
           </button>
         </Row>
+        <div className="border-t border-line pt-5">
+          <Row label="Gift or licence code" hint="Got a code from us, a friend or your school? Redeem it for Plus or Pro.">
+            <RedeemCodeButton />
+          </Row>
+        </div>
       </Section>
 
       <Section title="Appearance">

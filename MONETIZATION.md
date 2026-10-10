@@ -9,9 +9,10 @@ Nothing here charges anyone until you configure a provider.
 | --- | --- | --- | --- |
 | Trackers | 2 | unlimited | unlimited |
 | Detailed history / charts | 30 days | full, 90-day views | full, 90-day views |
-| Friends (incl. sent requests) | 3 | 10 | 50 |
+| Friends (incl. sent requests) | 1 | 3 | unlimited |
 | Colour themes, no ads | — | ✓ | ✓ |
 | Focus sounds, CSV/PDF reports, leaderboards | — | — | ✓ |
+| AI timetable that asks your needs first (coming) | — | ✓ | ✓ |
 | Price in India | ₹0 | ₹49/mo · ₹399/yr | ₹99/mo · ₹799/yr |
 | Price elsewhere | $0 | $1.99/mo · $14.99/yr | $3.99/mo · $29.99/yr |
 | Free trial | — | — | 7 days, once per account |
@@ -31,9 +32,13 @@ Web checkout today: **Indian prices via Razorpay**. Other regions show “coming
 until an international provider (Lemon Squeezy or Paddle) is connected. A visitor could
 switch to Indian prices, but would then pay in rupees through Razorpay.
 
+Gift codes, personal licence codes and institution licences also grant Plus or Pro —
+see [LICENSE_MANAGEMENT.md](LICENSE_MANAGEMENT.md).
+
 ## Changing prices and limits
 
-Everything lives in the `plans` table. Examples (SQL Editor):
+Limits and features can be edited in **Platform admin → Plans**. Everything lives in the
+`plans` table; prices are changed with SQL. Examples (SQL Editor):
 
 ```sql
 -- Plus in India: ₹59/month
@@ -56,7 +61,8 @@ plan in Razorpay/Play too. (`price_monthly`/`price_yearly` columns are legacy; `
 ## Subscription states
 
 `FREE` (never paid) · `TRIAL` · `ACTIVE` (on Plus or Pro) · `EXPIRED` (had a paid plan, now free).
-Computed by `my_entitlements()` from the `subscriptions` table. Cancelling keeps the plan until
+Computed by `my_entitlements()` from the `subscriptions` table and institution licences
+(`source` says which; see LICENSE_MANAGEMENT.md for how sources combine). Cancelling keeps the plan until
 `expires_at`. Losing a plan never deletes data. Upgrading Plus → Pro on the web stops the Plus renewal.
 
 ## Web payments: Razorpay (India)
