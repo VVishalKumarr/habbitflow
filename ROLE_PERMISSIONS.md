@@ -34,9 +34,9 @@ nobody else can ever be granted them, not even through an override.
 | view_all_classes | | | |
 | view_audit | | | |
 | set_homework_retention (0–14 days) | ✔ | | |
-| manage_programmes | ✔ | | |
-| import_export | | | |
-| view_reports | ✔ | ✔ | |
+| manage_programmes (class teachers: own class, coordinators: their grades) | ✔ | ✔ | |
+| import_export (CSV import; also allows exports) | | | |
+| view_reports (development scores, class reports, CSV exports) | ✔ | ✔ | |
 | record_attendance | | ✔ | ✔ |
 | create_assignments (for subjects they teach) | | ✔ | ✔ |
 | enter_marks (for subjects they teach) | | ✔ | ✔ |

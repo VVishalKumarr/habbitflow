@@ -57,6 +57,9 @@ const SchoolMarksPage = lazy(() => import('./pages/school/MarksPage'))
 const SchoolGuardiansPage = lazy(() => import('./pages/school/GuardiansPage'))
 const SchoolMessagesPage = lazy(() => import('./pages/school/MessagesPage'))
 const SchoolAnnouncementsPage = lazy(() => import('./pages/school/AnnouncementsPage'))
+const SchoolReportsPage = lazy(() => import('./pages/school/ReportsPage'))
+const SchoolProgrammesPage = lazy(() => import('./pages/school/ProgrammesPage'))
+const SchoolImportPage = lazy(() => import('./pages/school/ImportPage'))
 const GoalsPage = lazy(() => import('./pages/GoalsPage'))
 const PlatformAdminPage = lazy(() => import('./pages/admin/PlatformAdminPage'))
 
@@ -300,6 +303,9 @@ export default function App() {
               <Route path="messages" element={lazyPage(<SchoolMessagesPage />)} />
               <Route path="announcements" element={lazyPage(<SchoolAnnouncementsPage />)} />
               <Route path="goals" element={lazyPage(<GoalsPage />)} />
+              <Route path="reports" element={lazyPage(<SchoolReportsPage />)} />
+              <Route path="programmes" element={lazyPage(<SchoolProgrammesPage />)} />
+              <Route path="import" element={lazyPage(<SchoolImportPage />)} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

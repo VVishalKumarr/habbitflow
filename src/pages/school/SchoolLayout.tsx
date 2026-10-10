@@ -1,4 +1,4 @@
-import { Award, BookOpenCheck, Building2, CalendarCheck, CalendarDays, ClipboardList, HeartHandshake, History, LayoutGrid, Megaphone, MessageSquare, Settings2, ShieldAlert, Target, Users } from 'lucide-react'
+import { Award, BarChart3, BookOpenCheck, FileUp, Sprout, Building2, CalendarCheck, CalendarDays, ClipboardList, HeartHandshake, History, LayoutGrid, Megaphone, MessageSquare, Settings2, ShieldAlert, Target, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/EmptyState'
@@ -25,6 +25,8 @@ const ITEMS: Item[] = [
   { to: '/school/announcements', label: 'Announcements', icon: Megaphone, show: () => true },
   { to: '/school/messages', label: 'Messages', icon: MessageSquare, show: (m) => m.role === 'parent' || isStaff(m.role) },
   { to: '/school/goals', label: 'Goals', icon: Target, show: (m) => m.role === 'student' },
+  { to: '/school/programmes', label: 'Programmes', icon: Sprout, show: notParent },
+  { to: '/school/reports', label: 'Reports', icon: BarChart3, show: (m, can) => isStaff(m.role) && (can('view_reports') || can('import_export')) },
   {
     to: '/school/guardians',
     label: 'Parents & guardians',
@@ -39,6 +41,7 @@ const ITEMS: Item[] = [
     icon: Settings2,
     show: (m, can) => isHead(m.role) || can('set_homework_retention'),
   },
+  { to: '/school/import', label: 'Import', icon: FileUp, show: (m, can) => isStaff(m.role) && can('import_export') },
   { to: '/school/audit', label: 'Audit history', icon: History, show: (_m, can) => can('view_audit') },
 ]
 

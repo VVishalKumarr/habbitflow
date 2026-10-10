@@ -75,7 +75,7 @@ export const LOCKED_PERMISSIONS: Permission[] = ['manage_institution_settings', 
 /** Must match default_role_permissions() in the database. */
 export const DEFAULT_PERMISSIONS: Record<ConfigurableRole, Permission[]> = {
   coordinator: ['manage_students', 'manage_classes', 'manage_calendar', 'approve_deadline_changes', 'set_homework_retention', 'manage_programmes', 'view_reports', 'message_parents', 'manage_timetable'],
-  class_teacher: ['record_attendance', 'create_assignments', 'enter_marks', 'view_reports', 'message_parents', 'manage_timetable', 'edit_student_timetables'],
+  class_teacher: ['record_attendance', 'create_assignments', 'enter_marks', 'view_reports', 'message_parents', 'manage_timetable', 'edit_student_timetables', 'manage_programmes'],
   subject_teacher: ['record_attendance', 'create_assignments', 'enter_marks'],
 }
 
@@ -280,6 +280,7 @@ export interface InstitutionSettings {
   max_deadlines_per_week: number
   grading_scale: { label: string; min: number }[]
   attendance_statuses: string[]
+  development_weights: Record<'academic' | 'homework' | 'attendance' | 'planning' | 'extracurricular', number>
 }
 
 export interface Overview {

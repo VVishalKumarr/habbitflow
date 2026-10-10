@@ -1,6 +1,7 @@
 // Pro exports. Both formats get their rows from export_timetable(), which the
 // database only answers for accounts with the csv_export feature, and only
 // with the caller's own data.
+import { csvCell } from './csv'
 import { addDays, DAY_NAMES, formatDate, todayISO, type ISODate } from './dates'
 import { friendlyError } from './errors'
 import { saveFile } from './native'
@@ -32,11 +33,6 @@ async function fetchRows(from: ISODate, to: ISODate): Promise<ExportRow[]> {
   return data as ExportRow[]
 }
 
-const csvCell = (v: string) => {
-  // Neutralise spreadsheet formulas and quote everything.
-  const safe = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v
-  return `"${safe.replace(/"/g, '""')}"`
-}
 
 export async function exportCsv(from: ISODate, to: ISODate, username: string): Promise<number> {
   const rows = await fetchRows(from, to)

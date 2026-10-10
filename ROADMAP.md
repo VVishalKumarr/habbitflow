@@ -144,7 +144,7 @@ Rescheduling changes the weekly timetable (no single-date overrides yet; undo fr
 History). `study_plan` quota is not used yet. Real model output is untested until
 `ANTHROPIC_API_KEY` is set; all fallbacks and server checks are tested.
 
-## Phase 7 — Development reports, programmes, import/export ⬜
+## Phase 7 — Development reports, programmes, import/export ✅
 
 - Student development score 1–10: components (academic 35, homework 20,
   attendance 15, planning/habits 15, extracurricular/skills 15), normalised,
@@ -158,6 +158,10 @@ History). `study_plan` quota is not used yet. Real model output is untested unti
 - Printable PDF reports
 - Academic-year transition (archive / promote, history preserved)
 - Docs: `DATA_IMPORT_EXPORT.md`
+
+As built: planning/habits counts only if the student shares it with the school (off by
+default, private otherwise). Parents don't see development scores yet. The year transition
+moves whole classes; individual exceptions are re-enrolled afterwards.
 
 ## Phase 8 — Notification delivery ⬜ (needs credentials)
 

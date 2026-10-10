@@ -197,6 +197,26 @@ exams, holidays). Internal: `tt_apply_ops`. Details: [AI_TIMETABLE.md](AI_TIMETA
 `my_editable_students()`; server-only `student_timetable_owner(student)`. Notification kind
 `timetable_changed`. Rules: [ROLE_PERMISSIONS.md](ROLE_PERMISSIONS.md#timetables).
 
+## Reports, programmes, import (Phase 7)
+
+`2026-10-18_reports_phase7.sql`, `2026-10-19_import_year_transition.sql`.
+
+| Table | Purpose |
+|---|---|
+| `development_programmes`, `programme_members`, `programme_checkins` | programmes for the institution / a grade / a class; joining and one check-in per day |
+| `development_scores` | every development calculation: period, score (null = insufficient data), components, weights, who calculated (null = weekly job) |
+| `import_runs` | each CSV import: kind, file, counts, failed/skipped rows |
+
+`institution_invitations.class_id` (enrol on activation), `profiles.share_habits_with_school`,
+setting `development_weights`. Functions: `compute_development` (server only),
+`calculate_development_score`, `calculate_class_development`, `class_report`,
+`development_weekly_job` (pg_cron `development-scores`), `programmes_overview`,
+`join_programme`, `programme_checkin`, `programme_members_report`, `export_attendance`,
+`export_marks`, `export_assignments`, `export_development`, `log_export`,
+`import_check_people`, `import_person` (server only), `import_classes`, `import_teaching`,
+`record_import` (server only), `year_transition_preview`, `year_transition`.
+Details: [DATA_IMPORT_EXPORT.md](DATA_IMPORT_EXPORT.md).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

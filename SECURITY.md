@@ -193,6 +193,19 @@ project and check, among others:
 - `tests/timetable-core.test.mjs` (12), `tests/timetable-ai.test.mjs` (14),
   `tests/e2e-ai-timetable.mjs` (9 steps).
 
+## Reports, import and export
+
+- Scores, class reports and exports are computed in the database and limited to classes
+  the caller can see (`can_view_class`, `view_reports` / `import_export`); students only
+  see their own; `compute_development` and the import writers are server-only.
+- Personal habit data is used in development reports only when the student opts in, and
+  then only as counts.
+- CSV import: the role comes from the request, never the file; each row passes the same
+  checks as a manual invitation (approved list, can_invite_role, class permissions);
+  imports and exports are audited; exported cells are formula-neutralised.
+- Year transition: heads only, one transaction, nothing deleted.
+- `tests/reports.test.mjs` (12), `tests/e2e-reports.mjs` (8 steps).
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users

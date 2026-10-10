@@ -180,6 +180,11 @@ export function PrivacyPage() {
           allows it. They can’t see which tasks you ticked, your streaks or your progress. You get a notification for every change, it’s listed in your timetable History
           with the teacher’s name, and you can undo it. Your school can switch this off.
         </p>
+        <p>
+          Your school can calculate a development score from your published marks, homework, attendance and school programmes, which you and your teachers can see.
+          Your personal timetable and goals are only used if you switch on “Share my habit consistency with my school”, and then only as counts (how many planned activities
+          you ticked, completed skill goals) — never the tasks themselves.
+        </p>
       </section>
 
       <section>

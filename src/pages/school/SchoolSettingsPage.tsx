@@ -3,6 +3,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useStructure } from '../../components/school/data'
 import { AiPanel } from '../../components/school/AiPanel'
 import { LicencePanel } from '../../components/school/LicencePanel'
+import { YearTransitionModal } from '../../components/school/YearTransition'
+import { COMPONENT_LABEL, COMPONENTS, type ComponentKey } from '../../lib/development'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row } from '../../components/school/ui'
 import { Field } from '../../components/ui/Field'
 import { Spinner } from '../../components/ui/Spinner'
@@ -56,6 +58,7 @@ export default function SchoolSettingsPage() {
       {head && <YearsPanel inst={inst} />}
       {can('set_homework_retention') && <RetentionPanel inst={inst} days={data.settings.homework_retention_days} onSaved={reload} />}
       {head && <AcademicRulesPanel row={data.row} settings={data.settings} onSaved={reload} />}
+      {head && <WeightsPanel row={data.row} settings={data.settings} onSaved={reload} />}
       {head && <PermissionsPanel inst={inst} />}
       {can('manage_license') && <LicencePanel institutionId={inst.institution_id} />}
       {can('manage_institution_settings') && <AiPanel institutionId={inst.institution_id} />}
@@ -134,6 +137,7 @@ function YearsPanel({ inst }: { inst: MyInstitution }) {
   const [end, setEnd] = useState('')
   const [termFor, setTermFor] = useState<string | null>(null)
   const [term, setTerm] = useState({ name: '', start: '', end: '' })
+  const [transition, setTransition] = useState(false)
 
   const run = async (p: PromiseLike<{ error: unknown }>, ok: string) => {
     const { error } = await p
@@ -162,7 +166,13 @@ function YearsPanel({ inst }: { inst: MyInstitution }) {
   }
 
   return (
-    <Panel title="Academic years and terms" description="The year-end transfer of classes and records arrives with reports (Phase 6); past years stay readable.">
+    <Panel
+      title="Academic years and terms"
+      description="At the end of the year, start the next one: classes move up, repeat or graduate, and past years stay readable."
+      actions={(s?.classes ?? []).some((c) => !c.archived) && (
+        <button type="button" className="btn-secondary" onClick={() => setTransition(true)}>Start next academic year</button>
+      )}
+    >
       <List empty="No academic years yet.">
         {(s?.years ?? []).map((y) => (
           <Row key={y.id} className="items-start sm:items-start">
@@ -218,6 +228,7 @@ function YearsPanel({ inst }: { inst: MyInstitution }) {
           Add year
         </button>
       </form>
+      {transition && <YearTransitionModal inst={inst.institution_id} onClose={() => setTransition(false)} onDone={reload} />}
     </Panel>
   )
 }
@@ -393,5 +404,44 @@ function PermissionLine({ p, effective, toggle }: { p: Permission; effective: (r
         </span>
       ))}
     </>
+  )
+}
+
+function WeightsPanel({ row, settings, onSaved }: { row: InstitutionRow; settings: InstitutionSettings; onSaved: () => void }) {
+  const [w, setW] = useState<Record<ComponentKey, string>>(
+    () => Object.fromEntries(COMPONENTS.map((k) => [k, String(settings.development_weights?.[k] ?? 0)])) as Record<ComponentKey, string>,
+  )
+  const [busy, setBusy] = useState(false)
+  const total = COMPONENTS.reduce((n, k) => n + (Number(w[k]) || 0), 0)
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault()
+    if (total !== 100 || COMPONENTS.some((k) => !Number.isInteger(Number(w[k])) || Number(w[k]) < 0)) return toast.error('Use whole numbers that add up to 100.')
+    setBusy(true)
+    const { error: err } = await supabase
+      .from('institutions')
+      .update({ settings: { ...row.settings, development_weights: Object.fromEntries(COMPONENTS.map((k) => [k, Number(w[k])])) } })
+      .eq('id', row.id)
+    setBusy(false)
+    if (err) return toast.error(friendlyError(err))
+    toast.success('Weights saved. New calculations use them.')
+    onSaved()
+  }
+
+  return (
+    <Panel title="Development score weights" description="How much each part counts in the 1–10 development score. Parts without enough data for a student are left out and the rest re-weighted. 0 switches a part off.">
+      <form onSubmit={save} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {COMPONENTS.map((k) => (
+            <Field key={k} label={`${COMPONENT_LABEL[k]} (%)`} type="number" min={0} max={100} value={w[k]} onChange={(e) => setW({ ...w, [k]: e.target.value })} />
+          ))}
+        </div>
+        <p className={`text-sm ${total === 100 ? 'text-muted' : 'text-danger'}`}>Total: {total}%{total !== 100 && ' — must be 100%'}</p>
+        <button type="submit" className="btn-primary" disabled={busy || total !== 100}>
+          {busy && <Spinner className="size-4" />}
+          Save weights
+        </button>
+      </form>
+    </Panel>
   )
 }

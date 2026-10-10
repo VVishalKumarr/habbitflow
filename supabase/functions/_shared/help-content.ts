@@ -327,6 +327,33 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
   },
   {
+    slug: 'school-development-programmes',
+    title: 'School: development score and programmes',
+    description: 'What your development score means, how to improve it, and how school programmes and check-ins work.',
+    keywords: ['development', 'score', 'report', 'programme', 'program', 'check in', 'school', 'weights', 'share habits'],
+    route: '/school',
+    public: true,
+    sections: [
+      {
+        heading: 'Your development score',
+        body: [
+          'If your school uses HabitFlow, your Overview shows “Your development”: a score from 1 to 10 for the last 90 days, built from academic results, homework, attendance, planning & habits and extracurricular activities. Open your report to see each part, why it is what it is, and suggestions.',
+          'Parts without enough data are left out instead of counting as zero. Very long or late-night schedules are not rewarded.',
+          'Planning & habits only counts if you tick “Share my habit consistency with my school”. Your teachers then see counts only, never your tasks or ticks.',
+        ],
+      },
+      {
+        heading: 'Programmes',
+        body: [
+          '1. Open School → Programmes.',
+          '2. Choose Join on a programme that interests you.',
+          '3. Press “Check in today” each time you do it. You can check in for today or the previous 6 days; each programme has a weekly target.',
+          'Check-ins count towards the extracurricular part of your development score.',
+        ],
+      },
+    ],
+  },
+  {
     slug: 'habitflow-pro',
     title: 'Plans: Free, Plus and Pro',
     description: 'What each plan includes, how to upgrade and how to cancel.',
