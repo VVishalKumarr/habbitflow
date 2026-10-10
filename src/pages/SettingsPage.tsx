@@ -9,6 +9,7 @@ import {
   RecoveryEmailDialog,
   RemoveEmailDialog,
 } from '../components/settings/AccountDialogs'
+import { AiUsage } from '../components/settings/AiUsage'
 import { NotificationPrefs } from '../components/settings/NotificationPrefs'
 import { Spinner } from '../components/ui/Spinner'
 import { appConfig } from '../config'
@@ -322,6 +323,10 @@ export default function SettingsPage() {
             <RedeemCodeButton />
           </Row>
         </div>
+      </Section>
+
+      <Section title="AI usage" description="How much of each AI feature you can use, and when it resets.">
+        <AiUsage />
       </Section>
 
       <Section title="Appearance">

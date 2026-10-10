@@ -161,6 +161,23 @@ Entitlements: `entitlement_sources(user)`, `effective_limits(user)`,
 `renewal_scheduled`; daily pg_cron job `license-reminders` runs `send_license_reminders()`
 (30 days, 7 days, on expiry — heads and platform owner, deduplicated).
 
+## AI quotas (Phase 5, `2026-10-15_ai_quotas_phase5.sql`)
+
+| Table | Purpose |
+|---|---|
+| `ai_settings` | one row: quota time zone, max request/answer size, hourly burst, platform token cap, token prices for estimates |
+| `ai_features` | metered features, their period (day/week/month), global on/off |
+| `ai_plan_quotas` | requests per period per plan key (`free`, `plus`, `pro`, `institution`); readable by everyone |
+| `institution_ai_quotas` | an institution's own switches/lower limits |
+| `institution_ai_pools` | optional shared monthly requests/token cap per institution |
+| `ai_usage` | one row per AI request: user, feature, plan, charged to personal/institution, period, status (reserved/succeeded/refunded/rejected), tokens, model; students read their own, nobody edits |
+
+Server only: `ai_begin(user, feature, request_id, input_chars)`, `ai_finish(...)`,
+`ai_allowance`, `ai_used`. Read models: `my_ai_usage()`, `institution_ai_overview(inst)`,
+`platform_ai_overview()`. Changes: `institution_set_ai_quota`, `platform_set_ai_feature`,
+`platform_set_ai_quota`, `platform_update_ai_settings`, `platform_set_ai_pool`.
+Details: [AI_QUOTAS.md](AI_QUOTAS.md).
+
 Sign-up triggers on `auth.users`: `before_new_user` (institutional accounts need a
 valid one-time activation token, which it strips from the metadata) and
 `handle_new_user` (creates the profile and membership); `guard_email_change` stops

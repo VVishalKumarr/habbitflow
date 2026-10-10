@@ -80,7 +80,7 @@ Moved ahead of AI because AI quotas (Phase 5) depend on it.
   codes rejected; friend limits per plan
 - Docs: `LICENSE_MANAGEMENT.md`
 
-## Phase 5 — AI usage quotas & cost controls ⬜
+## Phase 5 — AI usage quotas & cost controls ✅
 
 - Tables: per-plan feature quotas (Free/Plus/Pro/Institution), quota periods
   (day/month/custom), usage records, optional institution credit pool, spend caps

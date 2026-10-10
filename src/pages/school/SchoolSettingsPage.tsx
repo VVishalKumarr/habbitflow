@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useStructure } from '../../components/school/data'
+import { AiPanel } from '../../components/school/AiPanel'
 import { LicencePanel } from '../../components/school/LicencePanel'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row } from '../../components/school/ui'
 import { Field } from '../../components/ui/Field'
@@ -57,6 +58,7 @@ export default function SchoolSettingsPage() {
       {head && <AcademicRulesPanel row={data.row} settings={data.settings} onSaved={reload} />}
       {head && <PermissionsPanel inst={inst} />}
       {can('manage_license') && <LicencePanel institutionId={inst.institution_id} />}
+      {can('manage_institution_settings') && <AiPanel institutionId={inst.institution_id} />}
     </div>
   )
 }

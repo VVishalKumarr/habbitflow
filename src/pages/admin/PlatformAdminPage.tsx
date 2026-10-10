@@ -12,6 +12,7 @@ import { supabase } from '../../lib/supabase'
 import { unwrap, useLoad } from '../../lib/useLoad'
 import { useInstitutionStore } from '../../store/institution'
 import { toast } from '../../store/ui'
+import { AiTab } from './AiAdmin'
 import { AccountsTab, CodesTab, LicenceHistoryTab, LicencesTab, PlansTab } from './LicensingAdmin'
 
 const TABS = [
@@ -19,6 +20,7 @@ const TABS = [
   ['codes', 'Codes'],
   ['licences', 'Licences'],
   ['plans', 'Plans'],
+  ['ai', 'AI'],
   ['accounts', 'Accounts'],
   ['history', 'History'],
 ] as const
@@ -95,6 +97,7 @@ export default function PlatformAdminPage() {
       {tab === 'codes' && <CodesTab institutions={(list.data ?? []).map((i) => ({ id: i.id, name: i.name }))} />}
       {tab === 'licences' && <LicencesTab />}
       {tab === 'plans' && <PlansTab />}
+      {tab === 'ai' && <AiTab />}
       {tab === 'accounts' && <AccountsTab />}
       {tab === 'history' && <LicenceHistoryTab />}
       {tab === 'institutions' && <ErrorNote>{list.error}</ErrorNote>}

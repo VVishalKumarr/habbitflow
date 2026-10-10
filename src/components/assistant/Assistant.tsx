@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { contextHint, searchHelp, type HelpArticle } from '../../content/help'
 import { aiConfig } from '../../config'
 import { analytics, cleanPath } from '../../lib/analytics'
+import { quotaMessage, QUOTA_CODES } from '../../lib/aiQuota'
 import { callFunction, FunctionError } from '../../lib/functions'
 import { pushBackHandler } from '../../store/ui'
 import { Spinner } from '../ui/Spinner'
@@ -79,14 +80,17 @@ export function Assistant() {
     }
     setBusy(true)
     try {
-      const res = await callFunction<{ answer: string }>('assistant', { question: q, page: path, history })
+      // request_id: a retry of the same question is never charged twice
+      const res = await callFunction<{ answer: string }>('assistant', { question: q, page: path, history, request_id: crypto.randomUUID() })
       setMessages((m) => [...m, { role: 'assistant', content: res.answer }])
     } catch (e) {
       const err = e as FunctionError
-      // Not configured / unreachable / busy: answer from the help articles instead.
-      if (err.code !== 'rate_limited') setOffline(err.code === 'ai_not_configured' || err.status === 0 || err.status === 404)
+      // Limits: explain (and when they reset), then answer from the help articles.
+      // Not configured / unreachable: switch to the help articles for the session.
+      const limited = QUOTA_CODES.has(err.code ?? '')
+      if (!limited) setOffline(err.code === 'ai_not_configured' || err.status === 0 || err.status === 404)
       const fb = fallbackAnswer(q, path)
-      if (err.code === 'rate_limited') fb.content = `${err.message}\n\n${fb.content}`
+      if (limited) fb.content = `${quotaMessage(err)}\n\n${fb.content}`
       setMessages((m) => [...m, fb])
     } finally {
       setBusy(false)

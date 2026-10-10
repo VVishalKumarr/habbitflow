@@ -164,6 +164,16 @@ project and check, among others:
   for the institution it was issued for. Licences add features, never permissions.
 - `tests/licensing.test.mjs` (15 checks) and `tests/e2e-licensing.mjs` (10 steps).
 
+## AI quotas
+
+- Every AI request is checked and reserved server-side (`ai_begin`, per-user advisory
+  lock) before the model is called; clients can't call it, write `ai_usage` or change
+  limits, so refreshing, other devices or direct API calls can't bypass a limit.
+- Request size, answer length, hourly burst and monthly token caps limit cost and abuse.
+- No prompts or answers are stored; institution heads see per-student counts only, the
+  platform owner sees personal accounts by username and institution members only in totals.
+- `tests/ai-quota.test.mjs` (15 checks) and `tests/e2e-ai-quota.mjs` (7 steps).
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users
