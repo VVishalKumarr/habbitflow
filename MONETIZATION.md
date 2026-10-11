@@ -13,17 +13,17 @@ Nothing here charges anyone until you configure a provider.
 | Colour themes, no ads | — | ✓ | ✓ |
 | Focus sounds, CSV/PDF reports, leaderboards | — | — | ✓ |
 | AI timetable that asks your needs first (coming) | — | ✓ | ✓ |
-| Price in India | ₹0 | ₹49/mo · ₹399/yr | ₹99/mo · ₹799/yr |
-| Price elsewhere | $0 | $1.99/mo · $14.99/yr | $3.99/mo · $29.99/yr |
+| Price in India | ₹0 | ₹59/mo · ₹499/yr | ₹129/mo · ₹999/yr |
+| Price elsewhere | $0 | $2.49/mo · $19.99/yr | $4.99/mo · $39.99/yr |
 | Free trial | — | — | 7 days, once per account |
 
-Prices are placeholders. The middle plan makes Pro look like the better deal.
+Final prices (set 2026-10). The middle plan makes Pro look like the better deal.
 A user is entitled to the highest-ranked plan with an active subscription.
 
 ## Regional prices
 
 Each plan has `prices` per region in the smallest currency unit
-(`{"IN": {"currency": "INR", "monthly": 4900, "yearly": 39900}, "default": {"currency": "USD", ...}}`).
+(`{"IN": {"currency": "INR", "monthly": 5900, "yearly": 49900}, "default": {"currency": "USD", ...}}`).
 `default` applies to every region without its own entry. The website picks the region
 from the device time zone (India → `IN`) and visitors can switch on the pricing page
 (`src/lib/region.ts`). Google Play and the App Store set local prices themselves.

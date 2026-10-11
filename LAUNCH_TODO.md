@@ -6,7 +6,7 @@ Tick them off as you go. Details are in the linked docs.
 ## Soon
 - [ ] Delete the Supabase access token (supabase.com → Account → Access Tokens) and remove the
       `SUPABASE_ACCESS_TOKEN` line from `.env`. Create a new one when you next need database changes.
-- [ ] Decide final prices for Plus and Pro, in India and internationally (placeholders: Plus ₹49/$1.99, Pro ₹99/$3.99 a month) — [MONETIZATION.md](MONETIZATION.md#changing-prices-and-limits)
+- [x] Final prices set in Supabase: Plus ₹59/₹499 · $2.49/$19.99, Pro ₹129/₹999 · $4.99/$39.99 (monthly/yearly). Razorpay/Play plans must use the same amounts — [MONETIZATION.md](MONETIZATION.md#changing-prices-and-limits)
 
 ## Before telling the public
 - [ ] Buy a domain and move hosting to Cloudflare Pages (GitHub Pages doesn’t allow commercial sites) — [SETUP.md §9](SETUP.md#9-deploy-the-website)

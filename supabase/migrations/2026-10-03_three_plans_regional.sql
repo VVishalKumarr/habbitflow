@@ -16,7 +16,7 @@ alter table public.plans add column if not exists rank smallint not null default
 alter table public.plans add column if not exists prices jsonb not null default '{}'::jsonb;
 
 insert into public.plans (id, name, rank, price_monthly, price_yearly, trial_days, limits, features) values
-  ('plus', 'Plus', 1, 4900, 39900, 0,
+  ('plus', 'Plus', 1, 5900, 49900, 0,
    '{"trackers": null, "friends": 10, "history_days": null}',
    array['basic_statistics', 'unlimited_trackers', 'advanced_statistics', 'full_history', 'custom_themes', 'no_ads'])
 on conflict (id) do nothing;
@@ -28,9 +28,9 @@ update public.plans set rank = 2 where id = 'pro';
 -- Seed regional prices only where none are set yet.
 update public.plans set prices = '{"IN": {"currency": "INR", "monthly": 0, "yearly": 0}, "default": {"currency": "USD", "monthly": 0, "yearly": 0}}'
   where id = 'free' and prices = '{}'::jsonb;
-update public.plans set prices = '{"IN": {"currency": "INR", "monthly": 4900, "yearly": 39900}, "default": {"currency": "USD", "monthly": 199, "yearly": 1499}}'
+update public.plans set prices = '{"IN": {"currency": "INR", "monthly": 5900, "yearly": 49900}, "default": {"currency": "USD", "monthly": 249, "yearly": 1999}}'
   where id = 'plus' and prices = '{}'::jsonb;
-update public.plans set prices = '{"IN": {"currency": "INR", "monthly": 9900, "yearly": 79900}, "default": {"currency": "USD", "monthly": 399, "yearly": 2999}}'
+update public.plans set prices = '{"IN": {"currency": "INR", "monthly": 12900, "yearly": 99900}, "default": {"currency": "USD", "monthly": 499, "yearly": 3999}}'
   where id = 'pro' and prices = '{}'::jsonb;
 
 -- The highest-ranked plan with an active subscription, else 'free'.
