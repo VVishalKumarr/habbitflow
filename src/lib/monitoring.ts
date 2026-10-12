@@ -41,7 +41,7 @@ export async function initMonitoring(): Promise<void> {
     S.init({
       dsn: sentryConfig.dsn,
       environment: appConfig.environment,
-      release: `habitflow@${appConfig.release}`,
+      release: `habbitflow@${appConfig.release}`,
       tracesSampleRate: sentryConfig.tracesSampleRate,
       // Collect as little as possible: no user/IP info, cookies, headers, bodies or query strings.
       dataCollection: {

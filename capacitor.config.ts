@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.habitflow.app',
-  appName: 'HabitFlow',
+  appId: 'com.habbitflow.app',
+  appName: 'HabbitFlow',
   webDir: 'dist',
   android: {
     // Keep the WebView behind the status/navigation bars; the web app handles safe areas.

@@ -56,7 +56,7 @@ recovery email.
 ## Email (to do: needs your accounts)
 
 1. Create a Resend account, add and verify your domain (DNS records).
-2. `npx supabase secrets set RESEND_API_KEY=re_… EMAIL_FROM="HabitFlow <no-reply@yourdomain>" --project-ref <ref>`
+2. `npx supabase secrets set RESEND_API_KEY=re_… EMAIL_FROM="HabbitFlow <no-reply@yourdomain>" --project-ref <ref>`
    (the same secrets as password-reset emails, SETUP.md §4).
 3. Settings → Notifications → turn on Email for a kind → **Send a test notification** →
    check the inbox and **Recent emails and push** ("Sent"). Until then emails are recorded as
@@ -64,7 +64,7 @@ recovery email.
 
 ## Android app push (to do: needs Firebase)
 
-1. Firebase console → create a project → add an Android app with package `com.habitflow.app`
+1. Firebase console → create a project → add an Android app with package `com.habbitflow.app`
    (see `capacitor.config.ts`) → download **`google-services.json`** into `android/app/`.
 2. Project settings → Service accounts → **Generate new private key** →
    `npx supabase secrets set FCM_SERVICE_ACCOUNT="$(cat key.json)" --project-ref <ref>`.

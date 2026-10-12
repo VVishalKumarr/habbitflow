@@ -42,7 +42,7 @@ wake/sleep, best focus time, study time per day, activities to keep/drop, anythi
 cost nothing and appear instantly; the model decides the timetable from the answers and
 explains what it included and why (“choices”), and what couldn't fit (“impossible”).
 
-Already known and never asked: for students of a school using HabitFlow,
+Already known and never asked: for students of a school using HabbitFlow,
 `my_timetable_context()` supplies class periods (merged into “school” blocks), homework
 due in the next 3 weeks, exams and holidays in the next 6 weeks. Answers are saved in
 `timetable_preferences` and filled in next time.
@@ -89,7 +89,7 @@ using the current timetable and shows “I understood: …” with Confirm. Open
 Speech: push-to-talk microphone button. Web: the browser's Web Speech API (Chrome, Edge,
 Safari). Android: `@capacitor-community/speech-recognition` (adds the `RECORD_AUDIO`
 permission; asked the first time). Firefox has no speech recognition, so the mic button is
-hidden and typing works. Audio never reaches HabitFlow.
+hidden and typing works. Audio never reaches HabbitFlow.
 
 ## Saving, history, undo
 

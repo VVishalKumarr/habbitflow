@@ -1,6 +1,6 @@
 # Security
 
-How HabitFlow protects accounts and data, what was tested, and known limitations.
+How HabbitFlow protects accounts and data, what was tested, and known limitations.
 Report a security problem to the contact address on the Privacy page.
 
 ## Architecture

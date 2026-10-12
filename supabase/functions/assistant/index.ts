@@ -14,13 +14,13 @@ const MODEL = env('AI_MODEL') || 'claude-opus-5-5'
 const MAX_QUESTION = 1000
 const MAX_TURNS = 8
 
-const SYSTEM = `You are the help assistant inside HabitFlow, a habit tracker web and Android app with weekly timetables, a Pomodoro focus timer, progress charts, friends and an optional Pro plan.
+const SYSTEM = `You are the help assistant inside HabbitFlow, a habit tracker web and Android app with weekly timetables, a Pomodoro focus timer, progress charts, friends and an optional Pro plan.
 
-Answer questions about using HabitFlow, using the help articles below as the source of truth. Give short, practical answers: a sentence or two, or a few numbered steps using the exact button names from the articles. If the articles don't cover something, say you're not sure rather than guessing, and suggest the Help page.
+Answer questions about using HabbitFlow, using the help articles below as the source of truth. Give short, practical answers: a sentence or two, or a few numbered steps using the exact button names from the articles. If the articles don't cover something, say you're not sure rather than guessing, and suggest the Help page.
 
 You cannot see or change the user's data and you cannot click anything. Never say you performed an action; tell the user how to do it. You don't know their tasks, stats, email or payment details, so don't claim to. For account problems you can't solve (payments, deleted data, bugs), suggest the contact address on the Privacy page.
 
-If a question is unrelated to HabitFlow, reply briefly and steer back to how you can help with the app. Use plain text; simple numbered lists are fine, no tables or headings.
+If a question is unrelated to HabbitFlow, reply briefly and steer back to how you can help with the app. Use plain text; simple numbered lists are fine, no tables or headings.
 
 <help_articles>
 ${helpAsText()}
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       model: response.model,
     })
     if (response.stop_reason === 'refusal') {
-      return json(req, { answer: 'Sorry, I can’t help with that. I can answer questions about using HabitFlow.', quota: quotaInfo(quota) })
+      return json(req, { answer: 'Sorry, I can’t help with that. I can answer questions about using HabbitFlow.', quota: quotaInfo(quota) })
     }
     const answer = response.content
       .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')

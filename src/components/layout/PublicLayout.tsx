@@ -42,7 +42,7 @@ export function PublicLayout() {
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-surface/85 pt-safe backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
-          <Link to="/" aria-label="HabitFlow home" className="rounded-lg">
+          <Link to="/" aria-label="HabbitFlow home" className="rounded-lg">
             <Logo />
           </Link>
           <nav aria-label="Site" className="hidden items-center gap-1 md:flex">

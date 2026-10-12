@@ -52,7 +52,7 @@ export function CookieSettingsModal() {
       open={open}
       onClose={close}
       title="Privacy & Cookies"
-      subtitle="Choose which optional technologies HabitFlow may use on this device."
+      subtitle="Choose which optional technologies HabbitFlow may use on this device."
       footer={
         <>
           <button type="button" className="btn-secondary" onClick={() => save({ analytics: false, advertising: false })}>

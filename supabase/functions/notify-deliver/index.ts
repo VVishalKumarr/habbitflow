@@ -60,8 +60,8 @@ async function deliverEmail(d: Delivery): Promise<[string, string | null]> {
     await sendEmail(d.email!, d.title, renderEmail({
       heading: d.title,
       lines: d.body ? [d.body] : [],
-      button: { label: 'Open HabitFlow', url },
-      footer: `You get these emails because “${KIND_LABEL[d.kind] ?? d.kind}” email notifications are on. Change this in HabitFlow → Settings → Notifications.`,
+      button: { label: 'Open HabbitFlow', url },
+      footer: `You get these emails because “${KIND_LABEL[d.kind] ?? d.kind}” email notifications are on. Change this in HabbitFlow → Settings → Notifications.`,
     }))
     return ['sent', null]
   } catch (e) {

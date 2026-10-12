@@ -43,7 +43,7 @@ export async function exportCsv(from: ISODate, to: ISODate, username: string): P
       .join(','),
   )
   const csv = '﻿' + [header.map(csvCell).join(','), ...lines].join('\r\n')
-  await saveFile(`habitflow-${username}-${from}-to-${to}.csv`, new Blob([csv], { type: 'text/csv;charset=utf-8' }))
+  await saveFile(`habbitflow-${username}-${from}-to-${to}.csv`, new Blob([csv], { type: 'text/csv;charset=utf-8' }))
   return rows.length
 }
 
@@ -102,7 +102,7 @@ export async function exportPdf(opts: { trackerId: string; trackerName: string; 
   doc.setTextColor(...ink)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(20)
-  doc.text('HabitFlow progress report', M, (y += 16))
+  doc.text('HabbitFlow progress report', M, (y += 16))
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   doc.setTextColor(...muted)
@@ -211,5 +211,5 @@ export async function exportPdf(opts: { trackerId: string; trackerName: string; 
     doc.text('No scheduled tasks in this period.', M, y)
   }
 
-  await saveFile(`habitflow-report-${opts.from}-to-${opts.to}.pdf`, doc.output('blob'))
+  await saveFile(`habbitflow-report-${opts.from}-to-${opts.to}.pdf`, doc.output('blob'))
 }

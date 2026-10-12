@@ -170,7 +170,7 @@ export function PrivacyPage() {
           </p>
           <p>
             The timetable assistant sends {ai} only what each request needs: your command text; or your answers to the timetable questions; or your timetable’s activity names,
-            categories and times. For students of a school that uses HabitFlow it also sends class times and subjects, and homework and exam titles and dates. It never sends your name,
+            categories and times. For students of a school that uses HabbitFlow it also sends class times and subjects, and homework and exam titles and dates. It never sends your name,
             email, school name, marks or attendance. Voice commands are turned into text by your browser or phone; we never receive or store audio. We don’t store prompts or
             answers — only counts and token numbers for usage limits. {ai} does not use this data to train its models.
           </p>
@@ -189,7 +189,7 @@ export function PrivacyPage() {
       <section>
         <h2>Accounts provided by a school</h2>
         <p>
-          If you use HabitFlow through your school or college, your class teacher can see and change your personal timetable (time slots, activities and notes) if your school
+          If you use HabbitFlow through your school or college, your class teacher can see and change your personal timetable (time slots, activities and notes) if your school
           allows it. They can’t see which tasks you ticked, your streaks or your progress. You get a notification for every change, it’s listed in your timetable History
           with the teacher’s name, and you can undo it. Your school can switch this off.
         </p>

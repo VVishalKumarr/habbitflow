@@ -11,7 +11,7 @@ export async function saveJsonFile(filename: string, data: unknown): Promise<voi
   const text = JSON.stringify(data, null, 2)
   if (isNative) {
     const { uri } = await Filesystem.writeFile({ path: filename, data: text, directory: Directory.Cache, encoding: Encoding.UTF8 })
-    await Share.share({ title: 'HabitFlow export', url: uri, dialogTitle: 'Save or share your data' })
+    await Share.share({ title: 'HabbitFlow export', url: uri, dialogTitle: 'Save or share your data' })
     return
   }
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))

@@ -62,11 +62,11 @@ Deno.serve(async (req) => {
   try {
     await sendEmail(
       email,
-      'Confirm your HabitFlow recovery email',
+      'Confirm your HabbitFlow recovery email',
       renderEmail({
         heading: 'Confirm your recovery email',
         lines: [
-          `Someone (hopefully you) added this address as the recovery email for the HabitFlow account “${username}”.`,
+          `Someone (hopefully you) added this address as the recovery email for the HabbitFlow account “${username}”.`,
           'Confirm it so you can reset your password if you ever forget it. The link works once and expires in 24 hours.',
         ],
         button: { label: 'Confirm email', url: link },
@@ -76,14 +76,14 @@ Deno.serve(async (req) => {
     if (existing?.recovery_email && existing.email_verified_at && existing.recovery_email !== email) {
       await sendEmail(
         existing.recovery_email,
-        'Your HabitFlow recovery email is being changed',
+        'Your HabbitFlow recovery email is being changed',
         renderEmail({
           heading: 'Recovery email change requested',
           lines: [
-            `A new recovery email was requested for the HabitFlow account “${username}”.`,
+            `A new recovery email was requested for the HabbitFlow account “${username}”.`,
             'This address stays active until the new one is confirmed. If this wasn’t you, log in and change your password.',
           ],
-          footer: 'HabitFlow',
+          footer: 'HabbitFlow',
         }),
       ).catch((e) => console.error('notice email failed', String(e)))
     }

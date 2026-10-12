@@ -1,4 +1,4 @@
-// Shared helpers for HabitFlow Edge Functions (Deno).
+// Shared helpers for HabbitFlow Edge Functions (Deno).
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2'
 
 const allowed = (Deno.env.get('ALLOWED_ORIGINS') ?? '')

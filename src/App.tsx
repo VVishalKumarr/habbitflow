@@ -159,7 +159,7 @@ function PomodoroRunner() {
   }, [])
 
   useEffect(() => {
-    const base = 'HabitFlow — Habit Tracker'
+    const base = 'HabbitFlow — Habit Tracker'
     document.title = running ? `${formatClock(remaining)} · ${MODE_LABEL[mode]} — ${base}` : base
   }, [running, remaining, mode])
 

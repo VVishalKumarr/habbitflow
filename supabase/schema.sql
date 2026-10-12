@@ -1,5 +1,5 @@
 -- =====================================================================
--- HabitFlow database schema (Supabase / PostgreSQL)
+-- HabbitFlow database schema (Supabase / PostgreSQL)
 --
 -- Security model
 --  * Accounts live in Supabase Auth (auth.users). Passwords are hashed
@@ -10311,7 +10311,7 @@ begin
     raise exception 'You can send 5 test notifications an hour.';
   end if;
   insert into public.notifications (user_id, kind, title, body, link)
-  values (auth.uid(), 'test', 'Test notification', 'Notifications from HabitFlow reach you here.', '/settings');
+  values (auth.uid(), 'test', 'Test notification', 'Notifications from HabbitFlow reach you here.', '/settings');
 end;
 $$;
 revoke execute on function public.send_test_notification() from public, anon;

@@ -86,11 +86,11 @@ export async function disableWebPush(): Promise<void> {
 export async function enableAndroidPush(): Promise<void> {
   const { PushNotifications } = await import('@capacitor/push-notifications')
   const perm = await PushNotifications.requestPermissions()
-  if (perm.receive !== 'granted') throw new Error('Notifications are turned off for HabitFlow in Android settings.')
+  if (perm.receive !== 'granted') throw new Error('Notifications are turned off for HabbitFlow in Android settings.')
   await PushNotifications.createChannel({ id: 'default', name: 'Notifications', importance: 4 }).catch(() => {})
   await new Promise<void>((resolve, reject) => {
     PushNotifications.addListener('registration', async ({ value }) => {
-      const { error } = await supabase.rpc('register_push_subscription', { p_kind: 'fcm', p_endpoint: value, p_p256dh: null, p_auth: null, p_label: 'HabitFlow app on Android' })
+      const { error } = await supabase.rpc('register_push_subscription', { p_kind: 'fcm', p_endpoint: value, p_p256dh: null, p_auth: null, p_label: 'HabbitFlow app on Android' })
       if (error) reject(error)
       else resolve()
     })

@@ -92,7 +92,7 @@ async function exportAll(username: string) {
   ])
   for (const r of [trackers, slots, tasks, completions, pomodoro]) if (r.error) throw r.error
   const data = {
-    app: 'HabitFlow',
+    app: 'HabbitFlow',
     exported_at: new Date().toISOString(),
     username,
     trackers: (trackers.data ?? []).map((t) => ({
@@ -103,7 +103,7 @@ async function exportAll(username: string) {
     completions: completions.data,
     pomodoro_sessions: pomodoro.data,
   }
-  await saveJsonFile(`habitflow-${username}-${todayISO()}.json`, data)
+  await saveJsonFile(`habbitflow-${username}-${todayISO()}.json`, data)
 }
 
 const ACCENTS: { value: AccentTheme; label: string; swatch: string }[] = [
@@ -481,7 +481,7 @@ export default function SettingsPage() {
 
       {appConfig.supportUrl && (
         <Section title={appConfig.supportLabel}>
-          <Row label="Enjoying HabitFlow?" hint="It’s built by an independent developer. Support is optional and doesn’t change your plan.">
+          <Row label="Enjoying HabbitFlow?" hint="It’s built by an independent developer. Support is optional and doesn’t change your plan.">
             <a href={appConfig.supportUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">
               <Heart className="size-4" aria-hidden="true" />
               {appConfig.supportLabel}

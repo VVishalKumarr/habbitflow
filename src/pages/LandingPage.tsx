@@ -22,15 +22,15 @@ const STEPS = [
 ]
 
 const FAQ = [
-  ['Is HabitFlow free?', 'Yes. The free plan covers the timetable, check-offs, streaks, the focus timer and friends. Plus and Pro are optional upgrades.'],
+  ['Is HabbitFlow free?', 'Yes. The free plan covers the timetable, check-offs, streaks, the focus timer and friends. Plus and Pro are optional upgrades.'],
   ['Do I need an email address?', 'No — just a username and password. Adding a recovery email is optional, but without one a forgotten password can’t be reset.'],
-  ['Is there a phone app?', 'HabitFlow works in any browser on phones, tablets and computers, and there is an Android app build.'],
+  ['Is there a phone app?', 'HabbitFlow works in any browser on phones, tablets and computers, and there is an Android app build.'],
   ['Can friends see my tasks?', 'No. Friends only see daily totals such as completion percentage and focus minutes, and you can switch even that off.'],
   ['Can I export my data?', 'Every account can download all its data as JSON from Settings. Pro adds CSV and PDF reports.'],
 ]
 
 const SHOTS = [
-  { src: `${base}landing/dashboard.jpg`, alt: 'HabitFlow dashboard with a weekly timetable of tasks in time slots', caption: 'Your week at a glance' },
+  { src: `${base}landing/dashboard.jpg`, alt: 'HabbitFlow dashboard with a weekly timetable of tasks in time slots', caption: 'Your week at a glance' },
   { src: `${base}landing/progress.jpg`, alt: 'Progress page with completion statistics, a weekly bar chart and a trend line', caption: 'Progress you can see' },
   { src: `${base}landing/focus.jpg`, alt: 'Focus timer counting down a named Pomodoro session', caption: 'Focus sessions' },
 ]
@@ -59,7 +59,7 @@ export default function LandingPage() {
             </p>
             <h1 className="mt-5 text-4xl leading-[1.1] font-semibold tracking-tight sm:text-5xl">{appConfig.tagline}</h1>
             <p className="mt-5 max-w-xl text-lg text-muted">
-              HabitFlow turns your routine into a weekly timetable you can tick off, day by day — with streaks, charts and a focus timer to keep you going.
+              HabbitFlow turns your routine into a weekly timetable you can tick off, day by day — with streaks, charts and a focus timer to keep you going.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {primary}
@@ -207,7 +207,7 @@ export default function LandingPage() {
             <h2 id="support-title" className="text-xl font-semibold">
               {appConfig.supportLabel}
             </h2>
-            <p className="max-w-md text-muted">HabitFlow is built by an independent developer. If it helps you, you can chip in — completely optional.</p>
+            <p className="max-w-md text-muted">HabbitFlow is built by an independent developer. If it helps you, you can chip in — completely optional.</p>
             <a href={appConfig.supportUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-2">
               {appConfig.supportLabel}
             </a>

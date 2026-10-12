@@ -229,7 +229,7 @@ export function CommandBar({ trackerId }: { trackerId: string | null }) {
           {busy ? <Spinner className="size-4" /> : <Send className="size-4" aria-hidden="true" />}
         </button>
       </form>
-      {listening && <p className="text-xs text-muted" role="status">Listening — tap the square to stop. Audio isn’t sent to HabitFlow.</p>}
+      {listening && <p className="text-xs text-muted" role="status">Listening — tap the square to stop. Audio isn’t sent to HabbitFlow.</p>}
       {speech.error && <p className="text-sm text-danger" role="alert">{speech.error}</p>}
       {note && <p className="rounded-xl bg-subtle px-3.5 py-2.5 text-sm" role="status">{note}</p>}
       {plan && (

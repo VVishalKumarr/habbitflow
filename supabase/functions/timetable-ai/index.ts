@@ -159,7 +159,7 @@ function cleanAnswers(raw: unknown): Answers {
 }
 
 // ---------------------------------------------------------------------------
-const GENERATE_SYSTEM = `You build weekly personal timetables for students in HabitFlow, a habit tracker.
+const GENERATE_SYSTEM = `You build weekly personal timetables for students in HabbitFlow, a habit tracker.
 
 The timetable is a grid: a list of time slots (rows, the same for every day of the week, never overlapping) and activities placed in a (slot, day) cell. Days are numbers: 0 = Sunday … 6 = Saturday. Times are 24-hour "HH:MM".
 
@@ -195,7 +195,7 @@ const GENERATE_SCHEMA: Json = {
   },
 }
 
-const EVALUATE_SYSTEM = `You review a student's weekly timetable in HabitFlow and give short, kind, practical advice.
+const EVALUATE_SYSTEM = `You review a student's weekly timetable in HabbitFlow and give short, kind, practical advice.
 
 You get the timetable, numbers already computed by the app (minutes per category and per day) and findings the app detected. Don't recalculate or contradict the numbers. Base advice on them: overloaded days, missing breaks, late nights, clashes with school, exams without revision, unused time. Suggest concrete changes ("Move Thursday's 21:00 study to the free 17:00 slot"). Never praise a schedule that leaves no time for sleep, meals or rest. Plain language for a teenager; no headings.
 
@@ -211,7 +211,7 @@ const EVALUATE_SCHEMA: Json = {
   },
 }
 
-const RESCHEDULE_SYSTEM = `You help a student in HabitFlow move activities that an event displaces in their weekly timetable.
+const RESCHEDULE_SYSTEM = `You help a student in HabbitFlow move activities that an event displaces in their weekly timetable.
 
 You get the event, the displaced activities and the free cells (ids) they could move to. For each displaced activity choose one free cell id, or null to leave it where it is. Use each cell at most once. Prefer: the same time on a nearby day, keeping study before the related deadline/exam, not stacking more than about 2 hours back to back, not making one day much heavier than others, and not late at night. "explanation": one or two sentences on the overall plan. Each "reason" is a few words.`
 
@@ -228,7 +228,7 @@ const RESCHEDULE_SCHEMA: Json = {
   },
 }
 
-const COMMAND_SYSTEM = `You turn one short spoken or typed instruction from a student into exactly one HabitFlow action. You never perform it; the app shows it to the student to confirm.
+const COMMAND_SYSTEM = `You turn one short spoken or typed instruction from a student into exactly one HabbitFlow action. You never perform it; the app shows it to the student to confirm.
 
 Actions (fill every field of the chosen action; days are 0 = Sunday … 6 = Saturday, resolve "today", "tomorrow", weekday names from the date given; times are 24-hour "HH:MM"):
 - add_task: add a weekly activity. title, day, start, end (if no end is said, one hour after start), category (study, exercise, work, personal, other).

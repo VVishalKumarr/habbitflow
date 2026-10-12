@@ -69,7 +69,7 @@ export default function SchoolLayout() {
           message={
             blocked
               ? blocked.institution_status !== 'active'
-                ? `${blocked.name} isn’t active on HabitFlow right now. Your records are kept safely.`
+                ? `${blocked.name} isn’t active on HabbitFlow right now. Your records are kept safely.`
                 : `Your access to ${blocked.name} has been ${blocked.status}. Contact your institution’s office if you think this is a mistake.`
               : 'Your account isn’t linked to a school, college or coaching centre. Institutions send an activation email to approved addresses.'
           }

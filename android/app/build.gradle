@@ -1,9 +1,9 @@
 apply plugin: 'com.android.application'
 
 // Release signing: create android/keystore.properties (git-ignored) with
-//   storeFile=../habitflow-release.jks
+//   storeFile=../habbitflow-release.jks
 //   storePassword=…
-//   keyAlias=habitflow
+//   keyAlias=habbitflow
 //   keyPassword=…
 // Without it, release builds are unsigned (debug builds are unaffected).
 def keystorePropsFile = rootProject.file('keystore.properties')
@@ -11,10 +11,10 @@ def keystoreProps = new Properties()
 if (keystorePropsFile.exists()) keystoreProps.load(new FileInputStream(keystorePropsFile))
 
 android {
-    namespace = "com.habitflow.app"
+    namespace = "com.habbitflow.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.habitflow.app"
+        applicationId "com.habbitflow.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 3

@@ -1,6 +1,6 @@
 // Push-to-talk speech → text. Recognition runs in the browser (Web Speech
 // API) or on the phone (Android speech service via the Capacitor plugin);
-// HabitFlow never receives or stores audio, only the recognised text.
+// HabbitFlow never receives or stores audio, only the recognised text.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { isNative } from './native'
 

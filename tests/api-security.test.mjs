@@ -29,7 +29,7 @@ async function signUp(username, password = 'correct-horse-9') {
   return { c, id: data.user.id }
 }
 
-console.log('HabitFlow backend tests')
+console.log('HabbitFlow backend tests')
 const alice = await signUp(`alice_${suffix}`)
 const bob = await signUp(`bob_${suffix}`)
 let aTracker, aSlot, aTask

@@ -100,9 +100,9 @@ Google Play requires digital subscriptions sold in the app to use Play Billing, 
 Android app never shows the web checkout (it shows “not available in the app yet”).
 To enable:
 
-1. Play Console → Monetize → Subscriptions: create `habitflow_pro` with monthly/yearly
-   base plans. `update public.plans set google_play_product_id = 'habitflow_pro' where id='pro';`
-   and `VITE_GOOGLE_PLAY_PRODUCT_ID=habitflow_pro`.
+1. Play Console → Monetize → Subscriptions: create `habbitflow_pro` with monthly/yearly
+   base plans. `update public.plans set google_play_product_id = 'habbitflow_pro' where id='pro';`
+   and `VITE_GOOGLE_PLAY_PRODUCT_ID=habbitflow_pro`.
 2. Google Cloud: service account with access to the Play Developer API; grant it
    “View financial data / Manage orders” in Play Console → Users & permissions. Put its
    JSON (one line) in `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, and set `GOOGLE_PLAY_PACKAGE_NAME`.

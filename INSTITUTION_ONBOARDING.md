@@ -3,7 +3,7 @@
 ## 0. One-time: make yourself platform owner
 
 The platform owner role is granted only with SQL (there is no button for it, so it
-can’t be granted by mistake or by an attacker). Sign up a normal HabitFlow account
+can’t be granted by mistake or by an attacker). Sign up a normal HabbitFlow account
 for yourself first, then run (Supabase dashboard → SQL editor, or
 `node --env-file=.env scripts/db-apply.mjs --query "…"`):
 
@@ -49,8 +49,8 @@ password and land in **School**. From then on they sign in at
 
 - Links are 32 random bytes, stored only as a SHA-256 hash, work once, and stop
   working when resent or withdrawn.
-- Passwords are never emailed or stored by HabitFlow (Supabase Auth hashes them).
-- An address that already has a HabitFlow institutional account (e.g. a teacher at
+- Passwords are never emailed or stored by HabbitFlow (Supabase Auth hashes them).
+- An address that already has a HabbitFlow institutional account (e.g. a teacher at
   two institutions) is asked to sign in and accept instead.
 
 ### Before email is configured

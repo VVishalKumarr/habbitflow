@@ -1,4 +1,4 @@
-// HabitFlow service worker: push notifications only. It doesn't cache or
+// HabbitFlow service worker: push notifications only. It doesn't cache or
 // intercept page requests. Registered when someone turns on push in
 // Settings → Notifications.
 self.addEventListener('install', () => self.skipWaiting())
@@ -9,11 +9,11 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data ? event.data.json() : {}
   } catch {
-    data = { title: 'HabitFlow', body: event.data ? event.data.text() : '' }
+    data = { title: 'HabbitFlow', body: event.data ? event.data.text() : '' }
   }
   const scope = self.registration.scope
   event.waitUntil(
-    self.registration.showNotification(data.title || 'HabitFlow', {
+    self.registration.showNotification(data.title || 'HabbitFlow', {
       body: data.body || '',
       icon: new URL('favicon.svg', scope).href,
       badge: new URL('favicon.svg', scope).href,

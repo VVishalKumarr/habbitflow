@@ -140,7 +140,7 @@ export function Assistant() {
               <h2 id="assistant-title" className="text-sm font-semibold">
                 AI Assistant
               </h2>
-              <p className="text-xs text-muted">{offline ? 'Answering from the help articles' : 'Answers questions about using HabitFlow'}</p>
+              <p className="text-xs text-muted">{offline ? 'Answering from the help articles' : 'Answers questions about using HabbitFlow'}</p>
             </div>
             <button type="button" className="icon-btn size-9" onClick={() => setOpen(false)} aria-label="Close assistant">
               <X className="size-[18px]" aria-hidden="true" />

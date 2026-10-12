@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // The site uses real paths (/dashboard, /help/…), so assets need an absolute base:
 //   '/'           – local dev, Capacitor (Android), a custom domain
-//   '/habitflow/' – GitHub Pages project site (set VITE_BASE_PATH in the workflow)
+//   '/habbitflow/' – GitHub Pages project site (set VITE_BASE_PATH in the workflow)
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const base = (process.env.VITE_BASE_PATH || env.VITE_BASE_PATH || '/').replace(/\/?$/, '/')

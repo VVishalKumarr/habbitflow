@@ -288,14 +288,14 @@ export const HELP_ARTICLES: HelpArticle[] = [
           '- “Mark reading done”',
           '- “What’s due this week?”',
           '- “Open my progress”',
-          'Speech is turned into text by your browser or phone; HabitFlow never receives audio. If the AI is unavailable or you’ve used your allowance, common commands still work.',
+          'Speech is turned into text by your browser or phone; HabbitFlow never receives audio. If the AI is unavailable or you’ve used your allowance, common commands still work.',
         ],
       },
       {
         heading: 'Build with AI (Plus and Pro)',
         body: [
           '1. Click “Build with AI”.',
-          '2. Answer a few questions — your goals, subjects that need more time, fixed commitments, sleep times, when you focus best. Skip anything you like. If your school uses HabitFlow, your class timetable, homework deadlines and exams are filled in automatically.',
+          '2. Answer a few questions — your goals, subjects that need more time, fixed commitments, sleep times, when you focus best. Skip anything you like. If your school uses HabbitFlow, your class timetable, homework deadlines and exams are filled in automatically.',
           '3. Click “Build my timetable”. The AI explains what it included and why, and anything that didn’t fit.',
           '4. Click “Save as new timetable”. Your existing timetables aren’t changed. Your answers are saved for next time.',
         ],
@@ -337,7 +337,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       {
         heading: 'Your development score',
         body: [
-          'If your school uses HabitFlow, your Overview shows “Your development”: a score from 1 to 10 for the last 90 days, built from academic results, homework, attendance, planning & habits and extracurricular activities. Open your report to see each part, why it is what it is, and suggestions.',
+          'If your school uses HabbitFlow, your Overview shows “Your development”: a score from 1 to 10 for the last 90 days, built from academic results, homework, attendance, planning & habits and extracurricular activities. Open your report to see each part, why it is what it is, and suggestions.',
           'Parts without enough data are left out instead of counting as zero. Very long or late-night schedules are not rewarded.',
           'Planning & habits only counts if you tick “Share my habit consistency with my school”. Your teachers then see counts only, never your tasks or ticks.',
         ],
@@ -354,7 +354,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
   },
   {
-    slug: 'habitflow-pro',
+    slug: 'habbitflow-pro',
     title: 'Plans: Free, Plus and Pro',
     description: 'What each plan includes, how to upgrade and how to cancel.',
     keywords: ['pro', 'plus', 'upgrade', 'price', 'pricing', 'plan', 'plans', 'subscription', 'cancel', 'trial', 'export', 'csv', 'pdf', 'themes', 'ads'],
@@ -394,7 +394,7 @@ export function contextHint(path: string): string {
   if (path.startsWith('/friends')) return 'I can help you add friends, compare progress or understand what friends can see.'
   if (path.startsWith('/settings')) return 'I can help you change your username, recovery email, appearance or account settings.'
   if (path.startsWith('/pro')) return 'I can explain what Pro includes and how upgrading works.'
-  return 'Ask me anything about using HabitFlow.'
+  return 'Ask me anything about using HabbitFlow.'
 }
 
 /** Plain-text version of all articles (for the AI system prompt). */

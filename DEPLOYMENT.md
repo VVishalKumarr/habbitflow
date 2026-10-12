@@ -1,10 +1,10 @@
 # Deployment
 
-HabitFlow has three parts: the **website** (static files), the **Supabase project**
+HabbitFlow has three parts: the **website** (static files), the **Supabase project**
 (database, auth, Edge Functions, scheduled jobs) and the **Android app** (see
 [ANDROID_BUILD.md](ANDROID_BUILD.md)). This page covers the first two.
 
-Current production: site https://vvishalkumarr.github.io/habitflow/ (GitHub Pages),
+Current production: site https://vvishalkumarr.github.io/habbitflow/ (GitHub Pages),
 Supabase project `udugejhizotqfmzqpnzf`.
 
 ## 1. Database
@@ -92,7 +92,7 @@ Build: `npm run build` → `dist/` (static). Environment (`VITE_*`, all public):
 | Variable | |
 |---|---|
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | required |
-| `VITE_BASE_PATH` | `/habitflow/` on GitHub Pages, `/` on your own domain and in the Android app |
+| `VITE_BASE_PATH` | `/habbitflow/` on GitHub Pages, `/` on your own domain and in the Android app |
 | `VITE_LEGAL_*`, `VITE_AI_PROVIDER`, analytics, Sentry, ads, payments, `VITE_SUPPORT_URL` | optional, see SETUP.md / PRIVACY_SETUP.md / MONETIZATION.md |
 
 **GitHub Pages (now):** pushing to `main` runs `.github/workflows/deploy.yml` with the

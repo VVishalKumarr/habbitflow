@@ -93,11 +93,11 @@ async function sendLink(loginEmail: string, to: string, accountName: string): Pr
     const link = `${siteUrl()}/reset-password?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=recovery`
     await sendEmail(
       to,
-      'Reset your HabitFlow password',
+      'Reset your HabbitFlow password',
       renderEmail({
         heading: 'Reset your password',
         lines: [
-          `We received a request to reset the password for the HabitFlow account “${accountName}”.`,
+          `We received a request to reset the password for the HabbitFlow account “${accountName}”.`,
           'This link works once and expires in 1 hour.',
         ],
         button: { label: 'Choose a new password', url: link },

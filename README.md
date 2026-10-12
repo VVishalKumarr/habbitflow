@@ -1,4 +1,4 @@
-# HabitFlow — habit tracker, weekly timetable and school platform
+# HabbitFlow — habit tracker, weekly timetable and school platform
 
 One codebase that ships as a **website** and an **Android app** (Capacitor):
 
@@ -6,7 +6,7 @@ One codebase that ships as a **website** and an **Android app** (Capacitor):
 - a platform for **schools, colleges and coaching centres**: staff, students and parents,
   homework, attendance, marks, timetables, reports — each institution isolated from the others.
 
-- **Live site:** https://vvishalkumarr.github.io/habitflow/
+- **Live site:** https://vvishalkumarr.github.io/habbitflow/
 - **Backend:** Supabase (Postgres with Row Level Security, Auth, Edge Functions, pg_cron)
 - **Status / what's done and what needs your accounts:** [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md) · [LAUNCH_TODO.md](LAUNCH_TODO.md)
 
