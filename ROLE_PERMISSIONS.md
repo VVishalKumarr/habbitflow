@@ -65,8 +65,9 @@ per role in **School → Settings → Role permissions**. Overrides are stored i
 
 ### Parent links and messages
 
-- A **student** starts a link (parent’s email, name, relationship). It is approved by
-  the student’s **class teacher** or anyone with `manage_students`, then activated by
+- A **student** starts a link (parent’s email, name, relationship) — nobody else can,
+  parents included. It is approved by the student’s **class teacher** (of a current,
+  non-archived class) or anyone with `manage_students`, then activated by
   the parent through a one-time email link. The student, approver or a head can revoke
   it with a reason; access stops immediately.
 - **Parents** can message their child’s class teacher, subject teachers, in-scope
@@ -83,13 +84,41 @@ per role in **School → Settings → Role permissions**. Overrides are stored i
   Institution-wide calendar events need an “all grades” (`*`) scope.
 - **Class / subject teachers** see a class only if they are its class teacher or
   teach a subject in it, and see only the students enrolled in those classes.
+- **Subject scope** (`can_view_subject()`): academic records — assessments, marks,
+  homework submissions and reviews, and the summaries, progress counts, exports and
+  study insights built from them — are visible to a **subject teacher only for the
+  subjects they teach** in that class. Class teachers see every subject of their own
+  class, coordinators every subject in their grades, heads everything. Assignment titles
+  and deadlines stay visible to all teachers of the class (the cross-subject deadline
+  calendar needs them); attendance is class-wide.
 - **Assignments** can be created only for a (class, subject) the teacher is
   assigned to. Students see only *published* assignments of their own classes.
 - **Deadline changes** proposed by anyone are applied only when the
   assignment’s teacher, or a head/coordinator with `approve_deadline_changes`,
   approves them.
 - **Nobody can change their own role or access**; role changes are only
-  between coordinator / class teacher / subject teacher.
+  between coordinator / class teacher / subject teacher and need `manage_staff`, which
+  only the principal or director can hold. So **only a principal or director can make
+  or remove a coordinator**. Coordinators assign subject teachers to classes in their
+  grades (`manage_classes`); class and subject teachers can't, unless a head grants their
+  role `manage_classes`. A role change records who, when, old and new role and a
+  reason in the audit history, and notifies the person. Refused attempts are written to
+  the database log (`access_denied` lines in Supabase → Logs → Postgres).
 - **Removing** someone means suspending or revoking their membership: they are
   signed out everywhere, their institutional data access stops immediately, and
   academic records are kept.
+
+## Study insights
+
+| Who | Sees |
+|---|---|
+| Student | All their subjects: status, reasons, recent results, suggested time; their own confidence ratings and study plan |
+| Subject teacher | Only the subjects they teach, for students in those classes (School → Study insights) |
+| Class teacher / coordinator / head | Every subject of the classes they can see |
+| Linked parent | A summary per subject (status and reasons, no individual results or self-ratings) |
+| Platform owner, other schools, other students | Nothing |
+
+Only heads (`manage_institution_settings`) change the rules (School → Settings → Study
+insights). Study plans change only the student's own personal timetable, only its study
+sessions, and only when the student saves them (or has chosen automatic mode); nobody at
+school sees the personal timetable through this feature.

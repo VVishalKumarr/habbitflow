@@ -1,6 +1,6 @@
 // Transactional email via Resend (https://resend.com). Configure with the
 // RESEND_API_KEY and EMAIL_FROM function secrets. EMAIL_FROM must use a
-// domain you have verified in Resend, e.g. "HabbitFlow <no-reply@yourdomain.com>".
+// domain you have verified in Resend, e.g. "HabbitFlows <no-reply@yourdomain.com>".
 import { env } from './http.ts'
 
 export const emailConfigured = () => Boolean(env('RESEND_API_KEY') && env('EMAIL_FROM'))

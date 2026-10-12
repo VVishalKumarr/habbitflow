@@ -33,7 +33,7 @@ function footer(doc: Doc) {
     doc.setPage(i)
     doc.setFontSize(8)
     doc.setTextColor(...MUTED)
-    doc.text(`HabbitFlow · generated ${new Date().toLocaleString()} · page ${i} of ${pages}`, 40, 820)
+    doc.text(`HabbitFlows · generated ${new Date().toLocaleString()} · page ${i} of ${pages}`, 40, 820)
   }
 }
 

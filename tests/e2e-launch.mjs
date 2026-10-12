@@ -67,9 +67,9 @@ await step('landing page is public with CTAs and pricing from the database', asy
   await page.getByRole('heading', { name: /Plan your week/ }).waitFor()
   await page.getByRole('link', { name: 'Create Free Account' }).first().waitFor()
   await page.getByRole('link', { name: 'Login' }).first().waitFor()
-  await page.getByText('₹999').first().waitFor({ timeout: 10000 })
+  await page.getByText('₹899').first().waitFor({ timeout: 10000 })
   await page.getByRole('radio', { name: 'Monthly' }).first().click()
-  await page.getByText('₹129').first().waitFor()
+  await page.getByText('₹199').first().waitFor()
   await page.screenshot({ path: `${SHOTS}/landing-1440.png`, fullPage: true })
 })
 
@@ -235,7 +235,7 @@ await step('Pro page: start free trial (server-side), plan shows everywhere', as
   await page.getByRole('link', { name: 'Upgrade' }).click()
   await page.getByRole('heading', { name: 'Choose your plan' }).waitFor()
   await page.getByRole('heading', { name: 'Plus', exact: true }).waitFor()
-  await page.getByText('₹499').first().waitFor() // Plus, yearly (default)
+  await page.getByText('₹899').first().waitFor() // Plus, yearly (default)
   await page.getByText('Online payments aren’t available yet.').waitFor() // no fake checkout
   await page.getByRole('button', { name: /Start 7-day free trial/ }).click()
   await toast('Your Pro trial has started.')

@@ -1,4 +1,4 @@
-import { Award, BarChart3, BookOpenCheck, FileUp, Sprout, Building2, CalendarCheck, CalendarDays, ClipboardList, HeartHandshake, History, LayoutGrid, Megaphone, MessageSquare, Settings2, ShieldAlert, Target, Users } from 'lucide-react'
+import { Award, BarChart3, BookOpenCheck, FileUp, Lightbulb, Sprout, Building2, CalendarCheck, CalendarDays, ClipboardList, HeartHandshake, History, LayoutGrid, Megaphone, MessageSquare, Settings2, ShieldAlert, Target, Users } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/EmptyState'
@@ -25,6 +25,7 @@ const ITEMS: Item[] = [
   { to: '/school/announcements', label: 'Announcements', icon: Megaphone, show: () => true },
   { to: '/school/messages', label: 'Messages', icon: MessageSquare, show: (m) => m.role === 'parent' || isStaff(m.role) },
   { to: '/school/goals', label: 'Goals', icon: Target, show: (m) => m.role === 'student' },
+  { to: '/school/study', label: 'Study insights', icon: Lightbulb, show: (m) => m.role === 'student' || isStaff(m.role) },
   { to: '/school/programmes', label: 'Programmes', icon: Sprout, show: notParent },
   { to: '/school/reports', label: 'Reports', icon: BarChart3, show: (m, can) => isStaff(m.role) && (can('view_reports') || can('import_export')) },
   {
@@ -69,7 +70,7 @@ export default function SchoolLayout() {
           message={
             blocked
               ? blocked.institution_status !== 'active'
-                ? `${blocked.name} isn’t active on HabbitFlow right now. Your records are kept safely.`
+                ? `${blocked.name} isn’t active on HabbitFlows right now. Your records are kept safely.`
                 : `Your access to ${blocked.name} has been ${blocked.status}. Contact your institution’s office if you think this is a mistake.`
               : 'Your account isn’t linked to a school, college or coaching centre. Institutions send an activation email to approved addresses.'
           }

@@ -5,7 +5,7 @@ you still need to do by hand.
 
 ## Already in place
 
-- [x] Application id `com.habbitflow.app`, app name “HabbitFlow” (`capacitor.config.ts`, `android/app/build.gradle`)
+- [x] Application id `com.habbitflows.app`, app name “HabbitFlows” (`capacitor.config.ts`, `android/app/build.gradle`)
 - [x] App icon (check mark) and splash screen resources
 - [x] Permissions: `INTERNET`, `ACCESS_NETWORK_STATE`; `RECORD_AUDIO` (voice commands, asked on first use); notification permissions from the push plugin (asked only when push is enabled) — see [ANDROID_BUILD.md](ANDROID_BUILD.md#permissions-in-this-build)
 - [x] HTTPS only (`usesCleartextTraffic="false"`); Android backups disabled so login tokens aren’t copied off-device
@@ -21,7 +21,7 @@ you still need to do by hand.
 
 ### Account & listing
 - [ ] Google Play Console developer account (one-time US$25), identity verification
-- [ ] Decide if the name “HabbitFlow” is free to use (other apps use it; check trademarks)
+- [ ] Decide if the name “HabbitFlows” is free to use (other apps use it; check trademarks)
 - [ ] Store listing: short/full description, 512×512 icon, 1024×500 feature graphic,
       phone screenshots (use `screenshots/*-390.png` as a starting point), category (Productivity)
 - [ ] Contact email and website on the listing
@@ -33,7 +33,7 @@ you still need to do by hand.
 - [ ] **Data safety form**: collected = username, optional email, user content (tasks, focus
       sessions), app interactions (only if analytics on), crash logs (only if Sentry on),
       purchase history (if Pro). Encrypted in transit: yes. Deletion: yes. Microphone: speech is
-      recognised by the phone’s speech service — HabbitFlow doesn’t collect audio. Schools: names,
+      recognised by the phone’s speech service — HabbitFlows doesn’t collect audio. Schools: names,
       institutional email, homework files, attendance, marks (collected for the institution).
 - [ ] Content rating questionnaire; target audience (set a minimum age — see PRIVACY_SETUP.md)
 - [ ] Ads declaration (“contains ads” only once AdMob is integrated)
@@ -41,13 +41,13 @@ you still need to do by hand.
 ### Release build
 1. Create a keystore once and **back it up** (losing it means you can’t update the app):
    ```bash
-   keytool -genkey -v -keystore habbitflow-release.jks -alias habbitflow -keyalg RSA -keysize 2048 -validity 10000
+   keytool -genkey -v -keystore habbitflows-release.jks -alias habbitflows -keyalg RSA -keysize 2048 -validity 10000
    ```
 2. `android/keystore.properties`:
    ```
-   storeFile=../habbitflow-release.jks
+   storeFile=../habbitflows-release.jks
    storePassword=…
-   keyAlias=habbitflow
+   keyAlias=habbitflows
    keyPassword=…
    ```
 3. Build an App Bundle: `npm run cap:sync && cd android && gradlew.bat bundleRelease`

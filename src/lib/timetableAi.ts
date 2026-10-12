@@ -122,7 +122,7 @@ export async function timetableVersion(trackerId: string): Promise<string> {
   return data as string
 }
 
-export type ChangeSource = 'ai_generate' | 'ai_reschedule' | 'voice'
+export type ChangeSource = 'ai_generate' | 'ai_reschedule' | 'voice' | 'ai_study_plan'
 
 /** Saves a confirmed change in one transaction. trackerId null = new timetable named `name`. */
 export async function applyChange(trackerId: string | null, opts: { name?: string; base?: string | null; source: ChangeSource; summary: string; ops: Op[] }) {

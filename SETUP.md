@@ -1,6 +1,6 @@
 # Setup
 
-How to run HabbitFlow locally, configure every optional service, and deploy.
+How to run HabbitFlows locally, configure every optional service, and deploy.
 Anything you don't configure is simply switched off — the app keeps working.
 
 ## 1. Run locally
@@ -68,11 +68,11 @@ Without a secret, a function answers `503` with a clear code and the app falls b
 
 How it works: see [SECURITY.md](SECURITY.md#password-recovery). To switch it on:
 
-1. Own a domain (e.g. `habbitflow.app`).
+1. Own a domain (e.g. `habbitflows.app`).
 2. Create a free account at [resend.com](https://resend.com), add the domain and
    the DNS records it shows, wait until it’s verified.
 3. Create an API key and set the function secrets:
-   `RESEND_API_KEY`, `EMAIL_FROM="HabbitFlow <no-reply@habbitflow.app>"`,
+   `RESEND_API_KEY`, `EMAIL_FROM="HabbitFlows <no-reply@habbitflows.app>"`,
    `SITE_URL=https://your-site` (no trailing slash).
 4. Set `VITE_EMAIL_PROVIDER=Resend` so the Privacy Policy lists it.
 
@@ -119,7 +119,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 ## 9. Deploy the website
 
 **GitHub Pages (current):** push to `main`; `.github/workflows/deploy.yml` builds with
-`VITE_BASE_PATH=/habbitflow/`. Put every `VITE_*` value you use in
+`VITE_BASE_PATH=/habbitflows/`. Put every `VITE_*` value you use in
 *Settings → Secrets and variables → Actions → Variables*. Deep links work through `404.html`.
 
 **Custom domain / Cloudflare Pages (recommended for a commercial site):** GitHub Pages’

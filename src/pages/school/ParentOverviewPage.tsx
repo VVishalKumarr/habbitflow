@@ -2,6 +2,7 @@ import { Award, CalendarCheck, ClipboardList, MessageSquare, Users } from 'lucid
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { STATUS_LABEL, STATUS_TONE, type SubmissionStatus } from '../../components/school/Submissions'
+import { StudyInsightsSummary } from '../../components/school/StudyInsights'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row, Stat } from '../../components/school/ui'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { DAY_SHORT } from '../../lib/dates'
@@ -113,6 +114,8 @@ export default function ParentOverviewPage() {
             <Stat icon={CalendarCheck} label="Attendance (60 days)" value={recent.length ? `${Math.round((present / recent.length) * 100)}%` : '—'} hint={recent.length ? `${recent.length} sessions` : 'Nothing recorded'} tone="muted" />
             <Stat icon={Award} label="Average mark" value={avg === null ? '—' : `${avg.toFixed(0)}%`} hint={scored.length ? `${scored.length} published` : 'No marks yet'} tone="muted" />
           </div>
+
+          <StudyInsightsSummary key={v.student.id} studentId={v.student.id} />
 
           <div className="grid gap-5 xl:grid-cols-2">
             <Panel title="Homework and deadlines" description="Last 45 days and upcoming. Teachers decide when work is accepted.">

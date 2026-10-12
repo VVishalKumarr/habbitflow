@@ -45,9 +45,9 @@ try {
 
   await test('each plan gets its own limits; disabled features are refused', async () => {
     const free = await usage(u1.c, 'chat')
-    assert.equal(free.limit, 10)
+    assert.equal(free.limit, 5)
     assert.equal(free.used, 0)
-    assert.equal(free.period, 'day')
+    assert.equal(free.period, 'month')
     const gen = await usage(u1.c, 'timetable_generate')
     assert.equal(gen.enabled, false)
     assert.equal(gen.upgrade_available, true)
@@ -55,17 +55,17 @@ try {
     assert.equal(r.ok, false)
     assert.equal(r.code, 'feature_disabled')
     await one(u2.c.rpc('redeem_code', { p_code: await gift('plus') }))
-    assert.equal((await usage(u2.c, 'chat')).limit, 40)
-    assert.equal((await usage(u2.c, 'timetable_generate')).limit, 10)
+    assert.equal((await usage(u2.c, 'chat')).limit, 60)
+    assert.equal((await usage(u2.c, 'timetable_generate')).limit, 3)
     await one(u3.c.rpc('redeem_code', { p_code: await gift('pro') }))
-    assert.equal((await usage(u3.c, 'chat')).limit, 100)
+    assert.equal((await usage(u3.c, 'chat')).limit, 150)
   })
 
   await test('usage is per student: one student’s use never touches another’s', async () => {
-    await consume(u1.id, 'chat', 10)
+    await consume(u1.id, 'chat', 5)
     const r = await begin(u1.id)
     assert.equal(r.code, 'quota_exceeded')
-    assert.equal(r.limit, 10)
+    assert.equal(r.limit, 5)
     assert.ok(new Date(r.resets_at) > new Date())
     assert.equal((await usage(u1.c, 'chat')).remaining, 0)
     assert.equal((await usage(u4.c, 'chat')).used, 0)
@@ -92,7 +92,7 @@ try {
   })
 
   await test('quotas reset when the period ends', async () => {
-    await adminSql(`update public.ai_usage set period_start = period_start - interval '1 day', created_at = created_at - interval '1 day'
+    await adminSql(`update public.ai_usage set period_start = period_start - interval '1 month', created_at = created_at - interval '1 month'
                     where user_id = '${u1.id}' and feature = 'chat'`)
     assert.equal((await usage(u1.c, 'chat')).used, 0)
     const r = await begin(u1.id)
@@ -101,7 +101,7 @@ try {
   })
 
   await test('simultaneous requests can’t exceed the limit', async () => {
-    await consume(u4.id, 'chat', 10 - (await usage(u4.c, 'chat')).used - 3)
+    await consume(u4.id, 'chat', 5 - (await usage(u4.c, 'chat')).used - 3)
     assert.equal((await usage(u4.c, 'chat')).remaining, 3)
     const results = await Promise.all(Array.from({ length: 8 }, () => begin(u4.id)))
     assert.equal(results.filter((r) => r.ok).length, 3)
@@ -115,10 +115,10 @@ try {
   await test('licensed students get the institution’s allowance; personal first, then the school', async () => {
     const sp = await usage(s1.c, 'study_plan')
     assert.equal(sp.enabled, true, 'not on Free, but on the institution')
-    assert.equal(sp.limit, 20)
+    assert.equal(sp.limit, 8)
     assert.equal(sp.institution_name, `Test School A ${suffix}`)
     const chat = await usage(s1.c, 'chat')
-    assert.equal(chat.limit, 50, 'the more generous of Free (10) and institution (50)')
+    assert.equal(chat.limit, 40, 'the more generous of Free (5) and institution (40)')
     const first = await begin(s1.id, 'chat')
     assert.equal(first.charged_to, 'personal')
     await finish(first.usage_id)
@@ -128,8 +128,8 @@ try {
   })
 
   await test('the school can lower or switch off features, never exceed the platform limit', async () => {
-    const { error } = await principal.c.rpc('institution_set_ai_quota', { p_inst: instA, p_feature: 'study_plan', p_enabled: true, p_max_requests: 21 })
-    assert.match(error?.message ?? '', /0 to 20/)
+    const { error } = await principal.c.rpc('institution_set_ai_quota', { p_inst: instA, p_feature: 'study_plan', p_enabled: true, p_max_requests: 9 })
+    assert.match(error?.message ?? '', /0 to 8/)
     await one(principal.c.rpc('institution_set_ai_quota', { p_inst: instA, p_feature: 'study_plan', p_enabled: true, p_max_requests: 1 }))
     assert.equal((await usage(s1.c, 'study_plan')).limit, 1)
     assert.equal((await begin(s1.id, 'study_plan')).code, 'quota_exceeded')
@@ -171,14 +171,14 @@ try {
     const lic = (await one(owner.c.rpc('platform_licenses'))).find((l) => l.institution_id === instA)
     await one(owner.c.rpc('platform_revoke_license', { p_license: lic.id, p_reason: 'ai test' }))
     assert.equal((await usage(s1.c, 'study_plan')).enabled, false)
-    assert.equal((await usage(s1.c, 'chat')).limit, 10)
+    assert.equal((await usage(s1.c, 'chat')).limit, 5)
   })
 
   await test('upgrades and downgrades apply at once', async () => {
     await one(u1.c.rpc('redeem_code', { p_code: await gift('pro') }))
-    assert.equal((await usage(u1.c, 'chat')).limit, 100)
+    assert.equal((await usage(u1.c, 'chat')).limit, 150)
     await adminSql(`update public.subscriptions set expires_at = now() - interval '1 second' where user_id = '${u1.id}'`)
-    assert.equal((await usage(u1.c, 'chat')).limit, 10)
+    assert.equal((await usage(u1.c, 'chat')).limit, 5)
   })
 
   await test('usage history is the student’s own and read-only', async () => {
@@ -211,7 +211,7 @@ try {
     assert.equal(r.status, 429)
     assert.equal(r.body.code, 'quota_exceeded')
     assert.ok(r.body.resets_at)
-    assert.equal(r.body.limit, 10)
+    assert.equal(r.body.limit, 5)
     const fresh = await individual(`aiu5_${suffix}`)
     const ok = await fn('assistant', { question: 'How do I add a task?', page: '/dashboard', request_id: `fresh-${suffix}` }, fresh.c)
     if (ok.status === 503) {

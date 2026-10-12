@@ -573,3 +573,334 @@ export function localCommand(input: string, todayDow: number): Command {
 }
 
 const cap = (s: string) => (s ? s.trim().charAt(0).toUpperCase() + s.trim().slice(1) : s)
+
+// ---------------------------------------------------------------------------
+// Study plans: extra time for subjects that need attention, from the
+// school's study insights. Only study sessions in the student's personal
+// timetable are touched: general study sessions are given a subject, time
+// beyond the essentials is taken from strong subjects, and new sessions go
+// into free cells within the daily study limit. School periods, fixed
+// commitments and every other activity stay where they are.
+// ---------------------------------------------------------------------------
+export type InsightStatus = 'needs_attention' | 'improving' | 'on_track' | 'strong' | 'insufficient_data'
+export interface SubjectInsight {
+  subject_id: string
+  subject: string
+  status: InsightStatus
+  recommended_minutes: number
+  reasons: { kind: 'concern' | 'strength' | 'info'; text: string }[]
+  evidence?: { exam?: { title: string; starts_on: string } | null }
+}
+export interface StudyPlanOptions {
+  busy?: Busy[]
+  /** most study minutes on one day (existing + added) */
+  maxDailyStudy: number
+  wake?: string | null
+  sleep?: string | null
+}
+export interface StudyPlanChange {
+  kind: 'relabel' | 'add'
+  task_id?: string
+  slot_id: string
+  day: number
+  start: string
+  end: string
+  minutes: number
+  subject: string
+  from_title?: string
+  title: string
+  reason: string
+}
+export interface StudyPlan {
+  changes: StudyPlanChange[]
+  ops: Op[]
+  /** what was traded for what, and what couldn't be done */
+  tradeoffs: string[]
+  /** time that couldn't be found, and why */
+  unmet: { subject: string; minutes: number; why: string }[]
+  summary: string
+  /** identifies the insights the plan was made for (auto mode applies each once) */
+  signature: string
+}
+
+/** Session lengths the plan adds: long enough to be useful, short enough to focus. */
+export const STUDY_BLOCK_MIN = 20
+export const STUDY_BLOCK_MAX = 90
+export const PLAN_MARK = 'Study plan'
+
+const ALIASES: Record<string, string[]> = {
+  mathematics: ['maths', 'math'],
+  biology: ['bio'],
+  chemistry: ['chem'],
+  physics: ['phys'],
+  english: ['eng'],
+  science: ['sci'],
+  geography: ['geo'],
+  history: ['hist'],
+  'computer science': ['computer', 'computing', 'cs', 'coding'],
+  economics: ['eco', 'econ'],
+  accountancy: ['accounts'],
+  'social science': ['social studies', 'sst'],
+}
+const words = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean)
+
+/** Does an activity title mention this subject (name, first word, or a common short form)? */
+export function mentionsSubject(title: string, subject: string): boolean {
+  const t = ` ${words(title).join(' ')} `
+  const s = words(subject).join(' ')
+  if (!s) return false
+  const names = new Set([s, ...(ALIASES[s] ?? [])])
+  const first = s.split(' ')[0]
+  if (first.length >= 4) names.add(first)
+  for (const [full, short] of Object.entries(ALIASES)) if (short.includes(s)) names.add(full)
+  return [...names].some((n) => t.includes(` ${n} `))
+}
+
+const GENERAL = /^(self[\s-]?)?(study|studies|revision|revise|homework|practice|reading|prep|preparation|school ?work)(\s+(time|session|block))?$/i
+
+/** Short stable hash for signatures (not for security). */
+const hash = (s: string) => {
+  let h = 5381
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0
+  return (h >>> 0).toString(16)
+}
+
+export function insightSignature(insights: SubjectInsight[]): string {
+  return hash(insights.map((i) => `${i.subject_id}:${i.status}:${i.recommended_minutes}`).sort().join(','))
+}
+
+const STATUS_TEXT: Record<InsightStatus, string> = {
+  needs_attention: 'needs attention',
+  improving: 'is improving — keep it going',
+  on_track: 'is on track',
+  strong: 'is strong',
+  insufficient_data: 'has an exam coming up',
+}
+
+export function planStudyBoost(slots: Slot[], tasks: Task[], insights: SubjectInsight[], opts: StudyPlanOptions): StudyPlan {
+  const slotById = new Map(slots.map((s) => [s.id, s]))
+  const dur = (s: Slot) => mins(s.end_time)! - mins(s.start_time)!
+  const sorted = slots.filter((s) => mins(s.start_time) !== null && mins(s.end_time) !== null)
+    .sort((a, b) => mins(a.start_time)! - mins(b.start_time)!)
+  const cell = (slotId: string, day: number) => `${slotId}|${day}`
+  const occupied = new Map<string, Task>()
+  for (const t of tasks) {
+    const key = cell(t.time_slot_id, t.day_of_week)
+    if (slotById.has(t.time_slot_id) && !occupied.has(key)) occupied.set(key, t)
+  }
+
+  // Minutes per day: everything, and study only (each cell once).
+  const dayTotal: number[] = Array(7).fill(0)
+  const dayStudy: number[] = Array(7).fill(0)
+  for (const t of occupied.values()) {
+    const m = dur(slotById.get(t.time_slot_id)!)
+    dayTotal[t.day_of_week] += m
+    if (t.category === 'study') dayStudy[t.day_of_week] += m
+  }
+  const subjectOf = (t: Task) => insights.find((i) => mentionsSubject(t.title, i.subject)) ?? null
+  const studyCells = [...occupied.values()].filter((t) => t.category === 'study')
+  const general = studyCells.filter((t) => GENERAL.test(t.title.trim()) && !subjectOf(t))
+  // subject → minutes per day, to spread a subject over the week
+  const perSubjectDay = new Map<string, number[]>()
+  const subjDay = (id: string) => {
+    if (!perSubjectDay.has(id)) perSubjectDay.set(id, Array(7).fill(0))
+    return perSubjectDay.get(id)!
+  }
+  for (const t of studyCells) {
+    const i = subjectOf(t)
+    if (i) subjDay(i.subject_id)[t.day_of_week] += dur(slotById.get(t.time_slot_id)!)
+  }
+
+  // needs attention first, then an exam coming up, then improving; more minutes first within each
+  const priority = (i: SubjectInsight) =>
+    (i.status === 'needs_attention' ? 0 : i.evidence?.exam ? 1 : i.status === 'improving' ? 2 : 3) * 1000 - i.recommended_minutes
+  const needs = insights.filter((i) => i.recommended_minutes > 0).sort((a, b) => priority(a) - priority(b))
+  const remaining = new Map(needs.map((i) => [i.subject_id, i.recommended_minutes]))
+  const changes: StudyPlanChange[] = []
+  const tradeoffs: string[] = []
+  const used = new Set<string>()
+
+  const reasonFor = (i: SubjectInsight) => {
+    const concern = i.reasons.find((r) => r.kind === 'concern') ?? i.reasons[0]
+    const exam = i.evidence?.exam ? ` Exam “${i.evidence.exam.title}” is coming up.` : ''
+    return `${i.subject} ${STATUS_TEXT[i.status]}.${concern ? ` ${concern.text}` : ''}${exam}`.slice(0, 300)
+  }
+  const titleFor = (i: SubjectInsight) => `${i.subject} ${i.evidence?.exam ? 'revision' : 'practice'}`.slice(0, 100)
+  // For a subject: the day with least of that subject, then least study overall.
+  const best = <T extends { day: number }>(i: SubjectInsight, cands: T[]) =>
+    [...cands].sort((a, b) => subjDay(i.subject_id)[a.day] - subjDay(i.subject_id)[b.day] || dayStudy[a.day] - dayStudy[b.day] || a.day - b.day)[0]
+
+  const relabel = (t: Task, i: SubjectInsight, why: string) => {
+    const s = slotById.get(t.time_slot_id)!
+    const m = dur(s)
+    changes.push({
+      kind: 'relabel', task_id: t.id, slot_id: s.id, day: t.day_of_week, start: s.start_time.slice(0, 5), end: s.end_time.slice(0, 5), minutes: m,
+      subject: i.subject, from_title: t.title, title: titleFor(i), reason: why,
+    })
+    used.add(cell(s.id, t.day_of_week))
+    subjDay(i.subject_id)[t.day_of_week] += m
+    remaining.set(i.subject_id, (remaining.get(i.subject_id) ?? 0) - m)
+  }
+
+  // 1. General study sessions get a subject; at least half stay general (homework time).
+  let generalLeft = general.length - Math.ceil(general.length / 2)
+  for (const i of needs) {
+    while ((remaining.get(i.subject_id) ?? 0) > 10 && generalLeft > 0) {
+      const pick = best(i, general.filter((t) => !used.has(cell(t.time_slot_id, t.day_of_week))).map((t) => ({ t, day: t.day_of_week })))
+      if (!pick) break
+      relabel(pick.t, i, reasonFor(i))
+      generalLeft--
+    }
+  }
+  const relabelled = changes.length
+  if (relabelled) {
+    tradeoffs.push(`${relabelled} general study session${relabelled === 1 ? ' now focuses' : 's now focus'} on a subject; ${general.length - relabelled} stay${general.length - relabelled === 1 ? 's' : ''} free for homework.`)
+  }
+
+  // 2. Time from strong subjects, keeping at least one session each (essential revision).
+  for (const strong of insights.filter((i) => i.status === 'strong' && i.recommended_minutes < 0)) {
+    let release = -strong.recommended_minutes
+    const own = studyCells
+      .filter((t) => subjectOf(t)?.subject_id === strong.subject_id && !used.has(cell(t.time_slot_id, t.day_of_week)))
+      .sort((a, b) => b.day_of_week - a.day_of_week)
+    for (const t of own.slice(1)) {
+      const m = dur(slotById.get(t.time_slot_id)!)
+      if (release < m / 2) break
+      const target = needs.find((i) => (remaining.get(i.subject_id) ?? 0) > 10)
+      if (!target) break
+      relabel(t, target, `${reasonFor(target)} ${strong.subject} is strong, so this session moves to ${target.subject}.`)
+      subjDay(strong.subject_id)[t.day_of_week] -= m
+      tradeoffs.push(`${fmtMin(m)} on ${DAYS[t.day_of_week]} moves from ${strong.subject} (strong) to ${target.subject}; ${strong.subject} keeps its other sessions.`)
+      release -= m
+    }
+  }
+
+  // 3. New sessions in free cells, within the limits.
+  const sleepAt = mins(opts.sleep ?? '')
+  const wakeAt = mins(opts.wake ?? '')
+  const busy = opts.busy ?? []
+  const touching = (a: Slot, b: Slot) => a.end_time.slice(0, 5) === b.start_time.slice(0, 5)
+  const stretch = (slot: Slot, day: number) => {
+    // length of the back-to-back run this cell would join
+    const idx = sorted.findIndex((s) => s.id === slot.id)
+    let run = dur(slot)
+    for (let k = idx - 1; k >= 0 && occupied.has(cell(sorted[k].id, day)) && touching(sorted[k], sorted[k + 1]); k--) run += dur(sorted[k])
+    for (let k = idx + 1; k < sorted.length && occupied.has(cell(sorted[k].id, day)) && touching(sorted[k - 1], sorted[k]); k++) run += dur(sorted[k])
+    return run
+  }
+  const blockedWhy: Record<string, string> = {}
+  for (const i of needs) {
+    while ((remaining.get(i.subject_id) ?? 0) > 10) {
+      const cands: { slot: Slot; day: number }[] = []
+      let blocked = ''
+      for (let d = 0; d < 7; d++) {
+        for (const s of sorted) {
+          const key = cell(s.id, d)
+          if (occupied.has(key) || used.has(key)) continue
+          const a = mins(s.start_time)!
+          const b = mins(s.end_time)!
+          if (b - a < STUDY_BLOCK_MIN || b - a > STUDY_BLOCK_MAX) {
+            blocked ||= `the free time slots aren’t ${STUDY_BLOCK_MIN}–${STUDY_BLOCK_MAX} minutes long`
+            continue
+          }
+          if (busy.some((x) => x.day === d && overlaps(a, b, mins(x.start) ?? 0, mins(x.end) ?? 0))) {
+            blocked ||= 'the free time clashes with school or fixed commitments'
+            continue
+          }
+          if ((wakeAt !== null && a < wakeAt) || (sleepAt !== null && sleepAt > 12 * 60 && b > sleepAt) || b > 23 * 60 || a < 5 * 60) {
+            blocked ||= 'the free time is outside your waking hours'
+            continue
+          }
+          if (dayStudy[d] + (b - a) > opts.maxDailyStudy) {
+            blocked = `your daily study limit of ${fmtMin(opts.maxDailyStudy)} is reached on the days with free time`
+            continue
+          }
+          if (dayTotal[d] + (b - a) > OVERLOAD_MINUTES) {
+            blocked ||= `the days with free time already have ${fmtMin(OVERLOAD_MINUTES)} planned`
+            continue
+          }
+          if (stretch(s, d) >= LONG_STRETCH_MINUTES) {
+            blocked ||= 'it would leave no break between activities'
+            continue
+          }
+          // at most one added session of a subject per day
+          if (changes.some((c) => c.kind === 'add' && c.subject === i.subject && c.day === d)) continue
+          cands.push({ slot: s, day: d })
+        }
+      }
+      const pick = best(i, cands)
+      if (!pick) {
+        blockedWhy[i.subject_id] = blocked || 'there is no free time in this timetable'
+        break
+      }
+      const m = dur(pick.slot)
+      const key = cell(pick.slot.id, pick.day)
+      changes.push({
+        kind: 'add', slot_id: pick.slot.id, day: pick.day, start: pick.slot.start_time.slice(0, 5), end: pick.slot.end_time.slice(0, 5), minutes: m,
+        subject: i.subject, title: titleFor(i), reason: reasonFor(i),
+      })
+      used.add(key)
+      occupied.set(key, { id: `new:${key}`, time_slot_id: pick.slot.id, day_of_week: pick.day, title: titleFor(i), category: 'study' })
+      dayStudy[pick.day] += m
+      dayTotal[pick.day] += m
+      subjDay(i.subject_id)[pick.day] += m
+      remaining.set(i.subject_id, (remaining.get(i.subject_id) ?? 0) - m)
+    }
+  }
+
+  const unmet = needs
+    .filter((i) => (remaining.get(i.subject_id) ?? 0) > 10)
+    .map((i) => ({ subject: i.subject, minutes: remaining.get(i.subject_id)!, why: blockedWhy[i.subject_id] ?? 'there is no more flexible study time' }))
+  for (const u of unmet) {
+    tradeoffs.push(`${u.subject} still needs about ${fmtMin(u.minutes)} a week, but ${u.why}. Add a ${STUDY_BLOCK_MIN}–${STUDY_BLOCK_MAX} minute time slot on a lighter day, or swap a non-study activity yourself.`)
+  }
+
+  const bySubject = new Map(insights.map((i) => [i.subject, i]))
+  const ops: Op[] = changes.map((c) => {
+    const description = `${PLAN_MARK}: ${reasonFor(bySubject.get(c.subject)!)}`.slice(0, 500)
+    return c.kind === 'relabel'
+      ? { op: 'update_task', task: c.task_id!, title: c.title, category: 'study', description }
+      : { op: 'add_task', slot: c.slot_id, day: c.day, title: c.title, category: 'study', description }
+  })
+  const added = changes.reduce((n, c) => n + (c.kind === 'add' ? c.minutes : 0), 0)
+  const subjects = [...new Set(changes.map((c) => c.subject))]
+  const summary = changes.length
+    ? `Study plan: more time for ${subjects.join(', ')}${added ? ` (+${fmtMin(added)} a week)` : ' (no extra hours)'}.`.slice(0, 300)
+    : 'Study plan: no changes needed.'
+  return { changes, ops, tradeoffs, unmet, summary, signature: insightSignature(insights) }
+}
+
+/** Merge each day's class periods into one "school" block per continuous stretch (gaps ≤ 30 min). */
+export function schoolBlocks(periods: { day: number; start: string; end: string }[]): Busy[] {
+  const out: Busy[] = []
+  for (let d = 0; d < 7; d++) {
+    const ps = periods.filter((p) => p.day === d).sort((a, b) => mins(a.start)! - mins(b.start)!)
+    for (const p of ps) {
+      const last = out[out.length - 1]
+      if (last && last.day === d && mins(p.start)! - mins(last.end)! <= 30) last.end = mins(p.end)! > mins(last.end)! ? p.end : last.end
+      else out.push({ day: d, start: p.start, end: p.end, label: 'school' })
+    }
+  }
+  return out
+}
+
+/** How many of the study plan's sessions the student ticked off (their own data; never shown to staff). */
+export function planAdherence(
+  tasks: Task[],
+  completions: { task_id: string; completion_date: string; completed: boolean }[],
+  fromISO: string,
+  toISO: string,
+) {
+  const planned = tasks.filter((t) => t.category === 'study' && (t.description ?? '').startsWith(PLAN_MARK))
+  if (!planned.length) return null
+  let scheduled = 0
+  const from = Date.parse(`${fromISO}T12:00:00Z`)
+  const to = Date.parse(`${toISO}T12:00:00Z`)
+  for (let t = from; t <= to; t += 86400000) {
+    const dow = new Date(t).getUTCDay()
+    scheduled += planned.filter((p) => p.day_of_week === dow).length
+  }
+  const ids = new Set(planned.map((p) => p.id))
+  const done = completions.filter((c) => c.completed && ids.has(c.task_id) && c.completion_date >= fromISO && c.completion_date <= toISO).length
+  return { sessions: planned.length, scheduled, done, rate: scheduled ? Math.round((done / scheduled) * 100) : null }
+}

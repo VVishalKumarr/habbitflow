@@ -20,6 +20,7 @@ export type Feature =
   | 'friend_groups'
   | 'no_ads'
   | 'ai_guided_timetable'
+  | 'advanced_ai'
 
 export type LimitKey = 'trackers' | 'friends' | 'history_days'
 
@@ -37,6 +38,7 @@ export const FEATURE_LABELS: Record<Feature, string> = {
   friend_groups: 'Friend groups (coming soon)',
   no_ads: 'No advertisements',
   ai_guided_timetable: 'AI timetable that asks your needs first',
+  advanced_ai: 'Our most capable AI for answers and planning',
 }
 
 /**

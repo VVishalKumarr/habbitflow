@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     // Which of our plans was bought (each paid plan has its own Play product).
     const item = purchase.lineItems?.find((l) => plans.some((p) => p.google_play_product_id === l.productId))
     const plan = plans.find((p) => p.google_play_product_id === item?.productId)
-    if (!item || !plan) return json(req, { error: 'This purchase is not for a HabbitFlow plan.' }, 400)
+    if (!item || !plan) return json(req, { error: 'This purchase is not for a HabbitFlows plan.' }, 400)
     if (purchase.externalAccountIdentifiers?.obfuscatedExternalAccountId !== who.user.id) {
       return json(req, { error: 'This purchase belongs to a different account.' }, 403)
     }

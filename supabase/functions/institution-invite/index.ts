@@ -116,13 +116,13 @@ Deno.serve(async (req) => {
   try {
     await sendEmail(
       invite.email,
-      `You're invited to ${invite.institution} on HabbitFlow`,
+      `You're invited to ${invite.institution} on HabbitFlows`,
       renderEmail({
         heading: `Join ${invite.institution}`,
         lines: [
           invite.role === 'parent' && invite.student
-            ? `${invite.institution} confirmed you as a parent or guardian of ${invite.student} on HabbitFlow. You'll be able to see their timetable, homework, attendance and marks, and message their teachers.`
-            : `You've been invited to ${invite.institution} on HabbitFlow as ${ROLE_LABEL[invite.role] ?? invite.role}.`,
+            ? `${invite.institution} confirmed you as a parent or guardian of ${invite.student} on HabbitFlows. You'll be able to see their timetable, homework, attendance and marks, and message their teachers.`
+            : `You've been invited to ${invite.institution} on HabbitFlows as ${ROLE_LABEL[invite.role] ?? invite.role}.`,
           'Open the link to confirm your email address and choose your password. You will then sign in with this email address and that password.',
           `The link works once and expires on ${expires}.`,
         ],
@@ -143,11 +143,11 @@ async function sendInvite(invite: Invite, link: string): Promise<string | null> 
   try {
     await sendEmail(
       invite.email,
-      `You're invited to ${invite.institution} on HabbitFlow`,
+      `You're invited to ${invite.institution} on HabbitFlows`,
       renderEmail({
         heading: `Join ${invite.institution}`,
         lines: [
-          `You've been invited to ${invite.institution} on HabbitFlow as ${ROLE_LABEL[invite.role] ?? invite.role}.`,
+          `You've been invited to ${invite.institution} on HabbitFlows as ${ROLE_LABEL[invite.role] ?? invite.role}.`,
           'Open the link to confirm your email address and choose your password. You will then sign in with this email address and that password.',
           `The link works once and expires on ${expires}.`,
         ],

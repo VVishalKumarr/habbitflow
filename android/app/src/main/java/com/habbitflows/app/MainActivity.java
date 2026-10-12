@@ -1,4 +1,4 @@
-package com.habbitflow.app;
+package com.habbitflows.app;
 
 import com.getcapacitor.BridgeActivity;
 

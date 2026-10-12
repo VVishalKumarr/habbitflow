@@ -26,8 +26,8 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          # GitHub Pages project site lives under /habbitflow/. Use / for a custom domain.
-          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/habbitflow/' }}
+          # GitHub Pages project site lives under /habbitflows/. Use / for a custom domain.
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/habbitflows/' }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           # Optional public settings (repository variables). Unset = feature off.

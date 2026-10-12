@@ -1,6 +1,6 @@
 # Security
 
-How HabbitFlow protects accounts and data, what was tested, and known limitations.
+How HabbitFlows protects accounts and data, what was tested, and known limitations.
 Report a security problem to the contact address on the Privacy page.
 
 ## Architecture
@@ -119,7 +119,28 @@ project and check, among others:
   exact allowlisted address (a domain match is not enough).
 - **Tenant isolation** is enforced by RLS on every table plus composite foreign keys
   and an `institution_id`-pinning trigger. Tests modify ids and request other
-  institutions’ rows directly through the API.
+  institutions’ rows directly through the API. How it works:
+  - every institution-owned row carries `institution_id`; links between rows are
+    composite foreign keys `(id, institution_id)`, so a record can't point at another
+    school's class, subject, student or teacher, and a trigger stops rows moving between
+    schools;
+  - the current institution is never taken from the request: every policy and function
+    re-derives the caller's role with `inst_role(institution)` = an **active** membership
+    of `auth.uid()` in an **active** institution. An `institution_id` from the app only
+    selects *which* of the caller's memberships to check; switching school in the app
+    changes nothing on the server;
+  - reads go through RLS; writes through security-definer functions that re-check;
+    server functions read with the caller's own token (RLS applies) and use the service
+    key only after the database has authorised the caller (`p_actor` functions);
+  - fail closed: no membership, a suspended membership or institution, or an unknown
+    record all mean no rows / “not found”.
+- **Subject scope**: academic records are visible to subject teachers only for the
+  subjects they teach (`can_view_subject()`; see ROLE_PERMISSIONS.md).
+- **Refused changes are logged**: role, membership, rules, export and study-insight
+  refusals write an `access_denied action=… user=… institution=…` line to the Postgres
+  log (Supabase → Logs → Postgres) before raising — the log line survives the rolled-back
+  transaction; no personal data beyond IDs is logged. Role changes also record a reason
+  in the audit history and notify the person.
 - **Suspension/removal** deletes the person’s Auth sessions and RLS stops returning
   institutional data at once (an already-issued access token reaches nothing).
 - **Audit log** is append-only for every client role and never stores token hashes.
@@ -256,6 +277,18 @@ consent-based). Listed for users in the Privacy Policy.
 **Remaining:** Supabase leaked-password protection and CAPTCHA are dashboard settings (launch
 list). `ALLOW_MANUAL_INVITE_LINKS` is on until email is configured — remove it then.
 
+## Study insights
+
+Insight tables (`study_insight_snapshots`) have no client access at all; insights are read
+only through `study_insights(student)` / `class_study_insights(class)`, which decide the
+viewer first (the student, staff who can see the class — then filtered to subjects they
+may see — or a linked parent) and refuse everyone else. The calculation function itself
+is not callable by clients. Confidence ratings are readable only by the student. Study
+plans can only add or re-label study sessions in the student's own timetable
+(`apply_timetable_change` checks every step). The AI explanation receives no marks.
+Tests: `tests/local-db.test.mjs` (real Postgres, offline) and
+`tests/study-insights.test.mjs` (live project).
+
 ## Known limitations / to do
 
 - Supabase “secure password change” (re-authentication email) is not used because users
@@ -275,3 +308,12 @@ list). `ALLOW_MANUAL_INVITE_LINKS` is on until email is configured — remove it
   the per-username/email limit (3/hour) is the one that protects inboxes.
 - Username lookups (friend requests) can reveal whether a username exists — inherent to
   adding friends by username.
+- Reads that RLS filters out return no rows; they are not logged (only refused function
+  calls are). Denial log lines live in the Postgres log, not in the in-app audit history,
+  because a refusal rolls back the transaction that would have written an audit row.
+- Attendance is visible to every teacher of the class (whether a student attended is
+  class-wide information); marks and homework are subject-scoped.
+- A **director** has the same institution-head powers as a principal (both are invited
+  only by the platform owner).
+- Study insights don't have topic-level data (marks aren't recorded per topic); they
+  point to low-scoring assessments instead and say so.

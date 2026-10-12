@@ -1,4 +1,5 @@
 import { MyDevelopmentCard } from '../../components/school/Development'
+import { StudyInsightsSummary } from '../../components/school/StudyInsights'
 import { AlertTriangle, Award, BookOpenCheck, CalendarCheck, CalendarClock, CalendarDays, ClipboardList, GraduationCap, MailPlus, ShieldAlert, UserCog, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { StudentGuardians } from '../../components/school/Guardians'
@@ -234,6 +235,7 @@ function InstitutionOverview() {
         </Panel>
       )}
 
+      {inst.role === 'student' && <StudyInsightsSummary studentId={inst.membership_id} link="/school/study" />}
       {inst.role === 'student' && <MyDevelopmentCard studentId={inst.membership_id} student={inst.display_name} institution={inst.name} />}
       {inst.role === 'student' && <StudentGuardians institutionId={inst.institution_id} studentId={inst.membership_id} />}
 

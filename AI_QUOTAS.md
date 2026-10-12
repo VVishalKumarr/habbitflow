@@ -7,20 +7,34 @@ shows them. API keys stay in Edge Function secrets.
 
 ## Features and default limits
 
-Requests per student. Empty = unlimited. All of these are starting values — change them
+Requests per student. Empty = unlimited. All of these — change them
 in **Platform admin → AI** without touching code.
 
 | Feature (key) | Period | Free | Plus | Pro | Institution (max) |
 |---|---|---|---|---|---|
-| AI help assistant (`chat`) | day | 10 | 40 | 100 | 50 |
-| AI voice commands (`voice_command`) | day | 10 | 50 | 150 | 50 |
-| AI timetable generation (`timetable_generate`) | month | off | 10 | 40 | 20 |
-| Timetable evaluation (`timetable_evaluate`) | month | 3 | 20 | 60 | 30 |
-| Homework and study planning (`study_plan`) | month | off | 10 | 40 | 20 |
-| AI rescheduling (`reschedule`) | month | 5 | 30 | 100 | 40 |
+| AI help assistant (`chat`) | month | 5 | 60 | 150 | 40 |
+| AI voice commands (`voice_command`) | month | 5 | 100 | 200 | 60 |
+| AI timetable generation (`timetable_generate`) | month | off | 3 | 8 | 3 |
+| Timetable evaluation (`timetable_evaluate`) | month | 1 | 6 | 15 | 6 |
+| Study plan explanations (`study_plan`) | month | off | 5 | 15 | 8 |
+| AI rescheduling (`reschedule`) | month | 1 | 10 | 25 | 10 |
+
+Lowered on 2026-10-12 (all monthly) so one user's worst-case AI cost on Claude Opus 5.5
+stays around $0.15 (Free, lowered again the same day), $3.30 (Plus), $7.90 (Pro) and $2.60 per school student; a
+typical user costs well under $1 a month. When an allowance runs out, commands fall back
+to the built-in parser and help to the articles.
 
 Periods reset at midnight (day), Monday (week) or the 1st (month) in the quota time zone
 (default Asia/Kolkata, changeable in Platform admin → AI → Cost controls).
+
+## Which model answers
+
+Plus, Pro and school-paid requests use the most capable model (`AI_MODEL`, default
+Claude Opus 5.5, with automatic fallback if a request is declined); Free requests use the
+fast model (`AI_MODEL_FREE`, default Claude Haiku 5.5 — about 40× cheaper). The Edge
+Functions pick it from the plan the database charged the request to
+(`beginAi()` in `supabase/functions/_shared/ai-quota.ts`). The plans list
+“Our most capable AI for answers and planning” (`advanced_ai`) for Plus and Pro.
 
 ## Which limit applies
 

@@ -13,11 +13,11 @@ Nothing here charges anyone until you configure a provider.
 | Colour themes, no ads | — | ✓ | ✓ |
 | Focus sounds, CSV/PDF reports, leaderboards | — | — | ✓ |
 | AI timetable that asks your needs first (coming) | — | ✓ | ✓ |
-| Price in India | ₹0 | ₹59/mo · ₹499/yr | ₹129/mo · ₹999/yr |
-| Price elsewhere | $0 | $2.49/mo · $19.99/yr | $4.99/mo · $39.99/yr |
+| Price in India | ₹0 | ₹99/mo · ₹899/yr | ₹199/mo · ₹1,799/yr |
+| Price elsewhere | $0 | $2.99/mo · $24.99/yr | $5.99/mo · $49.99/yr |
 | Free trial | — | — | 7 days, once per account |
 
-Final prices (set 2026-10). The middle plan makes Pro look like the better deal.
+Prices raised 2026-10-12 so AI costs stay covered (migration `2026-10-24_ai_limits_and_prices`). The middle plan makes Pro look like the better deal.
 A user is entitled to the highest-ranked plan with an active subscription.
 
 ## Regional prices
@@ -100,9 +100,9 @@ Google Play requires digital subscriptions sold in the app to use Play Billing, 
 Android app never shows the web checkout (it shows “not available in the app yet”).
 To enable:
 
-1. Play Console → Monetize → Subscriptions: create `habbitflow_pro` with monthly/yearly
-   base plans. `update public.plans set google_play_product_id = 'habbitflow_pro' where id='pro';`
-   and `VITE_GOOGLE_PLAY_PRODUCT_ID=habbitflow_pro`.
+1. Play Console → Monetize → Subscriptions: create `habbitflows_pro` with monthly/yearly
+   base plans. `update public.plans set google_play_product_id = 'habbitflows_pro' where id='pro';`
+   and `VITE_GOOGLE_PLAY_PRODUCT_ID=habbitflows_pro`.
 2. Google Cloud: service account with access to the Play Developer API; grant it
    “View financial data / Manage orders” in Play Console → Users & permissions. Put its
    JSON (one line) in `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, and set `GOOGLE_PLAY_PACKAGE_NAME`.

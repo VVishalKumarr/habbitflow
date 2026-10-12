@@ -10,6 +10,7 @@ confirms.
 | Build with AI (needs check → proposal → save) | Plus, Pro, licensed schools (`ai_guided_timetable`) | `timetable_generate` | not available; clear message |
 | Check my timetable | everyone | `timetable_evaluate` (advice only) | numbers and findings still shown |
 | Reschedule for an event | everyone | `reschedule` | automatic nearest-free-time plan |
+| Study plan (School → Study insights) | school students | `study_plan` (explanation only) | the plan itself never needs AI |
 | History and undo | everyone | — | — |
 
 Quotas, counting and cost controls: [AI_QUOTAS.md](AI_QUOTAS.md). Help article for users:
@@ -42,7 +43,7 @@ wake/sleep, best focus time, study time per day, activities to keep/drop, anythi
 cost nothing and appear instantly; the model decides the timetable from the answers and
 explains what it included and why (“choices”), and what couldn't fit (“impossible”).
 
-Already known and never asked: for students of a school using HabbitFlow,
+Already known and never asked: for students of a school using HabbitFlows,
 `my_timetable_context()` supplies class periods (merged into “school” blocks), homework
 due in the next 3 weeks, exams and holidays in the next 6 weeks. Answers are saved in
 `timetable_preferences` and filled in next time.
@@ -89,7 +90,7 @@ using the current timetable and shows “I understood: …” with Confirm. Open
 Speech: push-to-talk microphone button. Web: the browser's Web Speech API (Chrome, Edge,
 Safari). Android: `@capacitor-community/speech-recognition` (adds the `RECORD_AUDIO`
 permission; asked the first time). Firefox has no speech recognition, so the mic button is
-hidden and typing works. Audio never reaches HabbitFlow.
+hidden and typing works. Audio never reaches HabbitFlows.
 
 ## Saving, history, undo
 
@@ -106,6 +107,53 @@ hidden and typing works. Audio never reaches HabbitFlow.
 unchanged since (otherwise it explains why not). A generated timetable is removed by
 deleting it like any other.
 
+## Study plans (weak-subject detection)
+
+School students get **study insights**: each subject is classified from published marks,
+homework and teacher reviews by transparent rules (`compute_study_insights()` in
+`supabase/migrations/2026-10-23_isolation_and_study_insights.sql`):
+
+| Status | When (defaults; heads change them in School → Settings → Study insights) |
+|---|---|
+| Not enough data | fewer than 2 published marks **and** fewer than 3 homework pieces due (last 180 days) — never treated as weak |
+| Needs attention | indicator < 50, or homework handed in < 60 %, or results falling (three in a row down by ≥ 10 points, or the latest ≥ 10 below the ones before) unless still ≥ 80 |
+| Improving | latest result ≥ 5 points above the ones before, indicator < 80 |
+| Strong | indicator ≥ 80, not falling, homework fine (needs marks, not homework alone) |
+| On track | anything else |
+
+Indicator = 80 % recent marks (last three, external exams weighted 1.5×) + 20 % homework
+handed in; marks only or homework only when one is missing. Absences aren't counted as
+zero. Suggested extra time per week: needs attention +120 min, improving +60, on track 0,
+strong −30 (offered to weaker subjects), +60 with an exam in the next 3 weeks, +30 when
+the student rates their confidence ≤ 2/5. Each subject shows its reasons. A new snapshot
+(`study_insight_snapshots`) is stored whenever the underlying data changes, or every
+`refresh_days`, so students and teachers can see whether a subject is improving.
+
+`planStudyBoost()` (in `timetable-core.ts`, unit-tested in `tests/study-plan.test.mjs`)
+turns the suggested minutes into changes to the student's **own** timetable:
+
+1. general study sessions (“Study”, “Homework”, “Revision”…) get a subject — at least half
+   stay general for homework;
+2. a strong subject gives sessions beyond its first to a weaker one;
+3. new 20–90 minute sessions go into free cells: not during school periods or fixed
+   commitments, within waking hours, under the daily study limit (student's choice,
+   school default 180 min), under 6 h planned per day, never making 3 h back to back, at
+   most one per subject per day, spread over the least busy days.
+
+Nothing else is ever changed: `apply_timetable_change(source => 'ai_study_plan')` refuses
+any step that isn't adding a study session or re-labelling an existing study session.
+What couldn't fit is explained (“Physics still needs about 1 h a week, but your daily
+study limit is reached…”) instead of overloading days. Plans are previewed with a reason
+per change and saved in one transaction; History undoes them.
+
+Modes (`study_plan_settings`, per student): **off**; **recommend** (preview, then save);
+**auto** — when the dashboard opens and the insights changed since the last automatic
+plan (signature), the plan is applied and the student is told; undo from History.
+“Explain with AI” (`timetable-ai` action `study_advice`, quota `study_plan`) adds a short
+explanation and tips; it gets subject names, statuses and the planned changes — never
+marks. `planAdherence()` counts how many planned sessions the student ticked (shown to
+the student only).
+
 ## Class teachers
 
 Class teachers can also edit their students' personal timetables (and their class
@@ -118,13 +166,19 @@ by the student like any other change.
 
 Only what the request needs: command text; needs-check answers; activity titles,
 categories and times; for school students, class times and subject names, homework and
-exam titles and dates. Never names, emails, the school's name, marks or attendance. No
+exam titles and dates; for study advice, subject names, their status and the planned
+changes. Never names, emails, the school's name, marks or attendance. No
 prompts or answers are stored (only counts and token numbers in `ai_usage`). The Privacy
 Policy section “AI assistant” says the same.
 
 ## Tests
 
 - `node tests/timetable-core.test.mjs` — 12 unit tests of the shared rules (no network).
+- `node tests/study-plan.test.mjs` — 13 unit tests of study plans (no network).
+- `node tests/local-db.test.mjs` — study insights, plans and access rules on a real
+  Postgres in-process (no network).
+- `node --env-file=.env tests/study-insights.test.mjs` — the same against the project,
+  plus the `study_advice` function and parents.
 - `node --env-file=.env tests/timetable-ai.test.mjs` — 14 checks against the project:
   saving, transactions, stale proposals, cross-user tampering, append-only history, undo
   rules, private answers, school context isolation, function auth, plan gating, metering

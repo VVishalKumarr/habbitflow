@@ -17,7 +17,7 @@ const FAQ = [
   ['What’s the difference between Plus and Pro?', 'Plus removes ads and limits: unlimited trackers, full history, themes and more friends. Pro adds reports (PDF/CSV), focus sounds and leaderboards on top.'],
   ['What happens if my plan ends?', 'You keep all your data. Paid features switch off and the free limits apply to new items again.'],
   ['Can I switch or cancel any time?', 'Yes. Upgrading starts the new plan straight away; cancelling stops the next renewal and your plan stays active until the end of the period you paid for.'],
-  ['Why are prices different in my country?', 'We price fairly for each region, so HabbitFlow is affordable wherever you are.'],
+  ['Why are prices different in my country?', 'We price fairly for each region, so HabbitFlows is affordable wherever you are.'],
   ['How is payment handled?', 'By our payment provider. We never see or store your card or UPI details. In the Android app, plans are bought through Google Play.'],
 ]
 

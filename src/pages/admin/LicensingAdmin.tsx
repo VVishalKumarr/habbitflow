@@ -208,7 +208,7 @@ function ShowCodes({ codes, label, onClose }: { codes: string[]; label: string; 
     const blob = new Blob([`code\n${text}\n`], { type: 'text/csv' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = `habbitflow-codes-${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = `habbitflows-codes-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(a.href)
   }

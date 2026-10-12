@@ -166,7 +166,7 @@ export function AppShell() {
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-surface/85 pt-safe backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-6 px-4 sm:px-6 lg:px-8">
-          <NavLink to={nav[0].to} aria-label="HabbitFlow home" className="rounded-lg">
+          <NavLink to={nav[0].to} aria-label="HabbitFlows home" className="rounded-lg">
             <Logo />
           </NavLink>
           <nav aria-label="Main" className="hidden items-center gap-1 md:flex">

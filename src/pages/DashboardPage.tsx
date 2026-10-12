@@ -2,6 +2,7 @@ import { AlertTriangle, CalendarClock, Clock, Plus, Sparkles } from 'lucide-reac
 import { TodayPanel } from '../components/dashboard/TodayPanel'
 import { TodayProgressCard } from '../components/dashboard/TodayProgressCard'
 import { TrackerHeader } from '../components/dashboard/TrackerHeader'
+import { AutoStudyPlan } from '../components/school/AutoStudyPlan'
 import { TimetableAssistant } from '../components/timetable-ai/TimetableAssistant'
 import { WeekNavigator } from '../components/dashboard/WeekNavigator'
 import { MobileDaySelector, MobileDayView } from '../components/timetable/MobileDayView'
@@ -184,6 +185,7 @@ export default function DashboardPage() {
 
       {/* Outside the loading state so a saved change (which reloads the timetable) keeps the assistant open. */}
       {dataStatus !== 'error' && <TimetableAssistant />}
+      {dataStatus === 'ready' && <AutoStudyPlan />}
     </div>
   )
 }

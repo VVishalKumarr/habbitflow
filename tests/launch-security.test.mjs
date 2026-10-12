@@ -57,7 +57,7 @@ async function fn(name, body, token) {
 
 const ent = async (u) => (await u.c.rpc('my_entitlements')).data
 
-console.log('HabbitFlow launch security tests')
+console.log('HabbitFlows launch security tests')
 const alice = await signUp(`la_${suffix}`)
 const bob = await signUp(`lb_${suffix}`)
 const carol = await signUp(`lc_${suffix}`)

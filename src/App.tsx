@@ -61,6 +61,7 @@ const SchoolAnnouncementsPage = lazy(() => import('./pages/school/AnnouncementsP
 const SchoolReportsPage = lazy(() => import('./pages/school/ReportsPage'))
 const SchoolProgrammesPage = lazy(() => import('./pages/school/ProgrammesPage'))
 const SchoolImportPage = lazy(() => import('./pages/school/ImportPage'))
+const SchoolStudyPage = lazy(() => import('./pages/school/StudyPage'))
 const GoalsPage = lazy(() => import('./pages/GoalsPage'))
 const PlatformAdminPage = lazy(() => import('./pages/admin/PlatformAdminPage'))
 
@@ -159,7 +160,7 @@ function PomodoroRunner() {
   }, [])
 
   useEffect(() => {
-    const base = 'HabbitFlow — Habit Tracker'
+    const base = 'HabbitFlows — Habit Tracker'
     document.title = running ? `${formatClock(remaining)} · ${MODE_LABEL[mode]} — ${base}` : base
   }, [running, remaining, mode])
 
@@ -312,6 +313,7 @@ export default function App() {
               <Route path="reports" element={lazyPage(<SchoolReportsPage />)} />
               <Route path="programmes" element={lazyPage(<SchoolProgrammesPage />)} />
               <Route path="import" element={lazyPage(<SchoolImportPage />)} />
+              <Route path="study" element={lazyPage(<SchoolStudyPage />)} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -388,6 +388,7 @@ function EditMemberModal({ member, canChangeRole, onClose, onDone }: { member: M
   const [name, setName] = useState(member.display_name)
   const [externalId, setExternalId] = useState(member.external_id ?? '')
   const [role, setRole] = useState<InstRole>(member.role)
+  const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const staffRoles: InstRole[] = ['coordinator', 'class_teacher', 'subject_teacher']
@@ -395,8 +396,9 @@ function EditMemberModal({ member, canChangeRole, onClose, onDone }: { member: M
 
   const save = async (e: FormEvent) => {
     e.preventDefault()
+    if (role !== member.role && reason.trim().length < 3) return setError('Give a reason for the role change (at least 3 characters).')
     setBusy(true)
-    const { error: err } = await supabase.rpc('update_member', { p_membership: member.id, p_name: name, p_external_id: externalId, p_role: role })
+    const { error: err } = await supabase.rpc('update_member', { p_membership: member.id, p_name: name, p_external_id: externalId, p_role: role, p_reason: reason.trim() || null })
     setBusy(false)
     if (err) return setError(friendlyError(err))
     toast.success('Saved.')
@@ -433,6 +435,9 @@ function EditMemberModal({ member, canChangeRole, onClose, onDone }: { member: M
               </option>
             ))}
           </SelectField>
+        )}
+        {roleEditable && role !== member.role && (
+          <Field label="Reason for the role change" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} hint="Kept in the audit history. The person is notified of their new role." />
         )}
       </form>
     </Modal>

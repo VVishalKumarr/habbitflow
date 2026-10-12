@@ -21,7 +21,7 @@ const TABLES = ('academic_years,ai_usage,announcements,assessments,assignments,a
   'class_periods,classes,code_redemptions,conversations,coordinator_scopes,deadline_change_requests,development_programmes,development_scores,' +
   'guardian_links,homework_file_deletions,import_runs,institution_ai_pools,institution_ai_quotas,institution_email_allowlist,institution_invitations,' +
   'institution_licenses,institution_memberships,institution_role_permissions,license_codes,marks,notifications,programme_checkins,programme_members,' +
-  'subjects,submission_files,submission_reviews,submissions,teaching_assignments,terms').split(',')
+  'study_insight_rules,study_insight_snapshots,subject_confidence,subjects,submission_files,submission_reviews,submissions,teaching_assignments,terms').split(',')
 
 try {
   const stranger = await individual(`sec_${suffix}`)

@@ -1,7 +1,7 @@
 # Building the Android app
 
 The Android app is the same web app inside Capacitor 8 (`android/`). Package
-`com.habbitflow.app`, currently **versionCode 3 / versionName 1.2.0**.
+`com.habbitflows.app`, currently **versionCode 3 / versionName 1.2.0**.
 
 ## Requirements
 
@@ -25,17 +25,17 @@ Install: copy to the phone and open it (allow *Install unknown apps*), or
 1. **Create the upload keystore once and back it up** in two safe places (password
    manager + offline copy). Losing it means you can't publish updates.
    ```bash
-   keytool -genkey -v -keystore habbitflow-release.jks -alias habbitflow -keyalg RSA -keysize 2048 -validity 10000
+   keytool -genkey -v -keystore habbitflows-release.jks -alias habbitflows -keyalg RSA -keysize 2048 -validity 10000
    ```
-   Run it inside `android/` so the file is `android/habbitflow-release.jks` (git-ignored: `*.jks`).
+   Run it inside `android/` so the file is `android/habbitflows-release.jks` (git-ignored: `*.jks`).
 2. Create `android/keystore.properties` (git-ignored):
    ```
-   storeFile=../habbitflow-release.jks
+   storeFile=../habbitflows-release.jks
    storePassword=…
-   keyAlias=habbitflow
+   keyAlias=habbitflows
    keyPassword=…
    ```
-   (`storeFile` is relative to `android/app/`, so this points at `android/habbitflow-release.jks`.)
+   (`storeFile` is relative to `android/app/`, so this points at `android/habbitflows-release.jks`.)
 3. Raise `versionCode` (and `versionName`) in `android/app/build.gradle` for every upload.
 4. Build the signed App Bundle:
    ```bash
@@ -56,7 +56,7 @@ Install: copy to the phone and open it (allow *Install unknown apps*), or
 | `RECORD_AUDIO` | voice commands in the Timetable assistant | first time someone taps the microphone |
 | `POST_NOTIFICATIONS`, `WAKE_LOCK`, `c2dm.RECEIVE` | push notifications (Firebase plugin) | only when push is enabled — not before Firebase is set up |
 
-Speech is recognised by the phone's speech service; HabbitFlow never receives audio.
+Speech is recognised by the phone's speech service; HabbitFlows never receives audio.
 Answer the Play **Data safety** form accordingly (audio isn't collected by the app; see
 PRIVACY_SETUP.md).
 

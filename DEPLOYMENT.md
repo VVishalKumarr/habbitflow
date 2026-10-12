@@ -1,10 +1,10 @@
 # Deployment
 
-HabbitFlow has three parts: the **website** (static files), the **Supabase project**
+HabbitFlows has three parts: the **website** (static files), the **Supabase project**
 (database, auth, Edge Functions, scheduled jobs) and the **Android app** (see
 [ANDROID_BUILD.md](ANDROID_BUILD.md)). This page covers the first two.
 
-Current production: site https://vvishalkumarr.github.io/habbitflow/ (GitHub Pages),
+Current production: site https://vvishalkumarr.github.io/habbitflows/ (GitHub Pages),
 Supabase project `udugejhizotqfmzqpnzf`.
 
 ## 1. Database
@@ -26,7 +26,13 @@ node --env-file=.env scripts/db-apply.mjs supabase/migrations/<file>.sql
 | `2026-10-16_ai_timetable_phase6`, `2026-10-17_teacher_timetables` | AI timetable assistant, teacher edits |
 | `2026-10-18_reports_phase7`, `2026-10-19_import_year_transition` | reports, programmes, import/export, year transition |
 | `2026-10-20_notification_delivery` | email / push delivery |
-| `2026-10-21_hardening` | security hardening (run last; safe to re-run) |
+| `2026-10-21_hardening` | security hardening (safe to re-run) |
+| `2026-10-22_rebrand_habbitflow` | HabbitFlows name in the test notification |
+| `2026-10-23_isolation_and_study_insights` | subject-level access, role-change reasons, study insights and study plans |
+| `2026-10-24_ai_limits_and_prices` | monthly AI limits, Opus 5.5 cost tracking, new Plus/Pro prices |
+| `2026-10-25_free_ai_limits` | smaller Free AI allowance (5 questions, 5 commands, 1 check, 1 reschedule a month) |
+| `2026-10-26_ai_model_tiers` | “most capable AI” listed for Plus/Pro (Free uses Haiku) |
+| `2026-10-27_rebrand_habbitflows` | HabbitFlows name in the test notification |
 
 All migrations are additive and safe to re-run. `db-apply.mjs` needs
 `SUPABASE_ACCESS_TOKEN` in `.env` (supabase.com → Account → Access Tokens); delete the
@@ -92,7 +98,7 @@ Build: `npm run build` → `dist/` (static). Environment (`VITE_*`, all public):
 | Variable | |
 |---|---|
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | required |
-| `VITE_BASE_PATH` | `/habbitflow/` on GitHub Pages, `/` on your own domain and in the Android app |
+| `VITE_BASE_PATH` | `/habbitflows/` on GitHub Pages, `/` on your own domain and in the Android app |
 | `VITE_LEGAL_*`, `VITE_AI_PROVIDER`, analytics, Sentry, ads, payments, `VITE_SUPPORT_URL` | optional, see SETUP.md / PRIVACY_SETUP.md / MONETIZATION.md |
 
 **GitHub Pages (now):** pushing to `main` runs `.github/workflows/deploy.yml` with the

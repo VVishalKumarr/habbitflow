@@ -41,7 +41,7 @@ encryption against RFC 8291's example). Claim them as working only after a real 
 
 - AI needs-check questions are a fixed list in the app (the model builds the timetable).
 - Rescheduling changes the weekly timetable (no single-date overrides; undo from History).
-- The `study_plan` AI quota isn't used by any feature yet.
+- The `study_plan` AI quota is used by study plan explanations (October 2026; see PROJECT_STATUS.md).
 - Parents don't see development scores.
 - Planning/habits counts in development scores only if the student opts in.
 - The year transition moves whole classes; individual exceptions are re-enrolled by hand.

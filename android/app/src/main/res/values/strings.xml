@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">HabbitFlow</string>
-    <string name="title_activity_main">HabbitFlow</string>
-    <string name="package_name">com.habbitflow.app</string>
-    <string name="custom_url_scheme">com.habbitflow.app</string>
+    <string name="app_name">HabbitFlows</string>
+    <string name="title_activity_main">HabbitFlows</string>
+    <string name="package_name">com.habbitflows.app</string>
+    <string name="custom_url_scheme">com.habbitflows.app</string>
 </resources>

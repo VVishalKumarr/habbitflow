@@ -37,7 +37,7 @@ export function quotaMessage(err: FunctionError): string {
   const parts = [err.message]
   if (d.resets_at && err.code !== 'feature_disabled' && err.code !== 'too_large') parts.push(`It resets ${resetsIn(d.resets_at)}.`)
   if (err.code === 'quota_exceeded' || err.code === 'feature_disabled') {
-    parts.push(d.institution ? 'Your school sets these limits — ask your school administrator if you need more.' : 'Higher limits come with Plus and Pro (Settings → Plan).')
+    parts.push(d.institution ? 'Your school sets these limits — ask your school administrator if you need more.' : 'Higher limits and our most capable AI come with Plus and Pro (Settings → Plan).')
   }
   return parts.join(' ')
 }

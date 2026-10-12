@@ -288,14 +288,14 @@ export const HELP_ARTICLES: HelpArticle[] = [
           '- “Mark reading done”',
           '- “What’s due this week?”',
           '- “Open my progress”',
-          'Speech is turned into text by your browser or phone; HabbitFlow never receives audio. If the AI is unavailable or you’ve used your allowance, common commands still work.',
+          'Speech is turned into text by your browser or phone; HabbitFlows never receives audio. If the AI is unavailable or you’ve used your allowance, common commands still work.',
         ],
       },
       {
         heading: 'Build with AI (Plus and Pro)',
         body: [
           '1. Click “Build with AI”.',
-          '2. Answer a few questions — your goals, subjects that need more time, fixed commitments, sleep times, when you focus best. Skip anything you like. If your school uses HabbitFlow, your class timetable, homework deadlines and exams are filled in automatically.',
+          '2. Answer a few questions — your goals, subjects that need more time, fixed commitments, sleep times, when you focus best. Skip anything you like. If your school uses HabbitFlows, your class timetable, homework deadlines and exams are filled in automatically.',
           '3. Click “Build my timetable”. The AI explains what it included and why, and anything that didn’t fit.',
           '4. Click “Save as new timetable”. Your existing timetables aren’t changed. Your answers are saved for next time.',
         ],
@@ -337,7 +337,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       {
         heading: 'Your development score',
         body: [
-          'If your school uses HabbitFlow, your Overview shows “Your development”: a score from 1 to 10 for the last 90 days, built from academic results, homework, attendance, planning & habits and extracurricular activities. Open your report to see each part, why it is what it is, and suggestions.',
+          'If your school uses HabbitFlows, your Overview shows “Your development”: a score from 1 to 10 for the last 90 days, built from academic results, homework, attendance, planning & habits and extracurricular activities. Open your report to see each part, why it is what it is, and suggestions.',
           'Parts without enough data are left out instead of counting as zero. Very long or late-night schedules are not rewarded.',
           'Planning & habits only counts if you tick “Share my habit consistency with my school”. Your teachers then see counts only, never your tasks or ticks.',
         ],
@@ -354,7 +354,45 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
   },
   {
-    slug: 'habbitflow-pro',
+    slug: 'study-insights',
+    title: 'School: study insights and your study plan',
+    description: 'How HabbitFlows spots subjects that need attention, and how the study plan adds time for them in your own timetable.',
+    keywords: ['study insights', 'weak subject', 'needs attention', 'improving', 'study plan', 'extra study', 'confidence', 'automatic', 'struggling'],
+    route: '/school/study',
+    public: true,
+    sections: [
+      {
+        heading: 'How subjects are rated',
+        body: [
+          'Open School → Study insights. Each subject is marked Needs attention, Improving, On track, Strong or Not enough data, with the reasons — for example “Results fell over the last three assessments” or “4 of 7 homework pieces handed in”.',
+          'It uses your published marks (as percentages, so different maximums compare), homework handed in and teachers’ requests for changes, and exams in the next three weeks. Missing marks never count as zero: a subject with too little data is “Not enough data”, not weak.',
+          'This is guidance, not a judgement of your ability. If a mark looks wrong, ask your teacher — they can correct it, and the insights update automatically.',
+          'You can rate your confidence in each subject (1–5). A low rating adds a little extra time. Your teachers don’t see your rating.',
+        ],
+      },
+      {
+        heading: 'Your study plan',
+        body: [
+          '1. Under “My study plan”, choose your timetable and the most study you want on one day.',
+          '2. Click “Preview changes”. Each change shows the day, time and why: general study sessions can focus on a subject that needs attention, a strong subject may give one session away (it always keeps at least one), and new sessions go into free time.',
+          '3. Click “Save these changes”. Undo them any time from History.',
+          'The plan only touches your study sessions. School periods, exams, tuition and other activities are never moved. If there isn’t enough free time, it says so instead of overloading your days.',
+          'Choose “Adjust my study sessions automatically” to let HabbitFlows apply the plan by itself when your results change — you’ll get a message and can undo it. “Explain with AI” adds short tips (it uses your AI allowance).',
+        ],
+      },
+      {
+        heading: 'Who sees what',
+        body: [
+          '- You see all your subjects.',
+          '- Subject teachers see only the subjects they teach you; your class teacher sees your class’s subjects.',
+          '- Linked parents see a summary of how each subject is going.',
+          '- Nobody at school sees your personal timetable or which sessions you ticked.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'habbitflows-pro',
     title: 'Plans: Free, Plus and Pro',
     description: 'What each plan includes, how to upgrade and how to cancel.',
     keywords: ['pro', 'plus', 'upgrade', 'price', 'pricing', 'plan', 'plans', 'subscription', 'cancel', 'trial', 'export', 'csv', 'pdf', 'themes', 'ads'],
@@ -394,7 +432,7 @@ export function contextHint(path: string): string {
   if (path.startsWith('/friends')) return 'I can help you add friends, compare progress or understand what friends can see.'
   if (path.startsWith('/settings')) return 'I can help you change your username, recovery email, appearance or account settings.'
   if (path.startsWith('/pro')) return 'I can explain what Pro includes and how upgrading works.'
-  return 'Ask me anything about using HabbitFlow.'
+  return 'Ask me anything about using HabbitFlows.'
 }
 
 /** Plain-text version of all articles (for the AI system prompt). */

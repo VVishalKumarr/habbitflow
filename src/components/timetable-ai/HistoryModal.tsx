@@ -1,4 +1,4 @@
-import { Bot, GraduationCap, Mic, RotateCcw, Shuffle, Undo2 } from 'lucide-react'
+import { Bot, GraduationCap, Lightbulb, Mic, RotateCcw, Shuffle, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { friendlyError } from '../../lib/errors'
 import { loadHistory, undoable, undoChange, type ChangeRow } from '../../lib/timetableAi'
@@ -7,8 +7,8 @@ import { toast } from '../../store/ui'
 import { Modal } from '../ui/Modal'
 import { Spinner } from '../ui/Spinner'
 
-const ICON = { ai_generate: Bot, ai_reschedule: Shuffle, voice: Mic, undo: RotateCcw, teacher: GraduationCap }
-const SOURCE = { ai_generate: 'AI timetable builder', ai_reschedule: 'Rescheduling', voice: 'Command', undo: 'Undo', teacher: 'Class teacher' }
+const ICON = { ai_generate: Bot, ai_reschedule: Shuffle, voice: Mic, undo: RotateCcw, teacher: GraduationCap, ai_study_plan: Lightbulb }
+const SOURCE = { ai_generate: 'AI timetable builder', ai_reschedule: 'Rescheduling', voice: 'Command', undo: 'Undo', teacher: 'Class teacher', ai_study_plan: 'Study plan' }
 
 /** Changes made by the AI assistant and commands, newest first. The newest can be undone. */
 export function HistoryModal({ open, onClose, trackerId }: { open: boolean; onClose: () => void; trackerId: string }) {

@@ -3,7 +3,7 @@
 ## 0. One-time: make yourself platform owner
 
 The platform owner role is granted only with SQL (there is no button for it, so it
-can’t be granted by mistake or by an attacker). Sign up a normal HabbitFlow account
+can’t be granted by mistake or by an attacker). Sign up a normal HabbitFlows account
 for yourself first, then run (Supabase dashboard → SQL editor, or
 `node --env-file=.env scripts/db-apply.mjs --query "…"`):
 
@@ -49,8 +49,8 @@ password and land in **School**. From then on they sign in at
 
 - Links are 32 random bytes, stored only as a SHA-256 hash, work once, and stop
   working when resent or withdrawn.
-- Passwords are never emailed or stored by HabbitFlow (Supabase Auth hashes them).
-- An address that already has a HabbitFlow institutional account (e.g. a teacher at
+- Passwords are never emailed or stored by HabbitFlows (Supabase Auth hashes them).
+- An address that already has a HabbitFlows institutional account (e.g. a teacher at
   two institutions) is asked to sign in and accept instead.
 
 ### Before email is configured
@@ -83,3 +83,20 @@ npx supabase secrets unset ALLOW_MANUAL_INVITE_LINKS --project-ref <ref>
   data is deleted.
 - Forgotten passwords: **Forgot password** with the institutional email (needs email
   configured). Staff can also resend an unused invitation.
+
+## Keeping institutions separate
+
+Every institution is isolated by the database (see [SECURITY.md](SECURITY.md#institutions)),
+so there is nothing to configure per school. When provisioning, keep these habits:
+
+- Approve **exact addresses** for heads; approve a **domain** only if the school owns it
+  (public mail domains are refused automatically).
+- One person can belong to several institutions; each membership has its own role and is
+  checked separately. Invite them in each school rather than sharing accounts.
+- Remove people by **suspending or revoking** (access stops at once, records are kept);
+  never delete institutional data to remove access.
+- **Suspend the institution** (Platform admin) to stop all access, e.g. when a licence
+  lapses; reactivate to restore it.
+- After any database change, run `node --env-file=.env tests/security-review.test.mjs`
+  and `node tests/local-db.test.mjs`; both try to read and change one school's data as
+  another school and fail if anything leaks.

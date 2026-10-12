@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useStructure } from '../../components/school/data'
 import { AiPanel } from '../../components/school/AiPanel'
 import { LicencePanel } from '../../components/school/LicencePanel'
+import { StudyRulesPanel } from '../../components/school/StudyRulesPanel'
 import { YearTransitionModal } from '../../components/school/YearTransition'
 import { COMPONENT_LABEL, COMPONENTS, type ComponentKey } from '../../lib/development'
 import { ErrorNote, List, Loading, PageHeader, Panel, Pill, Row } from '../../components/school/ui'
@@ -62,6 +63,7 @@ export default function SchoolSettingsPage() {
       {head && <PermissionsPanel inst={inst} />}
       {can('manage_license') && <LicencePanel institutionId={inst.institution_id} />}
       {can('manage_institution_settings') && <AiPanel institutionId={inst.institution_id} />}
+      {can('manage_institution_settings') && <StudyRulesPanel institutionId={inst.institution_id} />}
     </div>
   )
 }

@@ -44,7 +44,7 @@ export function HelpIndexPage() {
   const results = useMemo(() => (q.trim().length > 2 ? searchHelp(q) : null), [q])
   const list = results ?? HELP_ARTICLES.filter((a) => a.public)
   useEffect(() => {
-    document.title = 'Help — HabbitFlow'
+    document.title = 'Help — HabbitFlows'
   }, [])
 
   return (
@@ -83,7 +83,7 @@ export function HelpArticlePage() {
   const { slug } = useParams()
   const article = HELP_ARTICLES.find((a) => a.slug === slug)
   useEffect(() => {
-    if (article) document.title = `${article.title} — HabbitFlow Help`
+    if (article) document.title = `${article.title} — HabbitFlows Help`
   }, [article])
   if (!article) return <Navigate to="/help" replace />
   const others = HELP_ARTICLES.filter((a) => a.slug !== article.slug).slice(0, 4)

@@ -6,21 +6,20 @@
 // the user's plan name and the conversation so far. Never passwords, tokens,
 // emails, task names or any other account data.
 import Anthropic from 'npm:@anthropic-ai/sdk'
-import { beginAi, finishAi, quotaInfo, quotaResponse, requestId } from '../_shared/ai-quota.ts'
+import { beginAi, finishAi, modelOptions, quotaInfo, quotaResponse, requestId } from '../_shared/ai-quota.ts'
 import { helpAsText } from '../_shared/help-content.ts'
 import { adminClient, env, json, preflight, rateLimited, readJson, userFromRequest } from '../_shared/http.ts'
 
-const MODEL = env('AI_MODEL') || 'claude-opus-5-5'
 const MAX_QUESTION = 1000
 const MAX_TURNS = 8
 
-const SYSTEM = `You are the help assistant inside HabbitFlow, a habit tracker web and Android app with weekly timetables, a Pomodoro focus timer, progress charts, friends and an optional Pro plan.
+const SYSTEM = `You are the help assistant inside HabbitFlows, a habit tracker web and Android app with weekly timetables, a Pomodoro focus timer, progress charts, friends and an optional Pro plan.
 
-Answer questions about using HabbitFlow, using the help articles below as the source of truth. Give short, practical answers: a sentence or two, or a few numbered steps using the exact button names from the articles. If the articles don't cover something, say you're not sure rather than guessing, and suggest the Help page.
+Answer questions about using HabbitFlows, using the help articles below as the source of truth. Give short, practical answers: a sentence or two, or a few numbered steps using the exact button names from the articles. If the articles don't cover something, say you're not sure rather than guessing, and suggest the Help page.
 
 You cannot see or change the user's data and you cannot click anything. Never say you performed an action; tell the user how to do it. You don't know their tasks, stats, email or payment details, so don't claim to. For account problems you can't solve (payments, deleted data, bugs), suggest the contact address on the Privacy page.
 
-If a question is unrelated to HabbitFlow, reply briefly and steer back to how you can help with the app. Use plain text; simple numbered lists are fine, no tables or headings.
+If a question is unrelated to HabbitFlows, reply briefly and steer back to how you can help with the app. Use plain text; simple numbered lists are fine, no tables or headings.
 
 <help_articles>
 ${helpAsText()}
@@ -70,11 +69,9 @@ Deno.serve(async (req) => {
   const client = new Anthropic({ apiKey: env('ANTHROPIC_API_KEY'), maxRetries: 1, timeout: 45_000 })
   try {
     const response = await client.beta.messages.create({
-      model: MODEL,
+      // Plus/Pro/school: most capable model, retried on a suitable model if declined; Free: the fast model.
+      ...modelOptions(quota),
       max_tokens: quota.max_output_tokens,
-      betas: ['server-side-fallback-2026-07-01'],
-      // Retry on a suitable model automatically if a request is declined.
-      fallbacks: 'default',
       output_config: { effort: 'low' },
       system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
       messages: [...history, { role: 'user', content: `[Page: ${page}] [Plan: ${planName}]\n${question}` }],
@@ -88,7 +85,7 @@ Deno.serve(async (req) => {
       model: response.model,
     })
     if (response.stop_reason === 'refusal') {
-      return json(req, { answer: 'Sorry, I can’t help with that. I can answer questions about using HabbitFlow.', quota: quotaInfo(quota) })
+      return json(req, { answer: 'Sorry, I can’t help with that. I can answer questions about using HabbitFlows.', quota: quotaInfo(quota) })
     }
     const answer = response.content
       .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')

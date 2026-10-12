@@ -13,7 +13,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
   return (
     <div className="flex min-h-dvh pt-safe pb-safe">
       <aside className="relative hidden w-[44%] max-w-xl flex-col justify-between overflow-hidden bg-brand p-12 text-white lg:flex">
-        <Link to="/" aria-label="HabbitFlow home" className="w-fit rounded-lg">
+        <Link to="/" aria-label="HabbitFlows home" className="w-fit rounded-lg">
           <Logo inverted />
         </Link>
         <div>
@@ -36,7 +36,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
       <main className="flex flex-1 items-center justify-center px-5 py-10">
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
-            <Link to="/" aria-label="HabbitFlow home" className="inline-block rounded-lg">
+            <Link to="/" aria-label="HabbitFlows home" className="inline-block rounded-lg">
               <Logo />
             </Link>
           </div>

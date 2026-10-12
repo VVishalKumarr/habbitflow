@@ -31,7 +31,7 @@ const api = (path, body) =>
 
 if (process.argv.includes('--vapid')) {
   const keys = await generateVapidKeys()
-  const subject = process.env.VAPID_SUBJECT || 'https://vvishalkumarr.github.io/habbitflow'
+  const subject = process.env.VAPID_SUBJECT || 'https://vvishalkumarr.github.io/habbitflows'
   await api('/secrets', [
     { name: 'VAPID_PUBLIC_KEY', value: keys.publicKey },
     { name: 'VAPID_PRIVATE_KEY', value: keys.privateKey },

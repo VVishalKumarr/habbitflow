@@ -1,7 +1,7 @@
 import { env } from './env'
 
 export const appConfig = {
-  name: 'HabbitFlow',
+  name: 'HabbitFlows',
   tagline: 'Plan your week. Track your habits. Understand your progress.',
   /** Public URL of the site, used in shared links. Falls back to the current origin. */
   siteUrl: env('VITE_SITE_URL'),

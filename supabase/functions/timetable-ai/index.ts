@@ -4,20 +4,22 @@
 //   evaluate   { tracker_id }              → numbers + findings (always) and advice (metered 'timetable_evaluate')
 //   reschedule { tracker_id, event }       → moves for displaced tasks (metered 'reschedule'; greedy plan without AI)
 //   command    { text, today, now }        → one app action (metered 'voice_command')
+//   study_advice { student_id, tracker_id } → study plan from the school's study insights,
+//                                            plus a short explanation (metered 'study_plan')
 // Nothing is saved here: the app shows the proposal and saves it with
 // apply_timetable_change() only after the student confirms.
 // The model gets the minimum: timetable titles/times, the student's answers,
 // class period times and subjects, deadline/exam titles and dates. Never
-// names, emails, the school's name, marks or attendance.
+// names, emails, the school's name, marks or attendance. Study advice sends
+// subject names, their status and the planned changes — no marks.
 import Anthropic from 'npm:@anthropic-ai/sdk'
-import { beginAi, finishAi, quotaInfo, quotaResponse, requestId, type AiFeature, type QuotaGranted, type QuotaRefused } from '../_shared/ai-quota.ts'
+import { beginAi, finishAi, modelOptions, quotaInfo, quotaResponse, requestId, type AiFeature, type QuotaGranted, type QuotaRefused } from '../_shared/ai-quota.ts'
 import { adminClient, env, json, preflight, rateLimited, readJson, userFromRequest } from '../_shared/http.ts'
 import {
-  affectedTasks, CATEGORIES, DAYS, evaluateTimetable, freeCells, mins, normalizeCommand, planMoves, validateProposal,
-  type Busy, type Move, type RescheduleEvent, type Slot, type Task,
+  affectedTasks, CATEGORIES, DAYS, evaluateTimetable, fmtMin, freeCells, mins, normalizeCommand, planMoves, planStudyBoost, schoolBlocks,
+  validateProposal, type Busy, type Move, type RescheduleEvent, type Slot, type SubjectInsight, type Task,
 } from '../_shared/timetable-core.ts'
 
-const MODEL = env('AI_MODEL') || 'claude-opus-5-5'
 // A whole week as JSON plus the model's reasoning doesn't fit in the chat
 // answer limit, so generation has its own floor.
 const GENERATE_MIN_TOKENS = 12000
@@ -46,10 +48,8 @@ async function askModel(q: QuotaGranted, opts: { system: string; user: string; s
   const client = new Anthropic({ apiKey: env('ANTHROPIC_API_KEY'), maxRetries: 0, timeout: 120_000 })
   try {
     const response = await client.beta.messages.create({
-      model: MODEL,
+      ...modelOptions(q),
       max_tokens: opts.maxTokens,
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
       output_config: { effort: opts.effort, format: { type: 'json_schema', schema: opts.schema } },
       system: [{ type: 'text', text: opts.system, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: opts.user }],
@@ -106,19 +106,7 @@ const aiNote = (o: AiOutcome) => (o.ok ? null : { ...(o.refused ?? {}), code: o.
 const day = (n: number) => DAYS[n]
 const t5 = (t: string) => t.slice(0, 5)
 
-function schoolBusy(ctx: Ctx): Busy[] {
-  // Merge each day's periods into one "school" block per continuous stretch (gaps ≤ 30 min).
-  const out: Busy[] = []
-  for (let d = 0; d < 7; d++) {
-    const ps = ctx.periods.filter((p) => p.day === d).sort((a, b) => mins(a.start)! - mins(b.start)!)
-    for (const p of ps) {
-      const last = out[out.length - 1]
-      if (last && last.day === d && mins(p.start)! - mins(last.end)! <= 30) last.end = mins(p.end)! > mins(last.end)! ? p.end : last.end
-      else out.push({ day: d, start: p.start, end: p.end, label: 'school' })
-    }
-  }
-  return out
-}
+const schoolBusy = (ctx: Ctx): Busy[] => schoolBlocks(ctx.periods)
 
 interface Answers {
   goals?: string[]
@@ -159,7 +147,7 @@ function cleanAnswers(raw: unknown): Answers {
 }
 
 // ---------------------------------------------------------------------------
-const GENERATE_SYSTEM = `You build weekly personal timetables for students in HabbitFlow, a habit tracker.
+const GENERATE_SYSTEM = `You build weekly personal timetables for students in HabbitFlows, a habit tracker.
 
 The timetable is a grid: a list of time slots (rows, the same for every day of the week, never overlapping) and activities placed in a (slot, day) cell. Days are numbers: 0 = Sunday … 6 = Saturday. Times are 24-hour "HH:MM".
 
@@ -195,7 +183,7 @@ const GENERATE_SCHEMA: Json = {
   },
 }
 
-const EVALUATE_SYSTEM = `You review a student's weekly timetable in HabbitFlow and give short, kind, practical advice.
+const EVALUATE_SYSTEM = `You review a student's weekly timetable in HabbitFlows and give short, kind, practical advice.
 
 You get the timetable, numbers already computed by the app (minutes per category and per day) and findings the app detected. Don't recalculate or contradict the numbers. Base advice on them: overloaded days, missing breaks, late nights, clashes with school, exams without revision, unused time. Suggest concrete changes ("Move Thursday's 21:00 study to the free 17:00 slot"). Never praise a schedule that leaves no time for sleep, meals or rest. Plain language for a teenager; no headings.
 
@@ -211,7 +199,7 @@ const EVALUATE_SCHEMA: Json = {
   },
 }
 
-const RESCHEDULE_SYSTEM = `You help a student in HabbitFlow move activities that an event displaces in their weekly timetable.
+const RESCHEDULE_SYSTEM = `You help a student in HabbitFlows move activities that an event displaces in their weekly timetable.
 
 You get the event, the displaced activities and the free cells (ids) they could move to. For each displaced activity choose one free cell id, or null to leave it where it is. Use each cell at most once. Prefer: the same time on a nearby day, keeping study before the related deadline/exam, not stacking more than about 2 hours back to back, not making one day much heavier than others, and not late at night. "explanation": one or two sentences on the overall plan. Each "reason" is a few words.`
 
@@ -228,7 +216,21 @@ const RESCHEDULE_SCHEMA: Json = {
   },
 }
 
-const COMMAND_SYSTEM = `You turn one short spoken or typed instruction from a student into exactly one HabbitFlow action. You never perform it; the app shows it to the student to confirm.
+const STUDY_SYSTEM = `You explain a study plan to a student in HabbitFlows. The app has already decided, from the school's marks and homework records, how each subject is going and which study sessions to add or re-label; you get the subject statuses and the planned changes, never the marks themselves.
+
+Write a short, kind summary (2–3 sentences) of what the plan does and why, and up to four concrete tips for using the extra time well (e.g. past papers for an exam, short daily practice for a declining subject, asking the teacher about corrections). Be honest that this is guidance, not a judgement of ability, and never promise better marks. Don't contradict or recalculate the plan. Plain language for a teenager; no headings.`
+
+const STUDY_SCHEMA: Json = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['summary', 'tips'],
+  properties: {
+    summary: { type: 'string' },
+    tips: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['title', 'detail'], properties: { title: { type: 'string' }, detail: { type: 'string' } } } },
+  },
+}
+
+const COMMAND_SYSTEM = `You turn one short spoken or typed instruction from a student into exactly one HabbitFlows action. You never perform it; the app shows it to the student to confirm.
 
 Actions (fill every field of the chosen action; days are 0 = Sunday … 6 = Saturday, resolve "today", "tomorrow", weekday names from the date given; times are 24-hour "HH:MM"):
 - add_task: add a weekly activity. title, day, start, end (if no end is said, one hour after start), category (study, exercise, work, personal, other).
@@ -500,6 +502,49 @@ Deno.serve(async (req) => {
         const f = e as AiFailure
         return json(req, { error: f.message, code: f.code }, f.status)
       }
+    }
+
+    // -----------------------------------------------------------------------
+    case 'study_advice': {
+      if (typeof body.student_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.student_id)) return json(req, { error: 'Invalid request.' }, 400)
+      const tt = await loadTimetable(who.client, body.tracker_id)
+      if (!tt) return json(req, { error: 'Timetable not found.' }, 404)
+      // The database decides what this person may see; a study plan is only for the student themselves.
+      const { data: ins, error: insError } = await who.client.rpc('study_insights', { p_student: body.student_id })
+      if (insError || !ins) return json(req, { error: 'Student not found.' }, 404)
+      const insights = ins as { viewer: string; rules: { max_daily_study_minutes: number }; subjects: SubjectInsight[] }
+      if (insights.viewer !== 'student') return json(req, { error: 'Study plans are made by the student.' }, 403)
+      const ctx = await loadCtx()
+      const busy = schoolBusy(ctx)
+      const [prefs, settings] = await Promise.all([
+        who.client.from('timetable_preferences').select('answers').maybeSingle(),
+        who.client.from('study_plan_settings').select('max_daily_study_minutes').maybeSingle(),
+      ])
+      const answers = (prefs.data?.answers as Answers | undefined) ?? {}
+      for (const c of answers.commitments ?? []) for (const d of c.days ?? []) busy.push({ day: d, start: c.start, end: c.end, label: c.label })
+      const plan = planStudyBoost(tt.slots, tt.tasks, insights.subjects, {
+        busy,
+        maxDailyStudy: settings.data?.max_daily_study_minutes ?? insights.rules.max_daily_study_minutes ?? 180,
+        wake: answers.wake ?? null,
+        sleep: answers.sleep ?? null,
+      })
+      const statusText = insights.subjects.map((s) => `${s.subject}: ${s.status.replace(/_/g, ' ')}${s.recommended_minutes ? ` (${s.recommended_minutes > 0 ? '+' : ''}${s.recommended_minutes} min a week suggested)` : ''}${s.evidence?.exam ? ', exam soon' : ''}`).join('\n')
+      const changeText = plan.changes.map((c) => `${day(c.day)} ${c.start}–${c.end}: ${c.kind === 'add' ? 'add' : `change “${c.from_title}” to`} ${c.title} (${fmtMin(c.minutes)})`).join('\n')
+      const user = [
+        `Subjects:\n${statusText}`,
+        plan.changes.length ? `Planned changes:\n${changeText}` : 'Planned changes: none',
+        plan.tradeoffs.length ? `Trade-offs:\n${plan.tradeoffs.join('\n')}` : '',
+      ].filter(Boolean).join('\n\n')
+      const o = insights.subjects.length
+        ? await metered(userId, 'study_plan', rid, user.length, (q) => askModel(q, { system: STUDY_SYSTEM, user, schema: STUDY_SCHEMA, effort: 'low', maxTokens: q.max_output_tokens }))
+        : { ok: false as const, code: 'empty', error: 'No subjects to plan for yet.', status: 200 }
+      const advice = o.ok
+        ? {
+            summary: String(o.data.summary ?? '').slice(0, 600),
+            tips: (Array.isArray(o.data.tips) ? o.data.tips : []).slice(0, 4).map((a) => ({ title: String((a as Json).title ?? '').slice(0, 120), detail: String((a as Json).detail ?? '').slice(0, 400) })),
+          }
+        : null
+      return json(req, { plan, version: tt.version, advice, ai: aiNote(o), quota: o.ok ? quotaInfo(o.quota) : undefined })
     }
 
     default:
