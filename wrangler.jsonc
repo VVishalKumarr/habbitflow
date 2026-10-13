@@ -1,0 +1,12 @@
+// Cloudflare Workers deployment of the website (habbitflows.com).
+// The site is static: Cloudflare serves the built files from dist/ and, for
+// any path that isn't a file (/dashboard, /help/…), returns index.html so the
+// app's router can show the page. No Worker code runs.
+{
+  "name": "habbitflows-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
