@@ -3,7 +3,7 @@
 // any path that isn't a file (/dashboard, /help/…), returns index.html so the
 // app's router can show the page. No Worker code runs.
 {
-  "name": "habbitflows-site",
+  "name": "habbitflows",
   "compatibility_date": "2026-10-01",
   // Builds the site as part of `wrangler deploy`, so the Cloudflare build
   // command can be left empty.
