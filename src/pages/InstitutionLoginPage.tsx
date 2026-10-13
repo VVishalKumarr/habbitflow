@@ -1,6 +1,7 @@
 import { AlertCircle, Building2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { EmailCodeLogin, LoginMethodSwitch } from '../components/auth/EmailCodeLogin'
 import { Field } from '../components/ui/Field'
 import { Spinner } from '../components/ui/Spinner'
 import { analytics } from '../lib/analytics'
@@ -15,6 +16,7 @@ export default function InstitutionLoginPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [method, setMethod] = useState<'password' | 'code'>('password')
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -45,6 +47,10 @@ export default function InstitutionLoginPage() {
           Institution
         </span>
       </div>
+      <LoginMethodSwitch value={method} onChange={setMethod} />
+      {method === 'code' ? (
+        <EmailCodeLogin identifierLabel="Institutional email" kind="institution" />
+      ) : (
       <form onSubmit={submit} noValidate className="space-y-5">
         {formError && (
           <div role="alert" className="flex items-start gap-2.5 rounded-xl bg-danger-soft px-3.5 py-3 text-sm text-danger">
@@ -82,6 +88,7 @@ export default function InstitutionLoginPage() {
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
+      )}
       <p className="mt-6 text-center text-sm text-muted">
         No account yet? Your institution sends you an activation email. Institutional accounts can’t be created here.
       </p>

@@ -6,6 +6,7 @@ import { callFunction, FunctionError } from '../../lib/functions'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/auth'
 import { toast } from '../../store/ui'
+import { EmailSetupForm } from '../auth/EmailSetup'
 import { Field } from '../ui/Field'
 import { Modal } from '../ui/Modal'
 import { Spinner } from '../ui/Spinner'
@@ -120,49 +121,32 @@ export function ChangeUsernameDialog({ open, onClose }: { open: boolean; onClose
   )
 }
 
-export function RecoveryEmailDialog({ open, onClose, current, onSaved }: { open: boolean; onClose: () => void; current: string | null; onSaved: () => void }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({})
-  const [busy, setBusy] = useState(false)
-
-  const submit = async () => {
-    const next: typeof errors = {}
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) next.email = 'Enter a valid email address.'
-    if (!password) next.password = 'Enter your current password.'
-    setErrors(next)
-    if (Object.keys(next).length) return
-    setBusy(true)
-    try {
-      await callFunction('account-email', { email: email.trim(), password })
-      toast.success(`We sent a confirmation link to ${email.trim()}. It expires in 24 hours.`)
-      setEmail('')
-      setPassword('')
-      onSaved()
-      onClose()
-    } catch (e) {
-      const err = e as FunctionError
-      if (err.status === 403) setErrors({ password: err.message })
-      else setErrors({ form: err.message })
-    } finally {
-      setBusy(false)
-    }
-  }
-
+export function RecoveryEmailDialog({ open, onClose, current, pending, onSaved }: {
+  open: boolean
+  onClose: () => void
+  current: string | null
+  pending?: string | null
+  onSaved: () => void
+}) {
   return (
-    <Dialog
+    <Modal
       open={open}
       onClose={onClose}
-      title={current ? 'Change Recovery Email' : 'Add Recovery Email'}
-      subtitle={current ? `Your current address (${current}) stays active until the new one is confirmed.` : 'Used only to reset your password if you forget it.'}
-      submitLabel="Send confirmation link"
-      busy={busy}
-      onSubmit={submit}
+      title={current ? 'Change Email' : 'Add Email'}
+      subtitle={current ? `Your current address (${current}) stays active until the new one is confirmed.` : 'Used for logging in with a code and resetting your password.'}
     >
-      {errors.form && <Warning>{errors.form}</Warning>}
-      <Field label="Email address" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
-      <Field label="Current Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
-    </Dialog>
+      {open && (
+        <EmailSetupForm
+          current={current}
+          pending={pending ?? null}
+          onDone={() => {
+            onSaved()
+            onClose()
+          }}
+          onCancel={onClose}
+        />
+      )}
+    </Modal>
   )
 }
 

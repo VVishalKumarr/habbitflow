@@ -5,7 +5,7 @@ import { Field } from '../components/ui/Field'
 import { Spinner } from '../components/ui/Spinner'
 import { analytics } from '../lib/analytics'
 import { PASSWORD_MIN, USERNAME_MAX, USERNAME_MIN, validatePassword, validateUsername } from '../lib/auth'
-import { callFunction } from '../lib/functions'
+import { sendEmailCode } from '../lib/emailCodes'
 import { useAuth } from '../store/auth'
 import { toast } from '../store/ui'
 import { AuthLayout } from './AuthLayout'
@@ -39,7 +39,7 @@ export default function RegisterPage() {
     if (p) next.password = p
     if (!confirm) next.confirm = 'Please confirm your password.'
     else if (confirm !== password) next.confirm = 'Passwords do not match.'
-    if (email.trim() && !EMAIL_RE.test(email.trim())) next.email = 'Enter a valid email address, or leave it empty.'
+    if (!EMAIL_RE.test(email.trim())) next.email = 'Enter your email address. You’ll confirm it with a code.'
     return next
   }
 
@@ -52,7 +52,7 @@ export default function RegisterPage() {
     setBusy(true)
     try {
       await signUp(username, password)
-      analytics.track('signup_completed', { source: email.trim() ? 'with_email' : 'no_email' })
+      analytics.track('signup_completed', { source: 'with_email' })
     } catch (err) {
       const message = (err as Error).message
       if (/username/i.test(message)) setErrors({ username: message })
@@ -60,18 +60,17 @@ export default function RegisterPage() {
       setBusy(false)
       return
     }
-    // The account exists now; the recovery email is a separate, optional step.
-    if (email.trim()) {
-      callFunction('account-email', { email: email.trim(), password })
-        .then(() => toast.success(`Check ${email.trim()} for a link to confirm your recovery email.`))
-        .catch((err: Error) =>
-          toast.info(`Your account is ready, but the recovery email wasn’t set: ${err.message} You can add it later in Settings.`),
-        )
-    }
+    // The account exists now. Send the confirmation code; the app asks for it
+    // straight away (EmailGate) and keeps asking until the email is confirmed.
+    sendEmailCode(email)
+      .then(() => toast.success(`We sent a 6-digit code to ${email.trim()}. Enter it to confirm your email.`))
+      .catch((err: Error & { code?: string }) => {
+        if (err.code !== 'email_not_configured') toast.info(`Your account is ready, but we couldn’t send the code: ${err.message} You can send it again in a moment.`)
+      })
   }
 
   return (
-    <AuthLayout title="Create your account" subtitle="A username and a password is all you need.">
+    <AuthLayout title="Create your account" subtitle="A username, a password and your email.">
       <form onSubmit={submit} onFocus={onStart} noValidate className="space-y-5">
         {formError && (
           <div role="alert" className="flex items-start gap-2.5 rounded-xl bg-danger-soft px-3.5 py-3 text-sm text-danger">
@@ -116,7 +115,7 @@ export default function RegisterPage() {
         />
         <div>
           <Field
-            label="Email (optional)"
+            label="Email"
             name="email"
             type="email"
             inputMode="email"
@@ -129,7 +128,7 @@ export default function RegisterPage() {
           />
           <p className="mt-2 flex items-start gap-2 text-sm text-muted">
             <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            If you don't add an email, password recovery will not be available unless you add one later.
+            We’ll send a code to confirm it. You can then log in with a code instead of your password, and reset your password if you forget it.
           </p>
         </div>
         <button type="submit" className="btn-primary h-11 w-full text-[15px]" disabled={busy}>

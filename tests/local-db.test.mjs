@@ -267,5 +267,37 @@ await test('direct reads of the new tables are closed', async () => {
   assert.match(await fails_(as(U.CT, `select public.deny('x', null, 'y')`)), /permission denied/)
 })
 
+await test('login codes: the account lookup finds verified emails and usernames, only for the server', async () => {
+  await db.exec(`set session_replication_role = replica`)
+  const kid = (await q(`insert into auth.users (email) values ('kid@habitflow.local') returning id`))[0].id
+  const kid2 = (await q(`insert into auth.users (email) values ('kid2@habitflow.local') returning id`))[0].id
+  const unverified = (await q(`insert into auth.users (email) values ('nomail@habitflow.local') returning id`))[0].id
+  const banned = (await q(`insert into auth.users (email, banned_until) values ('gone@habitflow.local', now() + interval '1 day') returning id`))[0].id
+  for (const [id, name] of [[kid, 'kid'], [kid2, 'kid2'], [unverified, 'nomail'], [banned, 'gone']]) {
+    await q(`insert into public.profiles (id, username) values ($1, $2)`, [id, name])
+  }
+  await q(`insert into public.profiles (id, username, account_type) values ($1, 'teacher_ct', 'institutional') on conflict (id) do nothing`, [U.CT])
+  await q(`insert into public.account_private (user_id, recovery_email, email_verified_at) values ($1, 'family@example.com', now()), ($2, 'family@example.com', now()), ($3, 'gone@example.com', now())`, [kid, kid2, banned])
+  await q(`insert into public.account_private (user_id, recovery_email) values ($1, 'nomail@example.com')`, [unverified])
+  await db.exec(`set session_replication_role = origin`)
+
+  const asServer = async (sql, params) => {
+    await db.exec('set role service_role')
+    try { return (await db.query(sql, params)).rows } finally { await db.exec('reset role') }
+  }
+  const look = (id) => asServer(`select username, login_email, destination from public.login_code_accounts($1) order by username`, [id])
+  assert.deepEqual((await look('family@example.com')).map((r) => r.username), ['kid', 'kid2'], 'one email, two accounts')
+  assert.deepEqual(await look('KID'), [{ username: 'kid', login_email: 'kid@habitflow.local', destination: 'family@example.com' }], 'username, case-insensitive')
+  assert.deepEqual(await look('nomail'), [], 'no confirmed email: no code')
+  assert.deepEqual(await look('nomail@example.com'), [], 'unconfirmed email: no code')
+  assert.deepEqual(await look('gone'), [], 'banned accounts never get codes')
+  assert.deepEqual((await look('ct@test.example')).map((r) => r.destination), ['ct@test.example'], 'institutional login email')
+  assert.deepEqual(await look('kid@habitflow.local'), [], 'internal login addresses are never a destination')
+  assert.match(await fails_(as(U.S1, `select * from public.login_code_accounts('family@example.com')`)), /permission denied/)
+  assert.match(await fails_(as(U.S1, `select count(*) from public.login_codes`)), /permission denied/)
+  const acct = (await as(kid, `select public.my_account() r`))[0].r
+  assert.deepEqual([acct.account_type, acct.email_verified, typeof acct.created_at], ['individual', true, 'string'])
+})
+
 console.log(`\n${passed} passed, ${fails.length} failed${fails.length ? ': ' + fails.join('; ') : ''}`)
 if (fails.length) process.exitCode = 1

@@ -217,7 +217,7 @@ export default function SettingsPage() {
       <span className="shrink-0 text-muted">· verified</span>
     </span>
   ) : (
-    <span className="text-sm text-muted">Not set — password recovery is unavailable.</span>
+    <span className="text-sm text-danger">Not set — required for login codes and password resets.</span>
   )
 
   const planLabel = sub.state === 'TRIAL' ? `${sub.plan_name} trial` : sub.state === 'EXPIRED' ? 'Free (paid plan ended)' : sub.plan_name
@@ -266,24 +266,19 @@ export default function SettingsPage() {
         </Row>
         <div className="flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="text-[15px] font-medium">Recovery Email</p>
+            <p className="text-[15px] font-medium">Email</p>
             {emailStatus}
             {account?.pending_email && (
               <p className="mt-1 text-sm break-words text-muted">
-                Waiting for confirmation: <span className="font-medium text-ink">{account.pending_email}</span>. Check your inbox.
+                Waiting for confirmation: <span className="font-medium text-ink">{account.pending_email}</span>. Enter the code we emailed you.
               </p>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
             <button type="button" className="btn-secondary" onClick={() => setDialog('email')}>
               <Mail className="size-4" aria-hidden="true" />
-              {account?.recovery_email ? 'Change email' : account?.pending_email ? 'Resend or change' : 'Add email'}
+              {account?.recovery_email ? 'Change email' : account?.pending_email ? 'Enter code' : 'Add email'}
             </button>
-            {(account?.recovery_email || account?.pending_email) && (
-              <button type="button" className="btn-ghost text-danger" onClick={() => setDialog('remove-email')}>
-                Remove
-              </button>
-            )}
           </div>
         </div>
         </>
@@ -495,7 +490,7 @@ export default function SettingsPage() {
       </div>
 
       <ChangeUsernameDialog open={dialog === 'username'} onClose={() => setDialog(null)} />
-      <RecoveryEmailDialog open={dialog === 'email'} onClose={() => setDialog(null)} current={account?.recovery_email ?? null} onSaved={loadAccount} />
+      <RecoveryEmailDialog open={dialog === 'email'} onClose={() => setDialog(null)} current={account?.recovery_email ?? null} pending={account?.pending_email ?? null} onSaved={loadAccount} />
       <RemoveEmailDialog open={dialog === 'remove-email'} onClose={() => setDialog(null)} onSaved={loadAccount} />
       <ChangePasswordDialog open={dialog === 'password'} onClose={() => setDialog(null)} />
       <DeleteAccountDialog open={dialog === 'delete'} onClose={() => setDialog(null)} />

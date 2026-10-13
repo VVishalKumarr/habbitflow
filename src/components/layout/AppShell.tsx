@@ -1,6 +1,7 @@
 import { Building2, ChartNoAxesColumn, ChevronDown, CircleHelp, LayoutDashboard, LogOut, Settings, ShieldCheck, Sparkles, Target, Timer, Users } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { analytics } from '../../lib/analytics'
+import { EmailGate } from '../auth/EmailSetup'
 import { useAuth } from '../../store/auth'
 import { useFriends } from '../../store/friends'
 import { useInstitutionStore } from '../../store/institution'
@@ -201,6 +202,7 @@ export function AppShell() {
       <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 pt-5 pb-[calc(9rem+env(safe-area-inset-bottom))] sm:px-6 md:pt-8 md:pb-24 lg:px-8">
         <Outlet />
       </main>
+      <EmailGate />
 
       <div className="mx-auto hidden w-full max-w-[1440px] px-4 pb-8 sm:px-6 md:block lg:px-8">
         <SiteFooter compact />

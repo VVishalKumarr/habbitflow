@@ -6,7 +6,7 @@
 import { spawnSync } from 'node:child_process'
 import { readdirSync } from 'node:fs'
 
-const unit = ['timetable-core.test.mjs', 'study-plan.test.mjs', 'webpush.test.mjs', 'local-db.test.mjs']
+const unit = ['timetable-core.test.mjs', 'study-plan.test.mjs', 'codes.test.mjs', 'webpush.test.mjs', 'local-db.test.mjs']
 const backend = readdirSync('tests').filter((f) => f.endsWith('.test.mjs') && !unit.includes(f)).sort()
 const e2e = process.argv.includes('--e2e') ? readdirSync('tests').filter((f) => f.startsWith('e2e') && f.endsWith('.mjs')).sort() : []
 

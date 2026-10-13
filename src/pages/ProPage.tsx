@@ -7,6 +7,7 @@ import { Spinner } from '../components/ui/Spinner'
 import { analytics } from '../lib/analytics'
 import { formatDate } from '../lib/dates'
 import { getPaymentService } from '../lib/payments'
+import { openStripePortal } from '../lib/payments/stripe'
 import { useRegion } from '../lib/region'
 import { useAuth } from '../store/auth'
 import { renewsAutomatically, useSubscription, useSubscriptionStore, type Plan } from '../store/subscription'
@@ -38,6 +39,20 @@ export default function ProPage() {
   useEffect(() => {
     if (signedIn) load()
   }, [signedIn, load])
+
+  // Back from Stripe Checkout: the plan switches on when Stripe's webhook arrives (usually seconds).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const result = params.get('checkout')
+    if (!result) return
+    window.history.replaceState(null, '', window.location.pathname)
+    if (result === 'success') {
+      toast.success('Payment received — your plan will switch on in a few seconds.')
+      const timers = [3000, 8000, 20000].map((ms) => window.setTimeout(() => load(), ms))
+      return () => timers.forEach((t) => window.clearTimeout(t))
+    }
+    if (result === 'cancelled') toast.info('Checkout cancelled. You haven’t been charged.')
+  }, [load])
 
   const upgrade = async (plan: Plan) => {
     analytics.track('upgrade_clicked', { source: 'pro_page', interval, plan: plan.id })
@@ -112,9 +127,14 @@ export default function ProPage() {
             {sub.expires_at &&
               ` · ${renewsAutomatically(sub) ? 'renews' : 'ends'} ${formatDate(sub.expires_at.slice(0, 10), { month: 'short', day: 'numeric', year: 'numeric' })}`}
           </p>
-          {sub.provider === 'razorpay' && !sub.cancel_at_period_end && payments.cancel && (
+          {(sub.provider === 'razorpay' || sub.provider === 'stripe') && !sub.cancel_at_period_end && payments.cancel && (
             <button type="button" className="btn-ghost" onClick={() => setConfirmCancel(true)}>
               Cancel subscription
+            </button>
+          )}
+          {sub.provider === 'stripe' && (
+            <button type="button" className="btn-ghost" onClick={() => openStripePortal().catch((e: Error) => toast.error(e.message))}>
+              Manage card & invoices
             </button>
           )}
           {sub.provider === 'google_play' && <p className="text-center text-sm text-muted">Manage this subscription in Google Play → Payments & subscriptions.</p>}

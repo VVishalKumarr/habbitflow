@@ -1,11 +1,14 @@
-// Web subscriptions (Razorpay).
-// POST { action: 'create', plan: 'plus' | 'pro', interval: 'monthly' | 'yearly' }  -> { subscription_id, key_id }
-// POST { action: 'verify', razorpay_payment_id, razorpay_subscription_id, razorpay_signature }
-// POST { action: 'cancel' }  -> cancels at the end of the current period
-// All signed in. Pro status is only ever set from data fetched from Razorpay
-// after the signature is verified; nothing the browser claims is trusted.
-import { adminClient, json, preflight, rateLimited, readJson, userFromRequest } from '../_shared/http.ts'
+// Web subscriptions: Razorpay (India, ₹) and Stripe (everywhere else, $).
+// POST { action: 'create', plan: 'plus' | 'pro', interval: 'monthly' | 'yearly' }  -> { subscription_id, key_id }   (Razorpay)
+// POST { action: 'verify', razorpay_payment_id, razorpay_subscription_id, razorpay_signature }                    (Razorpay)
+// POST { action: 'stripe_checkout', plan, interval }  -> { url }   Stripe Checkout page
+// POST { action: 'stripe_portal' }                    -> { url }   Stripe customer portal (card, cancel, invoices)
+// POST { action: 'cancel' }  -> cancels at the end of the current period (both providers)
+// All signed in. Plans are only ever granted from data fetched from the
+// provider after verification; nothing the browser claims is trusted.
+import { adminClient, json, preflight, rateLimited, readJson, siteUrl, userFromRequest } from '../_shared/http.ts'
 import { mapStatus, razorpay, razorpayConfigured, toIso, verifyCheckoutSignature, type RzpSubscription } from '../_shared/razorpay.ts'
+import { stripe, stripeConfigured, type StripeSubscription } from '../_shared/stripe.ts'
 
 Deno.serve(async (req) => {
   const early = preflight(req)
@@ -13,12 +16,73 @@ Deno.serve(async (req) => {
 
   const who = await userFromRequest(req)
   if (!who) return json(req, { error: 'Please log in again.' }, 401)
-  if (!razorpayConfigured()) {
-    return json(req, { error: 'Online payments aren’t set up yet.', code: 'payments_not_configured' }, 503)
-  }
-
   const body = await readJson<Record<string, string>>(req)
   const admin = adminClient()
+  const notConfigured = () => json(req, { error: 'Online payments aren’t set up yet.', code: 'payments_not_configured' }, 503)
+
+  if (body?.action === 'stripe_checkout') {
+    if (!stripeConfigured()) return notConfigured()
+    if (await rateLimited(who.user.id, 'billing_create', 10, 3600)) return json(req, { error: 'Too many attempts.' }, 429)
+    const interval = body.interval === 'yearly' ? 'yearly' : 'monthly'
+    const planIdWanted = /^[a-z][a-z0-9_]{1,30}$/.test(body.plan ?? '') ? body.plan : 'pro'
+    if (planIdWanted === 'free') return json(req, { error: 'Choose a paid plan.' }, 400)
+    const { data: plan } = await admin.from('plans').select('id, stripe_price_monthly, stripe_price_yearly').eq('id', planIdWanted).maybeSingle()
+    if (!plan) return json(req, { error: 'Unknown plan.' }, 400)
+    const price = interval === 'yearly' ? plan.stripe_price_yearly : plan.stripe_price_monthly
+    if (!price) return json(req, { error: 'This billing option isn’t available yet.', code: 'plan_not_configured' }, 503)
+    const { data: acct } = await admin.from('account_private').select('recovery_email, email_verified_at').eq('user_id', who.user.id).maybeSingle()
+    const email = acct?.email_verified_at ? acct.recovery_email : who.user.email?.endsWith('@habitflow.local') ? null : who.user.email
+    const session = await stripe<{ url: string }>('/checkout/sessions', {
+      method: 'POST',
+      body: {
+        mode: 'subscription',
+        line_items: [{ price, quantity: 1 }],
+        success_url: `${siteUrl()}/pro?checkout=success`,
+        cancel_url: `${siteUrl()}/pro?checkout=cancelled`,
+        client_reference_id: who.user.id,
+        customer_email: email ?? undefined,
+        subscription_data: { metadata: { user_id: who.user.id, plan: plan.id } },
+        metadata: { user_id: who.user.id, plan: plan.id },
+      },
+    })
+    return json(req, { url: session.url })
+  }
+
+  if (body?.action === 'stripe_portal') {
+    if (!stripeConfigured()) return notConfigured()
+    const { data: row } = await admin
+      .from('subscriptions')
+      .select('provider_subscription_id')
+      .eq('user_id', who.user.id)
+      .eq('provider', 'stripe')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (!row?.provider_subscription_id) return json(req, { error: 'No card subscription found.' }, 404)
+    const sub = await stripe<StripeSubscription>(`/subscriptions/${encodeURIComponent(row.provider_subscription_id)}`)
+    const portal = await stripe<{ url: string }>('/billing_portal/sessions', { method: 'POST', body: { customer: sub.customer, return_url: `${siteUrl()}/settings` } })
+    return json(req, { url: portal.url })
+  }
+
+  if (body?.action === 'cancel') {
+    if (stripeConfigured()) {
+      const { data: rows } = await admin
+        .from('subscriptions')
+        .select('id, provider_subscription_id')
+        .eq('user_id', who.user.id)
+        .eq('provider', 'stripe')
+        .in('status', ['active', 'past_due', 'trialing'])
+      for (const r of rows ?? []) {
+        await stripe(`/subscriptions/${r.provider_subscription_id}`, { method: 'POST', body: { cancel_at_period_end: true } }).catch((e) =>
+          console.error('stripe cancel failed', String(e)),
+        )
+        await admin.from('subscriptions').update({ cancel_at_period_end: true }).eq('id', r.id)
+      }
+    }
+    if (!razorpayConfigured()) return json(req, { ok: true })
+  }
+
+  if (!razorpayConfigured()) return notConfigured()
 
   if (body?.action === 'create') {
     if (await rateLimited(who.user.id, 'billing_create', 10, 3600)) return json(req, { error: 'Too many attempts.' }, 429)

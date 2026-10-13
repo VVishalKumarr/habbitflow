@@ -1,8 +1,8 @@
 // PaymentService: one interface, one implementation per provider.
 // The rest of the app only calls getPaymentService().
 //
-// Web      -> by pricing region: India (₹) uses Razorpay; other regions need an
-//             international provider (Lemon Squeezy / Stripe slots, not connected yet)
+// Web      -> by pricing region: India (₹) uses Razorpay; other regions ($) use
+//             Stripe (when VITE_STRIPE_PUBLISHABLE_KEY is set)
 // Android  -> Google Play Billing (required by Play for digital subscriptions;
 //             never an external web checkout inside the app)
 //
@@ -13,6 +13,7 @@ import { isNative } from '../native'
 import type { Region } from '../region'
 import { googlePlayProvider } from './googlePlay'
 import { razorpayProvider } from './razorpay'
+import { stripeProvider } from './stripe'
 
 export type BillingInterval = 'monthly' | 'yearly'
 
@@ -39,15 +40,13 @@ const unavailable = (reason: string): PaymentProvider => ({
 
 export function getPaymentService(region: Region = 'IN'): PaymentProvider {
   if (isNative) return googlePlayProvider()
-  switch (paymentsConfig.web) {
-    case 'razorpay':
-      // Razorpay charges the Indian (₹) prices; other regions need an international provider.
-      if (region !== 'IN') return unavailable('Payments outside India are coming soon.')
-      return paymentsConfig.razorpayKeyId ? razorpayProvider() : unavailable('Online payments aren’t set up yet.')
-    case 'stripe':
-    case 'lemonsqueezy':
-      return unavailable('This payment provider isn’t connected yet.')
-    default:
-      return unavailable('Online payments aren’t available yet.')
+  const razorpay = paymentsConfig.web === 'razorpay' && paymentsConfig.razorpayKeyId
+  const stripe = (paymentsConfig.web === 'stripe' || paymentsConfig.web === 'razorpay') && paymentsConfig.stripePublishableKey
+  // Razorpay charges the Indian (₹) prices; Stripe the international ($) ones.
+  if (region === 'IN') {
+    if (razorpay) return razorpayProvider()
+    return unavailable(stripe ? 'Payments in rupees are coming soon. Switch to international prices to pay by card.' : 'Online payments aren’t available yet.')
   }
+  if (stripe) return stripeProvider()
+  return unavailable(razorpay ? 'Payments outside India are coming soon.' : 'Online payments aren’t available yet.')
 }
