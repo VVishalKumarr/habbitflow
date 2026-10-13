@@ -5,6 +5,9 @@
 {
   "name": "habbitflows-site",
   "compatibility_date": "2026-10-01",
+  // Builds the site as part of `wrangler deploy`, so the Cloudflare build
+  // command can be left empty.
+  "build": { "command": "npm run build" },
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"

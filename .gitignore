@@ -17,6 +17,7 @@ keystore.properties
 # Local secrets
 .env.*
 !.env.example
+!.env.production
 supabase/functions/.env
 supabase/.temp
 supabase/.branches
