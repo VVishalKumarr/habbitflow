@@ -22,16 +22,16 @@ export interface QuotaGranted {
 }
 
 /**
- * Plus, Pro and school-paid requests use the most capable model; requests on
- * the Free plan use a fast, much cheaper one. Override with AI_MODEL /
- * AI_MODEL_FREE.
+ * Every plan uses Claude Haiku 5.5. The tiers stay separate so paid and free
+ * requests can be given different models again with AI_MODEL (Plus, Pro and
+ * school-paid) / AI_MODEL_FREE, without a code change.
  */
-export const PAID_MODEL = env('AI_MODEL') || 'claude-opus-5-5'
+export const PAID_MODEL = env('AI_MODEL') || 'claude-haiku-5-5'
 export const FREE_MODEL = env('AI_MODEL_FREE') || 'claude-haiku-5-5'
 
-/** Model and fallback options for a request. Haiku has no server-side refusal fallback, so it's only sent for the paid model. */
+/** Model and fallback options for a request. Haiku has no server-side refusal fallback, so it's only sent for other models. */
 export function modelOptions(q: QuotaGranted): { model: string; betas?: string[]; fallbacks?: 'default' } {
-  return q.tier === 'paid' ? { model: q.model, betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' } : { model: q.model }
+  return q.model.includes('haiku') ? { model: q.model } : { model: q.model, betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' }
 }
 
 export interface QuotaRefused {

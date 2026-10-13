@@ -13,11 +13,11 @@ Nothing here charges anyone until you configure a provider.
 | Colour themes, no ads | — | ✓ | ✓ |
 | Focus sounds, CSV/PDF reports, leaderboards | — | — | ✓ |
 | AI timetable that asks your needs first (coming) | — | ✓ | ✓ |
-| Price in India | ₹0 | ₹99/mo · ₹899/yr | ₹199/mo · ₹1,799/yr |
-| Price elsewhere | $0 | $2.99/mo · $24.99/yr | $5.99/mo · $49.99/yr |
+| Price in India | ₹0 | ₹79/mo · ₹699/yr | ₹149/mo · ₹1,299/yr |
+| Price elsewhere | $0 | $2.49/mo · $19.99/yr | $4.99/mo · $39.99/yr |
 | Free trial | — | — | 7 days, once per account |
 
-Prices raised 2026-10-12 so AI costs stay covered (migration `2026-10-24_ai_limits_and_prices`). The middle plan makes Pro look like the better deal.
+Prices set 2026-10-13, with every plan's AI on Claude Haiku 5.5 (migration `2026-10-28_haiku_all_and_prices`). The middle plan makes Pro look like the better deal.
 A user is entitled to the highest-ranked plan with an active subscription.
 
 ## Regional prices

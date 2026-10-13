@@ -48,7 +48,7 @@ export function AiNoteBox({ note, fallback }: { note: AiNote; fallback: string }
           <>
             {' '}
             <Link to="/pro" className="font-medium text-brand hover:underline">
-              Better AI and higher limits with Plus or Pro
+              Higher limits with Plus or Pro
             </Link>
           </>
         )}

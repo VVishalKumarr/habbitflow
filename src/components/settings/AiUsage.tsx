@@ -59,12 +59,9 @@ export function AiUsage() {
         {school ? `Your limits combine your own plan with ${school}’s. Your school can change its part. ` : ''}
         Only counts are kept — never what you asked.{' '}
         {canUpgrade && (
-          <>
-            Free uses a fast, lighter AI model; Plus and Pro use our most capable AI.{' '}
-            <Link to="/pro" className="font-medium text-brand hover:underline">
-              Better AI and higher limits with Plus or Pro
-            </Link>
-          </>
+          <Link to="/pro" className="font-medium text-brand hover:underline">
+            Higher limits with Plus or Pro
+          </Link>
         )}
       </p>
     </div>

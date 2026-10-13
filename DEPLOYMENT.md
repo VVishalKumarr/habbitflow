@@ -33,6 +33,7 @@ node --env-file=.env scripts/db-apply.mjs supabase/migrations/<file>.sql
 | `2026-10-25_free_ai_limits` | smaller Free AI allowance (5 questions, 5 commands, 1 check, 1 reschedule a month) |
 | `2026-10-26_ai_model_tiers` | “most capable AI” listed for Plus/Pro (Free uses Haiku) |
 | `2026-10-27_rebrand_habbitflows` | HabbitFlows name in the test notification |
+| `2026-10-28_haiku_all_and_prices` | Haiku for every plan (cost tracking), Plus ₹79/₹699, Pro ₹149/₹1,299 |
 
 All migrations are additive and safe to re-run. `db-apply.mjs` needs
 `SUPABASE_ACCESS_TOKEN` in `.env` (supabase.com → Account → Access Tokens); delete the

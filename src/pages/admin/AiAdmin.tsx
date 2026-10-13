@@ -79,7 +79,7 @@ export function AiTab() {
           <Figure label="Requests" value={d.month.requests.toLocaleString()} />
           <Figure label="Refused / refunded" value={`${d.month.refused} / ${d.month.refunded}`} />
           <Figure label="Tokens in / out (measured)" value={`${d.month.tokens_in.toLocaleString()} / ${d.month.tokens_out.toLocaleString()}`} />
-          <Figure label="Cost (estimate)" value={`≈ $${est.toFixed(2)}`} hint="At the paid model’s token prices below — an upper bound, since Free requests run on the much cheaper fast model. Not a bill." />
+          <Figure label="Cost (estimate)" value={`≈ $${est.toFixed(2)}`} hint="From the token prices set below, not from a bill." />
         </div>
         <p className="mt-4 text-sm text-muted">
           By feature: {Object.entries(d.month.by_feature).map(([k, n]) => `${label[k] ?? k} ${n}`).join(' · ') || '—'}

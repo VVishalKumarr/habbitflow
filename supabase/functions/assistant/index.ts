@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
   const client = new Anthropic({ apiKey: env('ANTHROPIC_API_KEY'), maxRetries: 1, timeout: 45_000 })
   try {
     const response = await client.beta.messages.create({
-      // Plus/Pro/school: most capable model, retried on a suitable model if declined; Free: the fast model.
+      // The plan's model (see ai-quota.ts); retried on a suitable model if declined, where supported.
       ...modelOptions(quota),
       max_tokens: quota.max_output_tokens,
       output_config: { effort: 'low' },

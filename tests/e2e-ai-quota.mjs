@@ -74,7 +74,7 @@ try {
     const s = aiSection()
     await s.getByText('0 of 5 used this month').first().waitFor()
     await s.getByText('Not included in your plan').first().waitFor()
-    await s.getByRole('link', { name: 'Better AI and higher limits with Plus or Pro' }).waitFor()
+    await s.getByRole('link', { name: 'Higher limits with Plus or Pro' }).waitFor()
     await s.scrollIntoViewIfNeeded()
     await page.screenshot({ path: `${SHOTS}/01-usage.png` })
   })
@@ -90,7 +90,7 @@ try {
     await panel.getByLabel('Ask a question').fill('How do I add a new time slot?')
     await panel.getByRole('button', { name: 'Send' }).click()
     await panel.getByText(/You’ve used all 5 .* requests for this month\. It resets (in|on)/).waitFor({ timeout: 15000 })
-    await panel.getByText(/Higher limits and our most capable AI come with Plus and Pro/).waitFor()
+    await panel.getByText(/Higher limits come with Plus and Pro/).waitFor()
     await page.screenshot({ path: `${SHOTS}/02-assistant-limit.png` })
   })
 

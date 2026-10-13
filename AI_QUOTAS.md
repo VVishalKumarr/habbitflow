@@ -19,9 +19,8 @@ in **Platform admin → AI** without touching code.
 | Study plan explanations (`study_plan`) | month | off | 5 | 15 | 8 |
 | AI rescheduling (`reschedule`) | month | 1 | 10 | 25 | 10 |
 
-Lowered on 2026-10-12 (all monthly) so one user's worst-case AI cost on Claude Opus 5.5
-stays around $0.15 (Free, lowered again the same day), $3.30 (Plus), $7.90 (Pro) and $2.60 per school student; a
-typical user costs well under $1 a month. When an allowance runs out, commands fall back
+All monthly. On Claude Haiku 5.5 even a user who uses every allowance costs only a few
+cents a month. When an allowance runs out, commands fall back
 to the built-in parser and help to the articles.
 
 Periods reset at midnight (day), Monday (week) or the 1st (month) in the quota time zone
@@ -29,12 +28,11 @@ Periods reset at midnight (day), Monday (week) or the 1st (month) in the quota t
 
 ## Which model answers
 
-Plus, Pro and school-paid requests use the most capable model (`AI_MODEL`, default
-Claude Opus 5.5, with automatic fallback if a request is declined); Free requests use the
-fast model (`AI_MODEL_FREE`, default Claude Haiku 5.5 — about 40× cheaper). The Edge
-Functions pick it from the plan the database charged the request to
-(`beginAi()` in `supabase/functions/_shared/ai-quota.ts`). The plans list
-“Our most capable AI for answers and planning” (`advanced_ai`) for Plus and Pro.
+Every plan uses **Claude Haiku 5.5** ($0.10 / $0.50 per million tokens). The Edge
+Functions still pick the model per request from the plan the database charged it to
+(`beginAi()` in `supabase/functions/_shared/ai-quota.ts`), so paid and free can be split
+again with the `AI_MODEL` (Plus, Pro, school-paid) and `AI_MODEL_FREE` secrets — no code
+change. Models other than Haiku also get the automatic fallback if a request is declined.
 
 ## Which limit applies
 
