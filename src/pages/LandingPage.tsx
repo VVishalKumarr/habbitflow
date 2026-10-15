@@ -23,7 +23,7 @@ const STEPS = [
 
 const FAQ = [
   ['Is HabbitFlows free?', 'Yes. The free plan covers the timetable, check-offs, streaks, the focus timer and friends. Plus and Pro are optional upgrades.'],
-  ['Do I need an email address?', 'No — just a username and password. Adding a recovery email is optional, but without one a forgotten password can’t be reset.'],
+  ['Do I need an email address?', 'Yes — one email address, used to sign in with a code and to recover your account if you forget your password.'],
   ['Is there a phone app?', 'HabbitFlows works in any browser on phones, tablets and computers, and there is an Android app build.'],
   ['Can friends see my tasks?', 'No. Friends only see daily totals such as completion percentage and focus minutes, and you can switch even that off.'],
   ['Can I export my data?', 'Every account can download all its data as JSON from Settings. Pro adds CSV and PDF reports.'],
@@ -70,7 +70,7 @@ export default function LandingPage() {
               )}
             </div>
             <p className="mt-4 flex items-center gap-2 text-sm text-muted">
-              <ShieldCheck className="size-4" aria-hidden="true" /> No email required · your tasks stay private
+              <ShieldCheck className="size-4" aria-hidden="true" /> Free to start · your tasks stay private
             </p>
           </div>
           <img

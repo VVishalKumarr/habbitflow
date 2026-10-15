@@ -59,23 +59,37 @@
   color-scheme: light;
 }
 
+/* Dark: neutral, slightly warm greys (no blue tint) and a deep brand colour
+   that keeps white text readable on buttons. Depth comes from surface
+   lightness rather than shadows, which don't show on dark backgrounds. */
 .dark {
-  --canvas: #0e1016;
-  --surface: #161922;
-  --subtle: #1e222d;
-  --line: #2a2f3c;
-  --ink: #e9ebf2;
-  --muted: #9aa0b3;
-  --brand: #8480f5;
-  --brand-hover: #9894f8;
-  --brand-soft: #25234a;
-  --brand-ink: #b9b6ff;
-  --success: #34c794;
-  --success-soft: #16352b;
-  --danger: #f06475;
-  --danger-soft: #3d1c23;
+  --canvas: #111110;
+  --surface: #1a1a19;
+  --subtle: #232322;
+  --line: #2e2e2c;
+  --ink: #ededec;
+  --muted: #a3a29d;
+  --brand: #6b64f0;
+  --brand-hover: #7a73f3;
+  --brand-soft: #23213d;
+  --brand-ink: #a7a2ff;
+  --success: #3fbf8f;
+  --success-soft: #17302a;
+  --danger: #ec6474;
+  --danger-soft: #3a1d22;
   --rival: #cc7a12;
   color-scheme: dark;
+}
+/* Brand-coloured text needs a lighter tint than brand-coloured fills on dark. */
+.dark .text-brand {
+  color: var(--brand-ink);
+}
+.dark .card,
+.dark .shadow-card {
+  box-shadow: none;
+}
+.dark .shadow-pop {
+  box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
 }
 
 /* Pro accent themes: only the brand colours change; everything else follows. */

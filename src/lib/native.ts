@@ -61,5 +61,5 @@ export const exitApp = () => App.exitApp()
 export function syncStatusBar(theme: 'light' | 'dark') {
   if (!isNative) return
   StatusBar.setStyle({ style: theme === 'dark' ? Style.Dark : Style.Light }).catch(() => {})
-  StatusBar.setBackgroundColor({ color: theme === 'dark' ? '#161922' : '#ffffff' }).catch(() => {})
+  StatusBar.setBackgroundColor({ color: theme === 'dark' ? '#1a1a19' : '#ffffff' }).catch(() => {})
 }
