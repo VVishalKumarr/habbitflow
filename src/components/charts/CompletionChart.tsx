@@ -1,4 +1,4 @@
-import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDate } from '../../lib/dates'
 import { SrTable, TooltipBox, pct } from './ChartCard'
 
@@ -9,8 +9,8 @@ export interface TrendPoint {
   scheduled: number
 }
 
-/** Completion-rate trend over time (days without scheduled tasks leave a gap), with an optional potential line (0–1). */
-export function CompletionChart({ data, caption, potential }: { data: TrendPoint[]; caption: string; potential?: number }) {
+/** Completion-rate trend over time (days without scheduled tasks leave a gap). */
+export function CompletionChart({ data, caption }: { data: TrendPoint[]; caption: string }) {
   const tickEvery = Math.max(1, Math.ceil(data.length / 6))
 
   return (
@@ -47,22 +47,11 @@ export function CompletionChart({ data, caption, potential }: { data: TrendPoint
                     lines={[
                       { label: 'Rate', value: d.rate === null ? '—' : pct(d.rate) },
                       { label: 'Completed', value: `${d.completed} of ${d.scheduled}` },
-                      ...(potential !== undefined ? [{ label: 'Potential', value: pct(potential), swatch: '#f2994a' }] : []),
                     ]}
                   />
                 )
               }}
             />
-            {potential !== undefined && (
-              <ReferenceLine
-                y={potential}
-                stroke="#f2994a"
-                strokeWidth={2}
-                strokeDasharray="6 5"
-                ifOverflow="extendDomain"
-                label={{ value: `Potential ${pct(potential)}`, position: 'insideTopRight', fill: '#f2994a', fontSize: 12, fontWeight: 600 }}
-              />
-            )}
             <Area
               type="monotone"
               dataKey="rate"
