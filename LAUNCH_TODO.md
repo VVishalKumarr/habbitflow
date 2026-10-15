@@ -25,8 +25,11 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-- [ ] **Supabase token** — supabase.com/dashboard/account/tokens → Generate new token (starts `sbp_`).
-- [ ] **Resend (all emails: login codes, confirmations, password resets, school invites)**
+**Live since 2026-10-15:** Resend email (login codes, confirmations, resets, invites) and Razorpay
+(live keys, 4 plans, webhook). Still open below: Anthropic and Stripe.
+
+- [x] **Supabase token** — supabase.com/dashboard/account/tokens → Generate new token (starts `sbp_`).
+- [x] **Resend (all emails: login codes, confirmations, password resets, school invites)**
   1. Sign up at resend.com → **Domains → Add domain** → `habbitflows.com` (region Tokyo or Mumbai).
   2. Resend shows 3–4 DNS records (TXT / MX). Add each in **Cloudflare → habbitflows.com → DNS →
      Records → Add record**, copying Type, Name and Value exactly, with the **orange cloud off**
@@ -36,7 +39,8 @@ STRIPE_WEBHOOK_SECRET=whsec_...
   Emails will come from `HabbitFlows <no-reply@habbitflows.com>`.
 - [ ] **Anthropic (AI assistant, timetable AI, study tips)** — console.anthropic.com → Billing (add
   credit; $5 is plenty to start) → **API Keys → Create key** → `ANTHROPIC_API_KEY=sk-ant-…`.
-- [ ] **Razorpay (India, ₹)** — test mode first, live after KYC.
+- [x] **Razorpay (India, ₹)** — live keys; plans `plan_To3c51GSy3GnyB` / `plan_To3cvdHp3290Ak` (Plus),
+  `plan_To3h79nubSwFiH` / `plan_To3hbb2wRmLatF` (Pro) saved in the `plans` table.
   1. **Account & Settings → API Keys → Generate** → Key ID and Key Secret (secret shown once).
   2. **Subscriptions → Plans**: create Plus ₹79/month, Plus ₹699/year, Pro ₹149/month,
      Pro ₹1,299/year. Send Claude the 4 plan IDs (`plan_…`; not secret).
@@ -55,6 +59,10 @@ STRIPE_WEBHOOK_SECRET=whsec_...
   4. **Settings → Billing → Customer portal** → click **Save** once (turns on “Manage card & invoices”).
 - [ ] **Revoke the Supabase tokens that were pasted in chat** (`sbp_fc50…`, `sbp_fc22…`) at
   supabase.com/dashboard/account/tokens.
+
+## Registrations
+- [ ] **Register HabbitFlows on YUKTI** (Ministry of Education innovation portal, yukti.aicte-india.org).
+  Keep the registration copy (e.g. Udyam certificate, JPG/PNG/PDF under 2 MB) ready to upload.
 
 ## Website on habbitflows.com (finish the move)
 - [x] Domain bought (GoDaddy), nameservers moved to Cloudflare, site live on Cloudflare Workers.
@@ -80,7 +88,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 - [ ] Turn on Supabase leaked-password protection and CAPTCHA for sign-ups — [SECURITY.md](SECURITY.md#known-limitations--to-do)
 
 ## To earn money
-- [ ] Razorpay account (KYC) and keys — see the keys section at the top; test with test keys first, then switch to live keys
+- [x] Razorpay account (KYC) and keys — see the keys section at the top; test with test keys first, then switch to live keys
 - [ ] International payments: Stripe (built; see the keys section at the top). If your Stripe account is registered in India, check it can accept international cards
 - [ ] AdSense application (the domain is ready now) + 3 ad units + `ads.txt` (send Claude the publisher ID and the `ads.txt` line) — [MONETIZATION.md](MONETIZATION.md#ads)
 - [ ] Donation link (`VITE_SUPPORT_URL`) — optional
