@@ -41,6 +41,8 @@ const ComparePage = lazy(() => import('./pages/ComparePage'))
 const ProPage = lazy(() => import('./pages/ProPage'))
 const PrivacyPage = lazy(() => import('./pages/LegalPages').then((m) => ({ default: m.PrivacyPage })))
 const TermsPage = lazy(() => import('./pages/LegalPages').then((m) => ({ default: m.TermsPage })))
+const AboutPage = lazy(() => import('./pages/InfoPages').then((m) => ({ default: m.AboutPage })))
+const ContactPage = lazy(() => import('./pages/InfoPages').then((m) => ({ default: m.ContactPage })))
 const HelpIndexPage = lazy(() => import('./pages/HelpPages').then((m) => ({ default: m.HelpIndexPage })))
 const HelpArticlePage = lazy(() => import('./pages/HelpPages').then((m) => ({ default: m.HelpArticlePage })))
 const InstitutionLoginPage = lazy(() => import('./pages/InstitutionLoginPage'))
@@ -267,6 +269,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/privacy" element={lazyPage(<PrivacyPage />)} />
             <Route path="/terms" element={lazyPage(<TermsPage />)} />
+            <Route path="/about" element={lazyPage(<AboutPage />)} />
+            <Route path="/contact" element={lazyPage(<ContactPage />)} />
             <Route path="/help" element={lazyPage(<HelpIndexPage />)} />
             <Route path="/help/:slug" element={lazyPage(<HelpArticlePage />)} />
           </Route>

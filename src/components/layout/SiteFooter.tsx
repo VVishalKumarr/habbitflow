@@ -18,6 +18,9 @@ export function SiteFooter({ compact = false }: { compact?: boolean }) {
           </p>
         )}
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link to="/about" className={linkClass}>
+            About
+          </Link>
           <Link to="/help" className={linkClass}>
             Help
           </Link>
@@ -33,11 +36,9 @@ export function SiteFooter({ compact = false }: { compact?: boolean }) {
           <button type="button" className={linkClass} onClick={openSettings}>
             Cookie Settings
           </button>
-          {legalConfig.contactEmail && (
-            <a href={`mailto:${legalConfig.contactEmail}`} className={linkClass}>
-              Contact
-            </a>
-          )}
+          <Link to="/contact" className={linkClass}>
+            Contact
+          </Link>
           {appConfig.supportUrl && (
             <a href={appConfig.supportUrl} target="_blank" rel="noopener noreferrer" className={`${linkClass} inline-flex items-center gap-1`}>
               <Heart className="size-3.5" aria-hidden="true" />
