@@ -22,6 +22,9 @@ import { useToday } from '../store/view'
 import { RangeToggle } from '../components/charts/RangeToggle'
 import { AdSlot } from '../components/ads/AdSlot'
 import { analytics } from '../lib/analytics'
+import { ScoreBar, ScoreRing } from '../components/score/Score'
+import { useInView } from '../components/score/useReveal'
+import { computeScores, scoreColor, type Scores } from '../lib/scores'
 
 function ProgressCard({ icon, label, value, detail }: { icon: ReactNode; label: string; value: string; detail?: string }) {
   return (
@@ -55,6 +58,43 @@ function trendData(daily: DayStat[], today: ISODate, days: number): TrendPoint[]
 }
 
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`
+
+/** Game-style score card: Overall vs Potential, plus the scores behind them. */
+function ScoreCard({ scores }: { scores: Scores }) {
+  const [ref, inView] = useInView<HTMLElement>(0.2)
+  const gap = scores.potential - scores.overall
+  return (
+    <section ref={ref} className="card relative overflow-hidden p-5 sm:p-6" aria-label="Your scores">
+      <div
+        className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full opacity-15 blur-3xl"
+        style={{ background: scoreColor(scores.overall) }}
+        aria-hidden="true"
+      />
+      <div className="relative grid items-center gap-6 md:grid-cols-[auto_1fr]">
+        <div className="flex flex-col items-center gap-2">
+          <ScoreRing value={scores.overall} run={inView} size={150} sub="overall" />
+          <p className="max-w-44 text-center text-sm text-muted">
+            {gap > 0 ? (
+              <>
+                <strong className="text-ink">+{gap}</strong> to reach your potential
+              </>
+            ) : (
+              'You’re at your potential — raise the bar!'
+            )}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
+          <ScoreBar label="Overall" value={scores.overall} potential={scores.potential} run={inView} hint="Completion over the last 30 days" />
+          <ScoreBar label="Potential" value={scores.potential} run={inView} hint="Based on your best 7-day run" />
+          <ScoreBar label="Consistency" value={scores.consistency} run={inView} hint="Days with 80% or more done, last 30 days" />
+          <ScoreBar label="This week" value={scores.week} run={inView} hint="Completion this week so far" />
+          <ScoreBar label="Streak power" value={scores.streak} run={inView} hint="Current streak compared with your best" />
+          <ScoreBar label={scores.topHabitTitle ? `Top: ${scores.topHabitTitle}` : 'Top habit'} value={scores.topHabit} run={inView} hint="Your most consistent habit" />
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function HabitDetail({ habit, onClose }: { habit: HabitStat; onClose: () => void }) {
   const days = useTrackerData((s) => {
@@ -104,6 +144,7 @@ function TimetableProgress() {
   const [habitKey, setHabitKey] = useState<string | null>(null)
 
   const trend = useMemo(() => trendData(stats.daily, today, range), [stats.daily, today, range])
+  const scores = useMemo(() => computeScores(stats, today), [stats, today])
   const habit = stats.habits.find((h) => h.key === habitKey)
 
   if (trackersStatus !== 'ready' || (tracker && (dataStatus === 'loading' || dataStatus === 'idle'))) {
@@ -175,6 +216,8 @@ function TimetableProgress() {
         </div>
       ) : (
         <>
+          <ScoreCard scores={scores} />
+
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             <ProgressCard icon={<Target />} label="Overall completion" value={pct(stats.totals.rate)} detail="All time, up to today" />
             <ProgressCard
@@ -202,12 +245,12 @@ function TimetableProgress() {
             </ChartCard>
             <ChartCard
               title="Completion trend"
-              subtitle="Daily completion rate"
+              subtitle="Daily completion rate vs your potential"
               action={
                 <RangeToggle value={range} onChange={setRange} />
               }
             >
-              <CompletionChart data={trend} caption={`Daily completion rate, last ${range} days`} />
+              <CompletionChart data={trend} potential={scores.potential / 100} caption={`Daily completion rate, last ${range} days; potential ${scores.potential}%`} />
             </ChartCard>
           </div>
 

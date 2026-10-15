@@ -38,9 +38,12 @@ export function PublicLayout() {
     </>
   )
 
+  // The landing page is always dark (app-store style); other public pages follow the theme.
+  const landing = pathname === '/'
+
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-30 border-b border-line bg-surface/85 pt-safe backdrop-blur-md">
+    <div className={`flex min-h-dvh flex-col ${landing ? 'dark bg-canvas text-ink' : ''}`}>
+      <header className={`sticky top-0 z-30 border-b pt-safe backdrop-blur-md ${landing ? 'border-white/5 bg-canvas/70' : 'border-line bg-surface/85'}`}>
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
           <Link to="/" aria-label="HabbitFlows home" className="rounded-lg">
             <Logo />
