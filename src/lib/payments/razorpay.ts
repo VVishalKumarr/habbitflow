@@ -1,5 +1,6 @@
 import { appConfig } from '../../config'
 import { callFunction } from '../functions'
+import type { Region } from '../region'
 import type { BillingInterval, CheckoutResult, PaymentProvider } from './index'
 
 interface RazorpayResponse {
@@ -30,7 +31,7 @@ function loadCheckout(): Promise<void> {
   return scriptPromise
 }
 
-export function razorpayProvider(): PaymentProvider {
+export function razorpayProvider(region: Region): PaymentProvider {
   return {
     id: 'razorpay',
     unavailableReason: null,
@@ -40,6 +41,7 @@ export function razorpayProvider(): PaymentProvider {
         action: 'create',
         plan,
         interval,
+        region,
       })
       return new Promise((resolve, reject) => {
         const rzp = new window.Razorpay!({

@@ -89,9 +89,18 @@ Deno.serve(async (req) => {
     const interval = body.interval === 'yearly' ? 'yearly' : 'monthly'
     const planIdWanted = /^[a-z][a-z0-9_]{1,30}$/.test(body.plan ?? '') ? body.plan : 'pro'
     if (planIdWanted === 'free') return json(req, { error: 'Choose a paid plan.' }, 400)
-    const { data: plan } = await admin.from('plans').select('id, razorpay_plan_monthly, razorpay_plan_yearly').eq('id', planIdWanted).maybeSingle()
+    // 'default' (international) charges the US$ plans; 'IN', or an older app
+    // that sends no region, the ₹ plans.
+    const usd = body.region === 'default'
+    const { data: plan } = await admin
+      .from('plans')
+      .select('id, razorpay_plan_monthly, razorpay_plan_yearly, razorpay_plan_monthly_usd, razorpay_plan_yearly_usd')
+      .eq('id', planIdWanted)
+      .maybeSingle()
     if (!plan) return json(req, { error: 'Unknown plan.' }, 400)
-    const planId = interval === 'yearly' ? plan?.razorpay_plan_yearly : plan?.razorpay_plan_monthly
+    const planId = usd
+      ? interval === 'yearly' ? plan.razorpay_plan_yearly_usd : plan.razorpay_plan_monthly_usd
+      : interval === 'yearly' ? plan.razorpay_plan_yearly : plan.razorpay_plan_monthly
     if (!planId) return json(req, { error: 'This billing option isn’t available yet.', code: 'plan_not_configured' }, 503)
 
     const sub = await razorpay<RzpSubscription>('/subscriptions', {

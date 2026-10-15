@@ -533,6 +533,8 @@ create table if not exists public.plans (
   features               text[] not null default '{}',
   razorpay_plan_monthly  text,
   razorpay_plan_yearly   text,
+  razorpay_plan_monthly_usd text,
+  razorpay_plan_yearly_usd  text,
   stripe_price_monthly   text,
   stripe_price_yearly    text,
   google_play_product_id text,

@@ -2,7 +2,7 @@
 // The rest of the app only calls getPaymentService().
 //
 // Web      -> by pricing region: India (₹) uses Razorpay; other regions ($) use
-//             Stripe (when VITE_STRIPE_PUBLISHABLE_KEY is set)
+//             Stripe when VITE_STRIPE_PUBLISHABLE_KEY is set, else Razorpay's US$ plans
 // Android  -> Google Play Billing (required by Play for digital subscriptions;
 //             never an external web checkout inside the app)
 //
@@ -42,11 +42,13 @@ export function getPaymentService(region: Region = 'IN'): PaymentProvider {
   if (isNative) return googlePlayProvider()
   const razorpay = paymentsConfig.web === 'razorpay' && paymentsConfig.razorpayKeyId
   const stripe = (paymentsConfig.web === 'stripe' || paymentsConfig.web === 'razorpay') && paymentsConfig.stripePublishableKey
-  // Razorpay charges the Indian (₹) prices; Stripe the international ($) ones.
+  // Razorpay charges the Indian (₹) prices, and the international ($) ones
+  // too (its US$ plans) unless Stripe is set up for those.
   if (region === 'IN') {
-    if (razorpay) return razorpayProvider()
+    if (razorpay) return razorpayProvider(region)
     return unavailable(stripe ? 'Payments in rupees are coming soon. Switch to international prices to pay by card.' : 'Online payments aren’t available yet.')
   }
   if (stripe) return stripeProvider()
-  return unavailable(razorpay ? 'Payments outside India are coming soon.' : 'Online payments aren’t available yet.')
+  if (razorpay) return razorpayProvider(region)
+  return unavailable('Online payments aren’t available yet.')
 }
