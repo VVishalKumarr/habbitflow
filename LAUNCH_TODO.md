@@ -85,7 +85,8 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 - [ ] Emails: Resend (see the keys section at the top), then test with “Send a test notification” ([NOTIFICATIONS.md](NOTIFICATIONS.md#email-to-do-needs-your-accounts))
 - [ ] When email works: remove the setup-mode secret `ALLOW_MANUAL_INVITE_LINKS` (it shows activation links to the inviter) — [INSTITUTION_ONBOARDING.md](INSTITUTION_ONBOARDING.md)
 - [ ] Legal details (`VITE_LEGAL_*`), write a refund policy, have Privacy/Terms reviewed by a lawyer — [PRIVACY_SETUP.md](PRIVACY_SETUP.md)
-- [ ] Turn on Supabase leaked-password protection and CAPTCHA for sign-ups — [SECURITY.md](SECURITY.md#known-limitations--to-do)
+- [ ] Turn on Supabase leaked-password protection — [SECURITY.md](SECURITY.md#known-limitations--to-do)
+- [ ] CAPTCHA (built, Cloudflare Turnstile on login + sign-up): create a Turnstile widget (hostnames: your site domain, plus `localhost` for the Android app), set repo variable `VITE_TURNSTILE_SITE_KEY` and deploy, **then** Supabase → Authentication → Attack Protection → enable CAPTCHA with provider Turnstile and the secret key. Order matters: enabling it in Supabase first blocks every login
 
 ## To earn money
 - [x] Razorpay account (KYC) and keys — see the keys section at the top; test with test keys first, then switch to live keys

@@ -1,6 +1,7 @@
 import { AlertCircle, Info } from 'lucide-react'
 import { useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { Captcha, captchaEnabled, type CaptchaHandle } from '../components/auth/Captcha'
 import { Field } from '../components/ui/Field'
 import { Spinner } from '../components/ui/Spinner'
 import { analytics } from '../lib/analytics'
@@ -24,6 +25,8 @@ export default function RegisterPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const started = useRef(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captcha = useRef<CaptchaHandle>(null)
 
   const onStart = () => {
     if (started.current) return
@@ -49,14 +52,19 @@ export default function RegisterPage() {
     setErrors(next)
     setFormError(null)
     if (Object.keys(next).length) return
+    if (captchaEnabled && !captchaToken) {
+      setFormError('Please complete the security check.')
+      return
+    }
     setBusy(true)
     try {
-      await signUp(username, password)
+      await signUp(username, password, captchaToken ?? undefined)
       analytics.track('signup_completed', { source: 'with_email' })
     } catch (err) {
       const message = (err as Error).message
       if (/username/i.test(message)) setErrors({ username: message })
       else setFormError(message)
+      captcha.current?.reset()
       setBusy(false)
       return
     }
@@ -131,6 +139,7 @@ export default function RegisterPage() {
             We’ll send a code to confirm it. You can then log in with a code instead of your password, and reset your password if you forget it.
           </p>
         </div>
+        <Captcha ref={captcha} onToken={setCaptchaToken} />
         <button type="submit" className="btn-primary h-11 w-full text-[15px]" disabled={busy}>
           {busy && <Spinner className="size-4" />}
           {busy ? 'Creating account…' : 'Create account'}

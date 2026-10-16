@@ -54,6 +54,7 @@ jobs:
           VITE_RAZORPAY_KEY_ID: ${{ vars.VITE_RAZORPAY_KEY_ID }}
           VITE_AI_PROVIDER: ${{ vars.VITE_AI_PROVIDER }}
           VITE_CONSENT_MODE: ${{ vars.VITE_CONSENT_MODE }}
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

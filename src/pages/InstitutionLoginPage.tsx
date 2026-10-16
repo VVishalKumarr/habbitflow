@@ -1,6 +1,7 @@
 import { AlertCircle, Building2 } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { Captcha, captchaEnabled, type CaptchaHandle } from '../components/auth/Captcha'
 import { EmailCodeLogin, LoginMethodSwitch } from '../components/auth/EmailCodeLogin'
 import { Field } from '../components/ui/Field'
 import { Spinner } from '../components/ui/Spinner'
@@ -17,6 +18,8 @@ export default function InstitutionLoginPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [method, setMethod] = useState<'password' | 'code'>('password')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captcha = useRef<CaptchaHandle>(null)
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -26,12 +29,17 @@ export default function InstitutionLoginPage() {
     setErrors(next)
     setFormError(null)
     if (Object.keys(next).length) return
+    if (captchaEnabled && !captchaToken) {
+      setFormError('Please complete the security check.')
+      return
+    }
     setBusy(true)
     try {
-      await signIn(email, password)
+      await signIn(email, password, captchaToken ?? undefined)
       analytics.track('login', { kind: 'institution' })
     } catch (err) {
       setFormError((err as Error).message)
+      captcha.current?.reset()
       setBusy(false)
     }
   }
@@ -83,6 +91,7 @@ export default function InstitutionLoginPage() {
             Forgot password?
           </Link>
         </div>
+        <Captcha ref={captcha} onToken={setCaptchaToken} />
         <button type="submit" className="btn-primary h-11 w-full text-[15px]" disabled={busy}>
           {busy && <Spinner className="size-4" />}
           {busy ? 'Signing in…' : 'Sign in'}

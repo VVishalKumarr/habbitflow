@@ -12,10 +12,11 @@ interface AuthState {
   session: Session | null
   profile: Profile | null
   init: () => () => void
-  signIn: (username: string, password: string) => Promise<void>
+  /** captchaToken: from the Turnstile widget; required by the server once CAPTCHA is on. */
+  signIn: (username: string, password: string, captchaToken?: string) => Promise<void>
   /** Institutional accounts sign in with their approved email address. */
-  signInInstitution: (email: string, password: string) => Promise<void>
-  signUp: (username: string, password: string) => Promise<void>
+  signInInstitution: (email: string, password: string, captchaToken?: string) => Promise<void>
+  signUp: (username: string, password: string, captchaToken?: string) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (
     patch: Partial<Pick<Profile, 'week_start' | 'time_format' | 'theme' | 'last_tracker_id' | 'accent_theme' | 'leaderboard_opt_in' | 'share_progress'>>,
@@ -108,18 +109,18 @@ export const useAuth = create<AuthState>((set, get) => ({
     return () => data.subscription.unsubscribe()
   },
 
-  signIn: async (username, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email: usernameToLogin(username), password })
+  signIn: async (username, password, captchaToken) => {
+    const { error } = await supabase.auth.signInWithPassword({ email: usernameToLogin(username), password, options: { captchaToken } })
     if (error) {
       if (/invalid login credentials/i.test(error.message)) throw new Error('Incorrect username or password.')
       throw new Error(friendlyError(error))
     }
   },
 
-  signInInstitution: async (email, password) => {
+  signInInstitution: async (email, password, captchaToken) => {
     const login = email.trim().toLowerCase()
     if (login.endsWith(`@${LOGIN_DOMAIN}`)) throw new Error('Use the personal account login for usernames.')
-    const { data, error } = await supabase.auth.signInWithPassword({ email: login, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email: login, password, options: { captchaToken } })
     if (error) {
       if (/invalid login credentials/i.test(error.message)) throw new Error('Incorrect email or password.')
       throw new Error(friendlyError(error))
@@ -130,11 +131,11 @@ export const useAuth = create<AuthState>((set, get) => ({
     throw new Error('Incorrect email or password.')
   },
 
-  signUp: async (username, password) => {
+  signUp: async (username, password, captchaToken) => {
     const { data, error } = await supabase.auth.signUp({
       email: usernameToLogin(username),
       password,
-      options: { data: { username: normalizeUsername(username) } },
+      options: { data: { username: normalizeUsername(username) }, captchaToken },
     })
     if (error) {
       if (/already registered|already exists/i.test(error.message)) throw new Error('That username is already taken.')
@@ -146,6 +147,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     if (data.user && data.user.identities?.length === 0) throw new Error('That username is already taken.')
     if (!data.session) {
       // Email confirmation is on in the project: sign in explicitly so the user lands in the app.
+      // (The CAPTCHA token was spent on sign-up; with CAPTCHA on, this needs auto-confirm.)
       await get().signIn(username, password)
     }
   },

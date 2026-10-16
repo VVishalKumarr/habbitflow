@@ -7,6 +7,7 @@
 //   ads.ts       – AdSense / AdMob ids and placements
 //   payments.ts  – web checkout provider, public keys
 //   ai.ts        – assistant on/off, provider disclosure
+//   captcha.ts   – Turnstile site key for login / sign-up
 //   consent.ts   – cookie consent behaviour
 //   features.ts  – feature keys and labels
 //
@@ -16,6 +17,7 @@ export { adsConfig } from './ads'
 export { aiConfig } from './ai'
 export { analyticsConfig, sentryConfig } from './analytics'
 export { appConfig } from './app'
+export { captchaConfig } from './captcha'
 export { consentConfig } from './consent'
 export { FEATURE_LABELS, FEATURE_UPSELL, UNRELEASED_FEATURES, type Feature, type LimitKey } from './features'
 export { legalComplete, legalConfig } from './legal'
